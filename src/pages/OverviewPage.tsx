@@ -271,14 +271,14 @@ export default function OverviewPage() {
 
           <div className="space-y-2">
             {[
-              { icon: TrendingUp, c: "emerald", t: "Revenue forecast", v: `+${pulse.forecast}% next 24h · confidence 94%` },
-              { icon: AlertTriangle, c: "amber", t: "Anomaly", v: "Spike on /api/checkout latency · auto-mitigation engaged" },
-              { icon: Rocket, c: "cyan", t: "Optimization", v: "Promote Pro Plan to 412 trial users (LTV +$48k est.)" },
-              { icon: ShieldCheck, c: "fuchsia", t: "Fraud watch", v: `${pulse.threats} suspicious sessions · 0 confirmed` },
+              { icon: TrendingUp, wrap: "bg-emerald-500/15 border border-emerald-500/30", ic: "text-emerald-400", t: "Revenue forecast", v: `+${pulse.forecast}% next 24h · confidence 94%` },
+              { icon: AlertTriangle, wrap: "bg-amber-500/15 border border-amber-500/30", ic: "text-amber-400", t: "Anomaly", v: "Spike on /api/checkout latency · auto-mitigation engaged" },
+              { icon: Rocket, wrap: "bg-cyan-500/15 border border-cyan-500/30", ic: "text-cyan-400", t: "Optimization", v: "Promote Pro Plan to 412 trial users (LTV +$48k est.)" },
+              { icon: ShieldCheck, wrap: "bg-fuchsia-500/15 border border-fuchsia-500/30", ic: "text-fuchsia-400", t: "Fraud watch", v: `${pulse.threats} suspicious sessions · 0 confirmed` },
             ].map((r, i) => (
               <div key={i} className="group flex items-center gap-3 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-cyan-500/30 transition-all px-3 py-2">
-                <div className={`w-7 h-7 rounded-md flex items-center justify-center bg-${r.c}-500/15 border border-${r.c}-500/30`}>
-                  <r.icon className={`w-3.5 h-3.5 text-${r.c}-400`} />
+                <div className={`w-7 h-7 rounded-md flex items-center justify-center ${r.wrap}`}>
+                  <r.icon className={`w-3.5 h-3.5 ${r.ic}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-xs font-medium text-foreground">{r.t}</div>
@@ -429,12 +429,12 @@ export default function OverviewPage() {
       {/* Infrastructure strip */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {[
-          { icon: Cpu, label: "CPU", v: pulse.cpu, suffix: "%", color: "cyan" },
-          { icon: Server, label: "RAM", v: pulse.ram, suffix: "%", color: "purple" },
-          { icon: Database, label: "DB", v: pulse.db, suffix: "%", color: "amber" },
-          { icon: Activity, label: "Queue", v: pulse.queue, suffix: " jobs", color: "green" },
-          { icon: Globe2, label: "CDN", v: pulse.cdn.toFixed(1), suffix: "%", color: "cyan" },
-          { icon: Zap, label: "AI Engine", v: pulse.ai.toFixed(1), suffix: "%", color: "purple" },
+          { icon: Cpu, label: "CPU", v: pulse.cpu, suffix: "%", ic: "text-cyan-400" },
+          { icon: Server, label: "RAM", v: pulse.ram, suffix: "%", ic: "text-fuchsia-400" },
+          { icon: Database, label: "DB", v: pulse.db, suffix: "%", ic: "text-amber-400" },
+          { icon: Activity, label: "Queue", v: pulse.queue, suffix: " jobs", ic: "text-emerald-400" },
+          { icon: Globe2, label: "CDN", v: pulse.cdn.toFixed(1), suffix: "%", ic: "text-cyan-400" },
+          { icon: Zap, label: "AI Engine", v: pulse.ai.toFixed(1), suffix: "%", ic: "text-fuchsia-400" },
         ].map((m, i) => {
           const pct = typeof m.v === "number" ? Math.min(100, m.v) : Number(m.v);
           const ok = pct < 75;
@@ -443,7 +443,7 @@ export default function OverviewPage() {
               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-cyan-500/5 to-transparent transition-opacity" />
               <div className="relative flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <m.icon className={`w-3.5 h-3.5 text-${m.color}-400`} />
+                  <m.icon className={`w-3.5 h-3.5 ${m.ic}`} />
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{m.label}</span>
                 </div>
                 <GlowDot color={ok ? "green" : "amber"} />
