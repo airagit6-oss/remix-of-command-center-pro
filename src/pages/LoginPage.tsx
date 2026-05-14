@@ -383,7 +383,7 @@ const LoginPage = () => {
     // Always validate against the seeded credential table first.
     const res = await loginWithCredentials(email, password);
     setSubmitting(false);
-    if (res.ok) {
+    if (res.ok === true) {
       setSuccess(true);
       setTimeout(() => navigate(res.redirect), 850);
     } else {
