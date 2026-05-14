@@ -319,7 +319,7 @@ const SuccessAnim: React.FC<{ accent: string }> = ({ accent }) => (
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, loginWithCredentials } = useAuth();
 
   const [mode, setMode] = useState<Mode>('login');
   const [role, setRole] = useState<Role>('user');
@@ -331,6 +331,8 @@ const LoginPage = () => {
   const [bioState, setBioState] = useState<'idle' | 'scanning' | 'done'>('idle');
   const [bioKind, setBioKind] = useState<'fingerprint' | 'faceid'>('fingerprint');
   const [success, setSuccess] = useState(false);
+  const [authError, setAuthError] = useState<string>('');
+  const [submitting, setSubmitting] = useState(false);
 
   const [leftIdx, setLeftIdx] = useState(0);
   const [rightIdx, setRightIdx] = useState(0);
@@ -372,11 +374,21 @@ const LoginPage = () => {
     }, 850);
   }, [login, navigate]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAuthError('');
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return;
     if (password.length < 1) return;
-    doLogin(role, email);
+    setSubmitting(true);
+    // Always validate against the seeded credential table first.
+    const res = await loginWithCredentials(email, password);
+    setSubmitting(false);
+    if (res.ok === true) {
+      setSuccess(true);
+      setTimeout(() => navigate(res.redirect), 850);
+    } else {
+      setAuthError(res.error);
+    }
   };
 
   const accent = role === 'admin' ? '#f5b042' : role === 'reseller' ? NEON.violet : NEON.cyan;
@@ -584,6 +596,16 @@ const LoginPage = () => {
                   <button type="button" onClick={() => setMode('forgot')} style={linkBtn}>Forgot password?</button>
                 </div>
                 <PrimaryButton accent={accent} label={role === 'admin' ? 'Enter Command Center' : role === 'reseller' ? 'Continue as Reseller' : 'Sign in securely'} />
+                {authError && (
+                  <p style={{ marginTop: 12, fontSize: 12, color: '#fca5a5', textAlign: 'center' }}>
+                    {authError}
+                  </p>
+                )}
+                {submitting && !authError && (
+                  <p style={{ marginTop: 12, fontSize: 11, color: NEON.mute, textAlign: 'center', letterSpacing: 0.4 }}>
+                    Verifying credentials…
+                  </p>
+                )}
               </form>
             ) : mode === 'forgot' ? (
               <ForgotView accent={accent} onBack={() => setMode('login')} />

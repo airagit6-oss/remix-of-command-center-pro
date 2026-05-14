@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { audit } from '@/lib/auditLog';
+import { bootstrapSeed, verifySeededCredentials, ROLE_HOME, type SeedRole } from '@/lib/seedAuth';
+
+// Run the role/seed bootstrap exactly once at module load.
+bootstrapSeed();
 
 interface AuthUser {
   id: string;
@@ -15,6 +19,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isReseller: boolean;
   login: (email: string, password: string, role?: 'user' | 'admin' | 'reseller') => void;
+  loginWithCredentials: (email: string, password: string) => Promise<{ ok: true; redirect: string; tier: SeedRole } | { ok: false; error: string }>;
   updateProfile: (profile: Pick<AuthUser, 'name' | 'email'>) => void;
   logout: () => void;
   activateSubscription: () => void;
@@ -55,6 +60,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     audit.login(newUser.id, { email: safeEmail, role });
   }, []);
 
+  // Verifies against the seeded credential table (hashed). Returns
+  // a redirect target derived from the seeded tier on success.
+  const loginWithCredentials = useCallback(async (email: string, password: string) => {
+    const seed = await verifySeededCredentials(email, password);
+    if (!seed) return { ok: false as const, error: 'Invalid email or password' };
+    const newUser: AuthUser = {
+      id: 'u_' + crypto.randomUUID().replace(/-/g, '').slice(0, 9),
+      name: seed.email.split('@')[0],
+      email: seed.email,
+      role: seed.role,
+    };
+    setUser(newUser);
+    localStorage.setItem(AUTH_KEY, JSON.stringify(newUser));
+    audit.login(newUser.id, { email: seed.email, role: seed.role, tier: seed.tier });
+    return { ok: true as const, redirect: ROLE_HOME[seed.tier], tier: seed.tier };
+  }, []);
+
   const updateProfile = useCallback((profile: Pick<AuthUser, 'name' | 'email'>) => {
     setUser(current => {
       if (!current) return current;
@@ -87,6 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAdmin: user?.role === 'admin',
         isReseller: user?.role === 'reseller' || user?.role === 'admin',
         login,
+        loginWithCredentials,
         updateProfile,
         logout,
         activateSubscription,
