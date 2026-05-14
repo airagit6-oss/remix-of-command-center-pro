@@ -388,7 +388,7 @@ const LoginPage = () => {
       setTimeout(() => navigate(res.redirect), 850);
       return;
     }
-    setAuthError(res.error);
+    if (!res.ok) setAuthError(res.error);
   };
 
   const accent = role === 'admin' ? '#f5b042' : role === 'reseller' ? NEON.violet : NEON.cyan;
