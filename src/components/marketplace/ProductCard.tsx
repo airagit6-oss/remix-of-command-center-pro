@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, ShoppingCart, ShoppingBag, Zap, Heart, Star } from 'lucide-react';
+import { Eye, ShoppingCart, ShoppingBag, Zap, Heart, Star, Sparkles, Users, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Product } from '@/lib/marketplaceData';
 import { useCart } from '@/contexts/CartContext';
@@ -19,6 +19,9 @@ export const ProductCard = ({ product }: Props) => {
 
   useEffect(() => subscribeUserActivity(() => setIsFav(favorites.has(product.id))), [product.id]);
 
+  const aiScore = Math.round(82 + (product.rating - 4) * 12);
+  const viewers = 6 + (product.users % 47);
+
   const toggleFav = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -32,8 +35,10 @@ export const ProductCard = ({ product }: Props) => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
+      {/* Ambient glow on hover */}
+      <div className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-br from-cyan-500/0 via-fuchsia-500/0 to-cyan-500/0 opacity-0 blur-xl transition-opacity duration-500 group-hover:from-cyan-500/30 group-hover:via-fuchsia-500/20 group-hover:to-cyan-500/30 group-hover:opacity-100" />
       {/* Base card */}
-      <div className="overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 group-hover:border-primary/30 group-hover:shadow-lg group-hover:shadow-primary/5 group-hover:scale-[1.03]">
+      <div className="relative overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 group-hover:border-cyan-400/40 group-hover:shadow-[0_20px_50px_-15px_rgba(34,211,238,0.35)] group-hover:scale-[1.03]">
         {/* Thumbnail - real preview image */}
         <div className="relative aspect-[16/10] w-full overflow-hidden">
           <img
@@ -42,6 +47,14 @@ export const ProductCard = ({ product }: Props) => {
             loading="lazy"
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           />
+          {/* Live viewers pill */}
+          <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full border border-white/10 bg-black/60 px-2 py-0.5 text-[9px] font-medium text-foreground backdrop-blur-md opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
+            </span>
+            {viewers} viewing
+          </div>
           {/* Overlay on hover */}
           {hovered && (
             <div className="absolute inset-0 flex items-center justify-center gap-2 bg-background/70 backdrop-blur-sm animate-in fade-in duration-200">
@@ -71,8 +84,8 @@ export const ProductCard = ({ product }: Props) => {
           )}
           {/* Status badge */}
           {product.status === 'trending' && (
-            <span className="absolute left-2 top-2 rounded-md bg-primary/90 px-2 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">
-              Trending
+            <span className="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-gradient-to-r from-fuchsia-500 to-cyan-500 px-2 py-0.5 text-[10px] font-bold uppercase text-background shadow-lg">
+              <TrendingUp className="h-2.5 w-2.5" /> Trending
             </span>
           )}
           {product.status === 'new' && (
@@ -84,14 +97,21 @@ export const ProductCard = ({ product }: Props) => {
 
         {/* Info */}
         <div className="p-4">
-          <p className="text-xs font-medium text-primary">{product.category}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-medium text-cyan-300">{product.category}</p>
+            <span className="flex items-center gap-1 rounded-full border border-fuchsia-400/30 bg-fuchsia-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-fuchsia-300">
+              <Sparkles className="h-2.5 w-2.5" /> AI {aiScore}
+            </span>
+          </div>
           <h3 className="mt-1 text-sm font-bold text-foreground truncate">{product.name}</h3>
           <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{product.shortDescription}</p>
           <div className="mt-3 flex items-center justify-between">
             <div className="flex items-center gap-1">
               <Star className="h-3.5 w-3.5 fill-mp-gold text-mp-gold" />
               <span className="text-xs font-medium text-foreground">{product.rating.toFixed(1)}</span>
-              <span className="text-xs text-muted-foreground">({product.users.toLocaleString()})</span>
+              <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                <Users className="h-3 w-3" /> {product.users.toLocaleString()}
+              </span>
             </div>
             <span className="text-sm font-bold text-foreground">${product.price}</span>
           </div>
