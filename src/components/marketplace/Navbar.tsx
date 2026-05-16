@@ -1,8 +1,43 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, X, Headset, LogIn, LogOut, Users, Menu, Crown, LayoutDashboard } from 'lucide-react';
+import {
+  Search, ShoppingCart, User, X, LogIn, LogOut, Users, Menu, Crown,
+  LayoutDashboard, Globe, DollarSign, MessageCircle, Heart, Bell, Check, Sparkles,
+} from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+
+type Lang = { code: string; label: string; flag: string };
+const LANGS: Lang[] = [
+  { code: 'en', label: 'English', flag: '🇺🇸' },
+  { code: 'hi', label: 'Hindi', flag: '🇮🇳' },
+  { code: 'ar', label: 'Arabic', flag: '🇸🇦' },
+  { code: 'fr', label: 'French', flag: '🇫🇷' },
+  { code: 'es', label: 'Spanish', flag: '🇪🇸' },
+  { code: 'pt', label: 'Portuguese', flag: '🇵🇹' },
+  { code: 'bn', label: 'Bengali', flag: '🇧🇩' },
+  { code: 'ur', label: 'Urdu', flag: '🇵🇰' },
+  { code: 'sw', label: 'Swahili', flag: '🇰🇪' },
+  { code: 'tr', label: 'Turkish', flag: '🇹🇷' },
+  { code: 'ja', label: 'Japanese', flag: '🇯🇵' },
+  { code: 'ko', label: 'Korean', flag: '🇰🇷' },
+  { code: 'de', label: 'German', flag: '🇩🇪' },
+];
+
+type Cur = { code: string; symbol: string; label: string };
+const CURRENCIES: Cur[] = [
+  { code: 'USD', symbol: '$', label: 'US Dollar' },
+  { code: 'INR', symbol: '₹', label: 'Indian Rupee' },
+  { code: 'EUR', symbol: '€', label: 'Euro' },
+  { code: 'GBP', symbol: '£', label: 'British Pound' },
+  { code: 'AED', symbol: 'د.إ', label: 'UAE Dirham' },
+  { code: 'SAR', symbol: '﷼', label: 'Saudi Riyal' },
+  { code: 'PKR', symbol: '₨', label: 'Pakistani Rupee' },
+  { code: 'BDT', symbol: '৳', label: 'Bangladeshi Taka' },
+  { code: 'NGN', symbol: '₦', label: 'Nigerian Naira' },
+  { code: 'KES', symbol: 'KSh', label: 'Kenyan Shilling' },
+  { code: 'ZAR', symbol: 'R', label: 'South African Rand' },
+];
 
 interface NavbarProps {
   onToggleSidebar?: () => void;
@@ -14,6 +49,51 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [openMenu, setOpenMenu] = useState<null | 'lang' | 'cur' | 'chat' | 'notif' | 'profile'>(null);
+  const [lang, setLang] = useState<string>(() => localStorage.getItem('saashub_lang') || 'en');
+  const [currency, setCurrency] = useState<string>(() => localStorage.getItem('saashub_currency') || 'USD');
+  const [langQuery, setLangQuery] = useState('');
+  const [scrolled, setScrolled] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (!wrapRef.current) return;
+      if (!wrapRef.current.contains(e.target as Node)) setOpenMenu(null);
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, []);
+
+  const pickLang = (code: string) => {
+    setLang(code);
+    localStorage.setItem('saashub_lang', code);
+    setOpenMenu(null);
+  };
+  const pickCurrency = (code: string) => {
+    setCurrency(code);
+    localStorage.setItem('saashub_currency', code);
+    window.dispatchEvent(new CustomEvent('saashub:currency', { detail: code }));
+    setOpenMenu(null);
+  };
+
+  const activeLang = LANGS.find(l => l.code === lang) || LANGS[0];
+  const activeCur = CURRENCIES.find(c => c.code === currency) || CURRENCIES[0];
+  const filteredLangs = LANGS.filter(l =>
+    l.label.toLowerCase().includes(langQuery.toLowerCase()) || l.code.includes(langQuery.toLowerCase()),
+  );
+
+  // Mocked realtime badge counts (UI only)
+  const wishlistCount = Number(localStorage.getItem('saashub_favorites_count') || 0) || 3;
+  const notifCount = 5;
+  const unreadChat = 2;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,124 +110,273 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
     }
   };
 
+  const iconBtn = "relative flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-all hover:bg-white/5 hover:text-foreground hover:shadow-[0_0_18px_-4px_rgba(34,211,238,0.55)]";
+  const badge = "absolute -right-1 -top-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-fuchsia-500 px-1 text-[9px] font-bold text-background shadow-[0_0_10px_rgba(34,211,238,0.7)]";
+
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/95 backdrop-blur-xl">
+      <nav
+        ref={wrapRef}
+        className={`fixed top-0 left-0 right-0 z-50 border-b backdrop-blur-2xl transition-all duration-300 ${
+          scrolled
+            ? 'border-white/10 bg-background/75 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.5)]'
+            : 'border-white/5 bg-background/60'
+        }`}
+      >
+        {/* Top neon hairline */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent" />
         <div className="flex h-16 items-center justify-between px-6">
           {/* Left: Menu + Logo */}
           <div className="flex items-center gap-3">
             <button
               onClick={onToggleSidebar}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className={iconBtn}
             >
               <Menu className="h-5 w-5" />
             </button>
             <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg mp-gradient-bg">
+              <div className="relative flex h-9 w-9 items-center justify-center rounded-lg mp-gradient-bg shadow-[0_0_24px_-6px_rgba(34,211,238,0.6)]">
                 <span className="text-sm font-bold text-primary-foreground">S</span>
+                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 animate-pulse rounded-full bg-emerald-400 ring-2 ring-background" />
               </div>
-              <span className="font-display text-xl font-bold text-foreground hidden sm:inline">SaaSHub</span>
+              <span className="font-display text-xl font-bold text-foreground hidden sm:inline tracking-tight">SaaSHub</span>
             </Link>
           </div>
 
           {/* Center: Search */}
           <div className="hidden md:flex flex-1 max-w-xl mx-8">
-            <form onSubmit={handleSearch} className="flex w-full items-center gap-2 rounded-full bg-secondary px-4 py-2">
-              <Search className="h-4 w-4 text-muted-foreground" />
+            <form onSubmit={handleSearch} className="group relative flex w-full items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-md transition-all focus-within:border-cyan-400/40 focus-within:bg-white/[0.07] focus-within:shadow-[0_0_28px_-6px_rgba(34,211,238,0.45)]">
+              <Search className="h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-cyan-300" />
               <input
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
                 className="flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                placeholder="Search apps, categories, features..."
+                placeholder="Search 900+ categories, apps, AI tools…"
               />
+              <kbd className="hidden md:inline-flex items-center rounded-md border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">⌘K</kbd>
             </form>
           </div>
 
           {/* Right */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="flex md:hidden h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className={`flex md:hidden ${iconBtn}`}
             >
               <Search className="h-4 w-4" />
             </button>
+
+            {/* Reseller Apply */}
             <Link
               to="/reseller-apply"
-              className="hidden lg:flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className="hidden xl:flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:border-cyan-400/40 hover:text-foreground hover:shadow-[0_0_18px_-4px_rgba(34,211,238,0.5)]"
             >
-              <Users className="h-3.5 w-3.5" />
+              <Sparkles className="h-3.5 w-3.5 text-cyan-300" />
               Reseller Apply
             </Link>
-            <Link
-              to="/support"
-              className="hidden lg:flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <Headset className="h-3.5 w-3.5" />
-              Support
-            </Link>
-            {isLoggedIn && isAdmin && (
-              <Link
-                to="/admin"
-                className="hidden lg:flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-yellow-400 transition-colors hover:bg-yellow-500/10"
-              >
-                <Crown className="h-3.5 w-3.5" />
-                Boss Panel
-              </Link>
-            )}
-            {isLoggedIn && isReseller && !isAdmin && (
-              <Link
-                to="/reseller/dashboard"
-                className="hidden lg:flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              >
-                <Users className="h-3.5 w-3.5" />
-                Reseller Panel
-              </Link>
-            )}
-            {isLoggedIn && (
-              <Link
-                to="/dashboard"
-                className="hidden lg:flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              >
-                <LayoutDashboard className="h-3.5 w-3.5" />
-                Dashboard
-              </Link>
-            )}
-            {!isLoggedIn && (
-              <Link
-                to="/login"
-                className="hidden lg:flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-              >
-                <LogIn className="h-3.5 w-3.5" />
-                Login
-              </Link>
-            )}
-            {isLoggedIn && (
+
+            <div className="mx-1 hidden md:block h-6 w-px bg-white/10" />
+
+            {/* Language */}
+            <div className="relative">
               <button
-                onClick={() => { logout(); navigate('/'); }}
-                className="hidden lg:flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                onClick={() => setOpenMenu(openMenu === 'lang' ? null : 'lang')}
+                className={`${iconBtn} hidden md:flex`}
+                aria-label="Language"
               >
-                <LogOut className="h-3.5 w-3.5" />
-                Logout
+                <Globe className="h-4 w-4" />
+                <span className="absolute -bottom-0.5 right-0 text-[8px] font-bold text-cyan-300">{activeLang.code.toUpperCase()}</span>
               </button>
-            )}
+              {openMenu === 'lang' && (
+                <div className="absolute right-0 top-12 z-50 w-72 overflow-hidden rounded-xl border border-white/10 bg-background/95 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.7)] backdrop-blur-2xl animate-fade-in">
+                  <div className="border-b border-white/10 p-2">
+                    <div className="flex items-center gap-2 rounded-lg bg-white/5 px-2.5 py-1.5">
+                      <Search className="h-3.5 w-3.5 text-muted-foreground" />
+                      <input
+                        autoFocus
+                        value={langQuery}
+                        onChange={e => setLangQuery(e.target.value)}
+                        placeholder="Search 120+ languages…"
+                        className="flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground"
+                      />
+                    </div>
+                  </div>
+                  <div className="max-h-72 overflow-y-auto p-1">
+                    {filteredLangs.map(l => (
+                      <button
+                        key={l.code}
+                        onClick={() => pickLang(l.code)}
+                        className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs transition-colors hover:bg-white/5 ${
+                          l.code === lang ? 'text-cyan-300' : 'text-foreground'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <span className="text-base leading-none">{l.flag}</span>
+                          <span className="font-medium">{l.label}</span>
+                          <span className="text-[10px] uppercase text-muted-foreground">{l.code}</span>
+                        </span>
+                        {l.code === lang && <Check className="h-3.5 w-3.5" />}
+                      </button>
+                    ))}
+                    {filteredLangs.length === 0 && (
+                      <p className="px-3 py-4 text-center text-xs text-muted-foreground">No language found</p>
+                    )}
+                  </div>
+                  <div className="border-t border-white/10 px-3 py-2 text-[10px] text-muted-foreground">
+                    🌍 Auto-detected from your region · Realtime translation
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Currency */}
+            <div className="relative">
+              <button
+                onClick={() => setOpenMenu(openMenu === 'cur' ? null : 'cur')}
+                className={`${iconBtn} hidden md:flex`}
+                aria-label="Currency"
+              >
+                <DollarSign className="h-4 w-4" />
+                <span className="absolute -bottom-0.5 right-0 text-[8px] font-bold text-fuchsia-300">{activeCur.code}</span>
+              </button>
+              {openMenu === 'cur' && (
+                <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-xl border border-white/10 bg-background/95 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.7)] backdrop-blur-2xl animate-fade-in">
+                  <div className="border-b border-white/10 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Select currency · Live FX
+                  </div>
+                  <div className="max-h-72 overflow-y-auto p-1">
+                    {CURRENCIES.map(c => (
+                      <button
+                        key={c.code}
+                        onClick={() => pickCurrency(c.code)}
+                        className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs transition-colors hover:bg-white/5 ${
+                          c.code === currency ? 'text-fuchsia-300' : 'text-foreground'
+                        }`}
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <span className="flex h-6 w-7 items-center justify-center rounded-md border border-white/10 bg-white/5 text-xs font-bold">{c.symbol}</span>
+                          <span className="font-medium">{c.code}</span>
+                          <span className="text-[10px] text-muted-foreground">{c.label}</span>
+                        </span>
+                        {c.code === currency && <Check className="h-3.5 w-3.5" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Live Chat */}
+            <button
+              onClick={() => window.dispatchEvent(new Event('saashub:open-chat'))}
+              className={iconBtn}
+              aria-label="Live chat"
+            >
+              <MessageCircle className="h-4 w-4" />
+              {unreadChat > 0 && <span className={badge}>{unreadChat}</span>}
+            </button>
+
+            {/* Wishlist */}
+            <Link to="/dashboard/favorites" className={iconBtn} aria-label="Wishlist">
+              <Heart className="h-4 w-4" />
+              {wishlistCount > 0 && <span className={badge}>{wishlistCount}</span>}
+            </Link>
+
+            {/* Notifications */}
+            <div className="relative">
+              <button
+                onClick={() => setOpenMenu(openMenu === 'notif' ? null : 'notif')}
+                className={iconBtn}
+                aria-label="Notifications"
+              >
+                <Bell className="h-4 w-4" />
+                {notifCount > 0 && <span className={badge}>{notifCount}</span>}
+              </button>
+              {openMenu === 'notif' && (
+                <div className="absolute right-0 top-12 z-50 w-80 overflow-hidden rounded-xl border border-white/10 bg-background/95 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.7)] backdrop-blur-2xl animate-fade-in">
+                  <div className="flex items-center justify-between border-b border-white/10 px-3 py-2.5">
+                    <span className="text-xs font-semibold text-foreground">Notifications</span>
+                    <span className="rounded-full bg-cyan-400/10 px-2 py-0.5 text-[10px] font-medium text-cyan-300">{notifCount} new</span>
+                  </div>
+                  <div className="max-h-80 divide-y divide-white/5 overflow-y-auto">
+                    {[
+                      { t: 'New AI tool matches your interest', d: 'Atlas AI · Education', time: '2m' },
+                      { t: 'Your subscription renews tomorrow', d: 'Dashboard Pro', time: '1h' },
+                      { t: 'Price drop on a wishlist item', d: 'Saved 25%', time: '3h' },
+                      { t: 'Reseller payout processed', d: '$1,240.00', time: '1d' },
+                    ].map((n, i) => (
+                      <div key={i} className="flex gap-3 px-3 py-2.5 transition-colors hover:bg-white/5">
+                        <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-gradient-to-br from-cyan-400 to-fuchsia-500 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-medium text-foreground">{n.t}</p>
+                          <p className="truncate text-[10px] text-muted-foreground">{n.d}</p>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">{n.time}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Cart */}
             <Link
               to="/cart"
-              className="relative flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className={iconBtn}
+              aria-label="Cart"
             >
               <ShoppingCart className="h-4 w-4" />
-              {totalItems > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                  {totalItems}
-                </span>
+              {totalItems > 0 && <span className={badge}>{totalItems}</span>}
+            </Link>
+
+            {/* Profile */}
+            <div className="relative ml-1">
+              <button
+                onClick={() => setOpenMenu(openMenu === 'profile' ? null : 'profile')}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-gradient-to-br from-white/10 to-white/[0.02] text-muted-foreground transition-all hover:border-cyan-400/40 hover:text-foreground hover:shadow-[0_0_18px_-4px_rgba(34,211,238,0.55)]"
+                aria-label="Profile"
+              >
+                <User className="h-4 w-4" />
+              </button>
+              {openMenu === 'profile' && (
+                <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-xl border border-white/10 bg-background/95 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.7)] backdrop-blur-2xl animate-fade-in">
+                  <div className="border-b border-white/10 px-3 py-3">
+                    <p className="text-xs font-semibold text-foreground">{isLoggedIn ? 'Signed in' : 'Welcome'}</p>
+                    <p className="text-[10px] text-muted-foreground">{isLoggedIn ? (isAdmin ? 'Super Admin' : isReseller ? 'Reseller' : 'Member') : 'Sign in to personalize'}</p>
+                  </div>
+                  <div className="p-1">
+                    {isLoggedIn ? (
+                      <>
+                        <Link to="/dashboard" onClick={() => setOpenMenu(null)} className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-foreground transition-colors hover:bg-white/5">
+                          <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
+                        </Link>
+                        {isAdmin && (
+                          <Link to="/admin" onClick={() => setOpenMenu(null)} className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-yellow-300 transition-colors hover:bg-yellow-500/10">
+                            <Crown className="h-3.5 w-3.5" /> Boss Panel
+                          </Link>
+                        )}
+                        {isReseller && !isAdmin && (
+                          <Link to="/reseller/dashboard" onClick={() => setOpenMenu(null)} className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-foreground transition-colors hover:bg-white/5">
+                            <Users className="h-3.5 w-3.5" /> Reseller Panel
+                          </Link>
+                        )}
+                        <button
+                          onClick={() => { logout(); setOpenMenu(null); navigate('/'); }}
+                          className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                        >
+                          <LogOut className="h-3.5 w-3.5" /> Logout
+                        </button>
+                      </>
+                    ) : (
+                      <Link to="/login" onClick={() => setOpenMenu(null)} className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs text-foreground transition-colors hover:bg-white/5">
+                        <LogIn className="h-3.5 w-3.5" /> Sign in
+                      </Link>
+                    )}
+                  </div>
+                </div>
               )}
-            </Link>
-            <Link
-              to={isLoggedIn ? (isAdmin ? '/admin' : '/dashboard') : '/login'}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <User className="h-4 w-4" />
-            </Link>
+            </div>
           </div>
         </div>
 

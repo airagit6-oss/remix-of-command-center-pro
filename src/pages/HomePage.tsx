@@ -3,6 +3,7 @@ import { Navbar } from '@/components/marketplace/Navbar';
 import { MarketplaceSidebar } from '@/components/marketplace/MarketplaceSidebar';
 import { HeroBanner } from '@/components/marketplace/HeroBanner';
 import { ProductRow } from '@/components/marketplace/ProductRow';
+import { LiveChatWidget } from '@/components/marketplace/LiveChatWidget';
 import { products, sections } from '@/lib/marketplaceData';
 
 const HomePage = () => {
@@ -71,6 +72,7 @@ const HomePage = () => {
           </div>
         </footer>
       </div>
+      <LiveChatWidget />
     </div>
   );
 };
