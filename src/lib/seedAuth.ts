@@ -58,7 +58,7 @@ export const ROLE_PERMISSIONS: Record<SeedRole, string[]> = {
 export const ROLE_HOME: Record<SeedRole, string> = {
   SUPER_ADMIN: '/admin',
   RESELLER:    '/reseller/dashboard',
-  AUTHOR:      '/dashboard',
+  AUTHOR:      '/author/dashboard',
   USER:        '/dashboard',
 };
 
