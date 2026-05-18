@@ -18,6 +18,7 @@ import { fetchActivityLogs, type ActivityLog } from '@/lib/activityTimeline';
 import { fetchNotifications, type Notification } from '@/lib/notifications';
 import { fetchFeatureFlags, type FeatureFlag } from '@/lib/featureFlags';
 import { listLocalBackups, triggerBackup, type BackupMeta } from '@/lib/backup';
+import { ProductEditor } from '@/components/admin/ProductEditor';
 
 const emptyDraft = (): Product => ({
   id: newProductId(),
@@ -638,73 +639,20 @@ const AdminProductsPage = () => {
         </div>
       )}
 
-      {/* Editor modal (unchanged logic) */}
+      {/* Full enterprise product editor */}
       {editing && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setEditing(null)}>
-          <form
-            onClick={e => e.stopPropagation()}
-            onSubmit={handleSave}
-            className="bg-card border border-border rounded-xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto"
-          >
-            <h2 className="text-lg font-semibold text-foreground">
-              {items.some(i => i.id === editing.id) ? 'Edit product' : 'Add product'}
-            </h2>
-            <div className="space-y-3">
-              <label className="block">
-                <span className="text-xs text-muted-foreground">Name</span>
-                <input required value={editing.name} onChange={e => setEditing({ ...editing, name: e.target.value })}
-                  className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground" />
-              </label>
-              <label className="block">
-                <span className="text-xs text-muted-foreground">Short description</span>
-                <input value={editing.shortDescription} onChange={e => setEditing({ ...editing, shortDescription: e.target.value })}
-                  className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground" />
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <label className="block">
-                  <span className="text-xs text-muted-foreground">Category</span>
-                  <select value={editing.categorySlug} onChange={e => setEditing({ ...editing, categorySlug: e.target.value })}
-                    className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground">
-                    {categories.map(c => (<option key={c.slug} value={c.slug}>{c.name}</option>))}
-                  </select>
-                </label>
-                <label className="block">
-                  <span className="text-xs text-muted-foreground">Status</span>
-                  <select value={editing.status} onChange={e => setEditing({ ...editing, status: e.target.value as Product['status'] })}
-                    className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground">
-                    <option value="new">new</option>
-                    <option value="trending">trending</option>
-                    <option value="popular">popular</option>
-                    <option value="featured">featured</option>
-                  </select>
-                </label>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <label className="block">
-                  <span className="text-xs text-muted-foreground">Price ($)</span>
-                  <input type="number" min={0} value={editing.price} onChange={e => setEditing({ ...editing, price: Number(e.target.value) })}
-                    className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground" />
-                </label>
-                <label className="block">
-                  <span className="text-xs text-muted-foreground">Users</span>
-                  <input type="number" min={0} value={editing.users} onChange={e => setEditing({ ...editing, users: Number(e.target.value) })}
-                    className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground" />
-                </label>
-                <label className="block">
-                  <span className="text-xs text-muted-foreground">Rating</span>
-                  <input type="number" min={0} max={5} step={0.1} value={editing.rating} onChange={e => setEditing({ ...editing, rating: Number(e.target.value) })}
-                    className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-border bg-background text-foreground" />
-                </label>
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button type="button" onClick={() => setEditing(null)}
-                className="px-4 py-2 text-sm rounded-lg border border-border text-foreground hover:bg-accent transition-colors">Cancel</button>
-              <button type="submit"
-                className="px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">Save</button>
-            </div>
-          </form>
-        </div>
+        <ProductEditor
+          product={editing}
+          isNew={!items.some(i => i.id === editing.id)}
+          onClose={() => setEditing(null)}
+          onSave={(p) => {
+            if (!p.name.trim()) { toast.error('Name is required'); return; }
+            const cat = categories.find(c => c.slug === p.categorySlug);
+            upsertProduct({ ...p, name: p.name.trim(), category: cat?.name || p.category });
+            toast.success('Product saved');
+            setEditing(null);
+          }}
+        />
       )}
     </div>
   );
