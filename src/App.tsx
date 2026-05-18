@@ -84,6 +84,15 @@ import ReportsPage from "./pages/admin/ReportsPage";
 import EmailTemplatesPage from "./pages/admin/EmailTemplatesPage";
 import { products } from "@/lib/marketplaceData";
 
+// Author Studio
+import AuthorLayout from "./pages/AuthorLayout";
+import {
+  AuthorDashboardPage, AuthorProductsPage, AuthorReleasesPage, AuthorAnalyticsPage,
+  AuthorRevenuePage, AuthorLicensesPage, AuthorStoragePage, AuthorDownloadsPage,
+  AuthorSeoPage, AuthorReviewsPage, AuthorSupportPage, AuthorDeploymentsPage,
+  AuthorAiScansPage, AuthorPayoutsPage, AuthorSettingsPage,
+} from "./pages/author/AuthorPages";
+
 const queryClient = new QueryClient();
 
 const setMeta = (selector: string, value: string) => {
@@ -231,6 +240,33 @@ const App = () => (
                 <Route path="reports" element={<ReportsPage />} />
                 <Route path="email-templates" element={<EmailTemplatesPage />} />
                 <Route path="settings" element={<SettingsPage />} />
+              </Route>
+
+              {/* Author Studio — auth-gated */}
+              <Route
+                path="/author"
+                element={
+                  <AuthGuard>
+                    <AuthorLayout />
+                  </AuthGuard>
+                }
+              >
+                <Route index element={<Navigate to="dashboard" replace />} />
+                <Route path="dashboard"   element={<AuthorDashboardPage />} />
+                <Route path="products"    element={<AuthorProductsPage />} />
+                <Route path="releases"    element={<AuthorReleasesPage />} />
+                <Route path="analytics"   element={<AuthorAnalyticsPage />} />
+                <Route path="revenue"     element={<AuthorRevenuePage />} />
+                <Route path="licenses"    element={<AuthorLicensesPage />} />
+                <Route path="storage"     element={<AuthorStoragePage />} />
+                <Route path="downloads"   element={<AuthorDownloadsPage />} />
+                <Route path="seo"         element={<AuthorSeoPage />} />
+                <Route path="reviews"     element={<AuthorReviewsPage />} />
+                <Route path="support"     element={<AuthorSupportPage />} />
+                <Route path="deployments" element={<AuthorDeploymentsPage />} />
+                <Route path="ai-scans"    element={<AuthorAiScansPage />} />
+                <Route path="payouts"     element={<AuthorPayoutsPage />} />
+                <Route path="settings"    element={<AuthorSettingsPage />} />
               </Route>
 
               {/* Catch-all → redirect to home (zero 404) */}
