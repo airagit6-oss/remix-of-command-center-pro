@@ -91,6 +91,10 @@ import {
   AuthorRevenuePage, AuthorLicensesPage, AuthorStoragePage, AuthorDownloadsPage,
   AuthorSeoPage, AuthorReviewsPage, AuthorSupportPage, AuthorDeploymentsPage,
   AuthorAiScansPage, AuthorPayoutsPage, AuthorSettingsPage,
+  AuthorUploadCenterPage, AuthorProductUpdatesPage, AuthorCommentsPage,
+  AuthorCustomersPage, AuthorFollowersPage, AuthorMarketingPage,
+  AuthorAiInsightsPage, AuthorSecurityPage, AuthorTaxInvoicesPage,
+  AuthorSalesAnalyticsPage, AuthorRevenueInsightsPage,
 } from "./pages/author/AuthorPages";
 
 const queryClient = new QueryClient();
@@ -254,10 +258,21 @@ const App = () => (
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard"   element={<AuthorDashboardPage />} />
                 <Route path="products"    element={<AuthorProductsPage />} />
+                <Route path="upload"      element={<AuthorUploadCenterPage />} />
+                <Route path="updates"     element={<AuthorProductUpdatesPage />} />
                 <Route path="releases"    element={<AuthorReleasesPage />} />
                 <Route path="analytics"   element={<AuthorAnalyticsPage />} />
+                <Route path="sales"       element={<AuthorSalesAnalyticsPage />} />
+                <Route path="insights"    element={<AuthorRevenueInsightsPage />} />
                 <Route path="revenue"     element={<AuthorRevenuePage />} />
                 <Route path="licenses"    element={<AuthorLicensesPage />} />
+                <Route path="customers"   element={<AuthorCustomersPage />} />
+                <Route path="followers"   element={<AuthorFollowersPage />} />
+                <Route path="marketing"   element={<AuthorMarketingPage />} />
+                <Route path="comments"    element={<AuthorCommentsPage />} />
+                <Route path="ai-insights" element={<AuthorAiInsightsPage />} />
+                <Route path="security"    element={<AuthorSecurityPage />} />
+                <Route path="tax"         element={<AuthorTaxInvoicesPage />} />
                 <Route path="storage"     element={<AuthorStoragePage />} />
                 <Route path="downloads"   element={<AuthorDownloadsPage />} />
                 <Route path="seo"         element={<AuthorSeoPage />} />
