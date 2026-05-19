@@ -339,7 +339,7 @@ export function AuthorDashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         <Kpi icon={DollarSign}  label="Revenue 30d"   value={`$${animRevenue.toLocaleString()}`} sub="all channels"   accent="emerald" trend={12} />
         <Kpi icon={Activity}    label="Sales 30d"     value={animSales.toLocaleString()}         sub="orders"         accent="cyan"    trend={8}  />
-        <Kpi icon={Package}     label="Active"        value={products.filter(p=>p.status!=='inactive').length} sub={`${products.length} total`} accent="fuchsia" />
+        <Kpi icon={Package}     label="Active"        value={products.length} sub="all listings live" accent="fuchsia" />
         <Kpi icon={Clock}       label="Pending review"value={Math.max(1, Math.round(products.length * 0.08))}  sub="avg 18h"       accent="amber" />
         <Kpi icon={AlertTriangle} label="Refunds"     value={Math.round(animSales * 0.018)}      sub="1.8% rate"      accent="amber"   trend={-3} />
         <Kpi icon={Star}        label="Avg rating"    value={totals.avgRating.toFixed(2)}        sub="catalog-wide"   accent="emerald" />
