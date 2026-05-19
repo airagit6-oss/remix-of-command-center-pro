@@ -534,13 +534,11 @@ export function AuthorDashboardPage() {
 
 export function AuthorProductsPage() {
   const { products } = useAuthorContext();
-  const [tab, setTab] = useState<'all'|'published'|'draft'|'rejected'>('all');
+  const [tab, setTab] = useState<'all'|'featured'|'new'|'trending'>('all');
   const [q, setQ] = useState('');
 
   const filtered = useMemo(() => products.filter(p => {
-    if (tab === 'published' && p.status !== 'active') return false;
-    if (tab === 'draft' && p.status !== 'inactive') return false;
-    if (tab === 'rejected' && p.status !== 'maintenance') return false;
+    if (tab !== 'all' && p.status !== tab) return false;
     return !q || p.name.toLowerCase().includes(q.toLowerCase());
   }), [products, tab, q]);
 
@@ -559,7 +557,7 @@ export function AuthorProductsPage() {
       <div className="flex flex-wrap items-center gap-2 justify-between">
         <div className="flex items-center gap-1 rounded-lg border border-border bg-card/60 p-1">
           {([
-            ['all','All'],['published','Published'],['draft','Draft'],['rejected','Rejected'],
+            ['all','All'],['featured','Featured'],['new','New'],['trending','Trending'],
           ] as const).map(([k, label]) => (
             <button key={k} onClick={() => setTab(k)}
               className={`px-3 py-1 text-xs rounded-md ${tab===k ? 'bg-gradient-to-r from-cyan-500/20 to-fuchsia-500/10 text-foreground border border-cyan-500/30':'text-muted-foreground hover:text-foreground'}`}>
@@ -581,7 +579,7 @@ export function AuthorProductsPage() {
               <div className="relative">
                 {p.thumbnail && <img src={p.thumbnail} alt={p.name} className="h-28 w-full object-cover" />}
                 <span className="absolute top-2 left-2 text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-black/60 border border-cyan-500/30 text-cyan-300">v1.4.0</span>
-                <span className={`absolute top-2 right-2 text-[9px] uppercase px-1.5 py-0.5 rounded ${p.status==='active'?'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30':'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`}>{p.status}</span>
+                <span className={`absolute top-2 right-2 text-[9px] uppercase px-1.5 py-0.5 rounded ${p.status==='featured'?'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30':p.status==='trending'?'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30':'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'}`}>{p.status}</span>
               </div>
               <div className="p-3 space-y-2">
                 <div>
