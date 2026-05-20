@@ -284,7 +284,7 @@ function AuthorHeader({ onOpenCommand }: { onOpenCommand: () => void }) {
 
       {/* Upload quick action */}
       <Link
-        to="/author/upload"
+        to="/author/upload/new"
         className="inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-cyan-500 to-fuchsia-500 px-3 py-1.5 text-xs font-medium text-white shadow-[0_0_18px_-6px_rgba(34,211,238,0.6)] hover:opacity-90 transition"
       >
         <Plus className="h-3.5 w-3.5" /> Upload
