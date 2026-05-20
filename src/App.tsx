@@ -96,6 +96,12 @@ import {
   AuthorAiInsightsPage, AuthorSecurityPage, AuthorTaxInvoicesPage,
   AuthorSalesAnalyticsPage, AuthorRevenueInsightsPage,
 } from "./pages/author/AuthorPages";
+import {
+  AuthorUploadWizardPage, AuthorProfilePage, AuthorNotificationsPage,
+  AuthorVerificationPage, AuthorTeamPage, AuthorWorkspacePage,
+  AuthorApiKeysPage, AuthorActivityPage, AuthorRankingPage,
+  AuthorAffiliatePage, AuthorAchievementsPage,
+} from "./pages/author/AuthorPagesExtra";
 
 const queryClient = new QueryClient();
 
@@ -259,6 +265,17 @@ const App = () => (
                 <Route path="dashboard"   element={<AuthorDashboardPage />} />
                 <Route path="products"    element={<AuthorProductsPage />} />
                 <Route path="upload"      element={<AuthorUploadCenterPage />} />
+                <Route path="upload/new"  element={<AuthorUploadWizardPage />} />
+                <Route path="profile"      element={<AuthorProfilePage />} />
+                <Route path="notifications" element={<AuthorNotificationsPage />} />
+                <Route path="verification" element={<AuthorVerificationPage />} />
+                <Route path="team"         element={<AuthorTeamPage />} />
+                <Route path="workspace"    element={<AuthorWorkspacePage />} />
+                <Route path="api-keys"     element={<AuthorApiKeysPage />} />
+                <Route path="activity"     element={<AuthorActivityPage />} />
+                <Route path="ranking"      element={<AuthorRankingPage />} />
+                <Route path="affiliate"    element={<AuthorAffiliatePage />} />
+                <Route path="achievements" element={<AuthorAchievementsPage />} />
                 <Route path="updates"     element={<AuthorProductUpdatesPage />} />
                 <Route path="releases"    element={<AuthorReleasesPage />} />
                 <Route path="analytics"   element={<AuthorAnalyticsPage />} />
