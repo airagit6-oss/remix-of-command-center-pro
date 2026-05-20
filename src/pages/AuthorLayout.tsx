@@ -5,6 +5,7 @@ import {
   Search, Star, LifeBuoy, GitBranch, Cpu, Wallet, Settings, LogOut, Sparkles, Radio,
   Upload, Bell, MessageSquare, Users, Megaphone, ShieldCheck, FileText, TrendingUp,
   Receipt, Command as CommandIcon, Plus, Activity, Layers, BadgeCheck, Globe,
+  Trophy, Crown, IdCard, Palette, KeySquare, Gift, UserCircle2,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -26,6 +27,8 @@ const groups = [
     label: 'Overview',
     items: [
       { to: '/author/dashboard', label: 'Dashboard', icon: Compass },
+      { to: '/author/notifications', label: 'Notifications', icon: Bell },
+      { to: '/author/activity', label: 'Activity', icon: Activity },
     ],
   },
   {
@@ -33,6 +36,7 @@ const groups = [
     items: [
       { to: '/author/products',    label: 'Products',        icon: Package },
       { to: '/author/upload',      label: 'Upload Center',   icon: Upload },
+      { to: '/author/upload/new',  label: 'Upload Wizard',   icon: Sparkles },
       { to: '/author/updates',     label: 'Product Updates', icon: GitBranch },
       { to: '/author/releases',    label: 'Releases',        icon: Rocket },
       { to: '/author/deployments', label: 'Deployments',     icon: Activity },
@@ -72,11 +76,19 @@ const groups = [
     label: 'Growth',
     items: [
       { to: '/author/marketing', label: 'Marketing', icon: Megaphone },
+      { to: '/author/affiliate', label: 'Affiliate',     icon: Gift },
+      { to: '/author/ranking',   label: 'Marketplace rank', icon: Trophy },
+      { to: '/author/achievements', label: 'Achievements', icon: Crown },
     ],
   },
   {
     label: 'System',
     items: [
+      { to: '/author/profile',  label: 'Creator Profile', icon: UserCircle2 },
+      { to: '/author/verification', label: 'Verification', icon: IdCard },
+      { to: '/author/team',     label: 'Team',          icon: Users },
+      { to: '/author/workspace',label: 'Workspace',     icon: Palette },
+      { to: '/author/api-keys', label: 'API keys',      icon: KeySquare },
       { to: '/author/security', label: 'Security',     icon: ShieldCheck },
       { to: '/author/storage',  label: 'Storage / CDN', icon: HardDrive },
       { to: '/author/settings', label: 'Settings',     icon: Settings },
@@ -272,7 +284,7 @@ function AuthorHeader({ onOpenCommand }: { onOpenCommand: () => void }) {
 
       {/* Upload quick action */}
       <Link
-        to="/author/upload"
+        to="/author/upload/new"
         className="inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-cyan-500 to-fuchsia-500 px-3 py-1.5 text-xs font-medium text-white shadow-[0_0_18px_-6px_rgba(34,211,238,0.6)] hover:opacity-90 transition"
       >
         <Plus className="h-3.5 w-3.5" /> Upload
