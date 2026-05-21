@@ -102,6 +102,11 @@ import {
   AuthorApiKeysPage, AuthorActivityPage, AuthorRankingPage,
   AuthorAffiliatePage, AuthorAchievementsPage,
 } from "./pages/author/AuthorPagesExtra";
+import {
+  AuthorLiveVisitorsPage, AuthorChatCenterPage, AuthorSubscriptionsPage,
+  AuthorAiSeoPage, AuthorAiAssistantPage, AuthorDemosPage,
+  AuthorChangelogPage, AuthorKycPage, AuthorReputationPage,
+} from "./pages/author/AuthorPagesPremium";
 
 const queryClient = new QueryClient();
 
@@ -299,6 +304,15 @@ const App = () => (
                 <Route path="ai-scans"    element={<AuthorAiScansPage />} />
                 <Route path="payouts"     element={<AuthorPayoutsPage />} />
                 <Route path="settings"    element={<AuthorSettingsPage />} />
+                <Route path="live"          element={<AuthorLiveVisitorsPage />} />
+                <Route path="chat"          element={<AuthorChatCenterPage />} />
+                <Route path="subscriptions" element={<AuthorSubscriptionsPage />} />
+                <Route path="ai-seo"        element={<AuthorAiSeoPage />} />
+                <Route path="ai-assistant"  element={<AuthorAiAssistantPage />} />
+                <Route path="demos"         element={<AuthorDemosPage />} />
+                <Route path="changelog"     element={<AuthorChangelogPage />} />
+                <Route path="kyc"           element={<AuthorKycPage />} />
+                <Route path="reputation"    element={<AuthorReputationPage />} />
               </Route>
 
               {/* Catch-all → redirect to home (zero 404) */}

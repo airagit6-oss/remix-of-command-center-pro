@@ -6,6 +6,7 @@ import {
   Upload, Bell, MessageSquare, Users, Megaphone, ShieldCheck, FileText, TrendingUp,
   Receipt, Command as CommandIcon, Plus, Activity, Layers, BadgeCheck, Globe,
   Trophy, Crown, IdCard, Palette, KeySquare, Gift, UserCircle2,
+  Eye, Bot, Wand2, Play, Repeat,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -21,6 +22,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { LivePulseDock } from '@/pages/author/AuthorPagesPremium';
 
 const groups = [
   {
@@ -47,6 +49,7 @@ const groups = [
     items: [
       { to: '/author/reviews',   label: 'Reviews & Ratings',    icon: Star },
       { to: '/author/comments',  label: 'Comments & Support',   icon: MessageSquare },
+      { to: '/author/chat',      label: 'Chat Center',          icon: MessageSquare },
       { to: '/author/support',   label: 'Support Inbox',        icon: LifeBuoy },
       { to: '/author/followers', label: 'Followers',            icon: Users },
     ],
@@ -54,10 +57,13 @@ const groups = [
   {
     label: 'Intelligence',
     items: [
+      { to: '/author/live',       label: 'Live Visitors',    icon: Eye },
       { to: '/author/sales',      label: 'Sales Analytics',  icon: BarChart2 },
       { to: '/author/insights',   label: 'Revenue Insights', icon: TrendingUp },
       { to: '/author/downloads',  label: 'Downloads',        icon: Download },
       { to: '/author/seo',        label: 'SEO Tools',        icon: Search },
+      { to: '/author/ai-seo',     label: 'AI SEO Optimizer', icon: Wand2 },
+      { to: '/author/ai-assistant', label: 'AI Assistant',   icon: Bot },
       { to: '/author/ai-insights',label: 'AI Insights',      icon: Sparkles },
       { to: '/author/ai-scans',   label: 'AI Scans',         icon: Cpu },
     ],
@@ -67,6 +73,7 @@ const groups = [
     items: [
       { to: '/author/revenue',   label: 'Earnings',      icon: DollarSign },
       { to: '/author/payouts',   label: 'Payouts',       icon: Wallet },
+      { to: '/author/subscriptions', label: 'Subscriptions', icon: Repeat },
       { to: '/author/tax',       label: 'Tax Invoices',  icon: Receipt },
       { to: '/author/licenses',  label: 'Licenses',      icon: KeyRound },
       { to: '/author/customers', label: 'Customers',     icon: BadgeCheck },
@@ -78,6 +85,7 @@ const groups = [
       { to: '/author/marketing', label: 'Marketing', icon: Megaphone },
       { to: '/author/affiliate', label: 'Affiliate',     icon: Gift },
       { to: '/author/ranking',   label: 'Marketplace rank', icon: Trophy },
+      { to: '/author/reputation',label: 'Reputation',    icon: Trophy },
       { to: '/author/achievements', label: 'Achievements', icon: Crown },
     ],
   },
@@ -86,6 +94,9 @@ const groups = [
     items: [
       { to: '/author/profile',  label: 'Creator Profile', icon: UserCircle2 },
       { to: '/author/verification', label: 'Verification', icon: IdCard },
+      { to: '/author/kyc',       label: 'KYC',            icon: ShieldCheck },
+      { to: '/author/demos',     label: 'Demos',          icon: Play },
+      { to: '/author/changelog', label: 'Changelog',      icon: GitBranch },
       { to: '/author/team',     label: 'Team',          icon: Users },
       { to: '/author/workspace',label: 'Workspace',     icon: Palette },
       { to: '/author/api-keys', label: 'API keys',      icon: KeySquare },
@@ -401,6 +412,7 @@ const AuthorLayout = () => {
           </main>
         </div>
         <AuthorCommandBar open={cmdOpen} onOpenChange={setCmdOpen} />
+        <LivePulseDock />
       </div>
     </SidebarProvider>
   );
