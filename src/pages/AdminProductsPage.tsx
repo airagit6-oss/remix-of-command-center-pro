@@ -4,7 +4,7 @@ import {
   Search, Pencil, Trash2, Plus, Package, Image as ImageIcon, Activity, Shield,
   Database, HardDrive, Zap, GitBranch, Bell, Webhook, CheckCircle2, AlertTriangle,
   Sparkles, TrendingUp, Users, Star, Layers, RefreshCw, Download, Radio, Cpu,
-  CloudUpload, FileCheck2, ServerCog,
+  CloudUpload, FileCheck2, ServerCog, LayoutGrid, List, Rocket, Eye, Play, Tag,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -100,6 +100,8 @@ const AdminProductsPage = () => {
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Product | null>(null);
   const [tab, setTab] = useState<Tab>('catalog');
+  const [view, setView] = useState<'cinematic' | 'table'>('cinematic');
+  const [hoverId, setHoverId] = useState<string | null>(null);
 
   // Real backend-connected data streams
   const gallery = useGallery();
