@@ -4,7 +4,7 @@ import {
   Search, Pencil, Trash2, Plus, Package, Image as ImageIcon, Activity, Shield,
   Database, HardDrive, Zap, GitBranch, Bell, Webhook, CheckCircle2, AlertTriangle,
   Sparkles, TrendingUp, Users, Star, Layers, RefreshCw, Download, Radio, Cpu,
-  CloudUpload, FileCheck2, ServerCog,
+  CloudUpload, FileCheck2, ServerCog, LayoutGrid, List, Rocket, Eye, Play, Tag,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -100,6 +100,8 @@ const AdminProductsPage = () => {
   const [query, setQuery] = useState('');
   const [editing, setEditing] = useState<Product | null>(null);
   const [tab, setTab] = useState<Tab>('catalog');
+  const [view, setView] = useState<'cinematic' | 'table'>('cinematic');
+  const [hoverId, setHoverId] = useState<string | null>(null);
 
   // Real backend-connected data streams
   const gallery = useGallery();
@@ -248,7 +250,133 @@ const AdminProductsPage = () => {
 
       {/* ============ CATALOG TAB ============ */}
       {tab === 'catalog' && (
-        <div className="rounded-xl border border-border bg-card/60 backdrop-blur overflow-hidden">
+        <>
+        {/* View toggle */}
+        <div className="flex items-center justify-between">
+          <div className="text-xs text-muted-foreground">
+            Showing <span className="text-foreground font-medium tabular-nums">{filtered.length}</span> of {items.length}
+          </div>
+          <div className="inline-flex items-center rounded-lg border border-border bg-card/60 backdrop-blur p-0.5">
+            <button onClick={() => setView('cinematic')}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 text-[11px] rounded-md transition ${view==='cinematic' ? 'bg-gradient-to-r from-cyan-500/20 to-fuchsia-500/20 text-foreground border border-cyan-500/30' : 'text-muted-foreground hover:text-foreground'}`}>
+              <LayoutGrid className="h-3 w-3"/> Cinematic
+            </button>
+            <button onClick={() => setView('table')}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 text-[11px] rounded-md transition ${view==='table' ? 'bg-gradient-to-r from-cyan-500/20 to-fuchsia-500/20 text-foreground border border-cyan-500/30' : 'text-muted-foreground hover:text-foreground'}`}>
+              <List className="h-3 w-3"/> Table
+            </button>
+          </div>
+        </div>
+
+        {view === 'cinematic' && (
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 mt-3">
+            {filtered.map(p => {
+              const hovered = hoverId === p.id;
+              // deterministic pseudo-version & draft from id
+              const seed = p.id.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
+              const version = `v${1 + (seed % 4)}.${(seed >> 2) % 10}.${seed % 9}`;
+              const isDraft = seed % 7 === 0;
+              const isPublished = !isDraft;
+              return (
+                <div
+                  key={p.id}
+                  onMouseEnter={() => setHoverId(p.id)}
+                  onMouseLeave={() => setHoverId(null)}
+                  className={`group relative rounded-xl overflow-hidden border bg-card/60 backdrop-blur transition-all duration-300 ${hovered ? 'border-cyan-500/40 -translate-y-1 shadow-[0_18px_50px_-18px_rgba(34,211,238,0.45)] z-10' : 'border-border'}`}
+                >
+                  {/* Thumbnail */}
+                  <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-cyan-500/10 to-fuchsia-500/10">
+                    {p.thumbnail ? (
+                      <img src={p.thumbnail} alt={p.name} className={`h-full w-full object-cover transition-transform duration-500 ${hovered ? 'scale-110' : 'scale-100'}`} />
+                    ) : (
+                      <div className="h-full w-full grid place-items-center text-muted-foreground"><Package className="h-8 w-8"/></div>
+                    )}
+                    {/* gradient overlay */}
+                    <div className={`absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent transition-opacity ${hovered ? 'opacity-100' : 'opacity-70'}`} />
+
+                    {/* Top-left badges */}
+                    <div className="absolute top-2 left-2 flex flex-col gap-1">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[9px] font-semibold backdrop-blur border ${
+                        isDraft ? 'border-amber-500/40 bg-amber-500/15 text-amber-200' : 'border-emerald-500/40 bg-emerald-500/15 text-emerald-200'}`}>
+                        <span className={`h-1 w-1 rounded-full ${isDraft ? 'bg-amber-400' : 'bg-emerald-400 animate-pulse'}`}/>
+                        {isDraft ? 'Draft' : 'Live'}
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[9px] font-mono border border-cyan-500/30 bg-cyan-500/10 text-cyan-200 backdrop-blur">
+                        <GitBranch className="h-2.5 w-2.5"/> {version}
+                      </span>
+                    </div>
+
+                    {/* Top-right status chip */}
+                    <div className="absolute top-2 right-2">
+                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold capitalize backdrop-blur border ${
+                        p.status === 'trending' ? 'border-cyan-500/40 bg-cyan-500/15 text-cyan-200' :
+                        p.status === 'new' ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-200' :
+                        p.status === 'popular' ? 'border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-200' :
+                        'border-amber-500/40 bg-amber-500/15 text-amber-200'}`}>
+                        {p.status}
+                      </span>
+                    </div>
+
+                    {/* Hover overlay: quick actions */}
+                    <div className={`absolute inset-0 flex flex-col justify-end p-3 transition-opacity ${hovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+                      <div className="text-[10px] text-muted-foreground line-clamp-2 mb-2">{p.shortDescription || 'No description'}</div>
+                      <div className="flex items-center gap-1.5">
+                        <Link to={`/product/${p.id}`} title="Preview"
+                          className="inline-flex items-center gap-1 rounded-md bg-white/10 hover:bg-white/20 backdrop-blur px-2 py-1 text-[10px] text-white border border-white/20">
+                          <Play className="h-3 w-3"/> Preview
+                        </Link>
+                        <button onClick={() => setEditing({ ...p })} title="Quick edit"
+                          className="inline-flex items-center gap-1 rounded-md bg-cyan-500/20 hover:bg-cyan-500/30 backdrop-blur px-2 py-1 text-[10px] text-cyan-100 border border-cyan-400/30">
+                          <Pencil className="h-3 w-3"/> Edit
+                        </button>
+                        {isDraft ? (
+                          <button onClick={() => { upsertProduct({ ...p, status: 'new' }); toast.success(`Published ${p.name}`); }} title="Quick publish"
+                            className="inline-flex items-center gap-1 rounded-md bg-gradient-to-r from-cyan-500 to-fuchsia-500 px-2 py-1 text-[10px] font-medium text-white border border-white/10">
+                            <Rocket className="h-3 w-3"/> Publish
+                          </button>
+                        ) : (
+                          <button onClick={() => { upsertProduct({ ...p }); toast.success(`Bumped ${p.name}`); }} title="Bump version"
+                            className="inline-flex items-center gap-1 rounded-md bg-fuchsia-500/20 hover:bg-fuchsia-500/30 px-2 py-1 text-[10px] text-fuchsia-100 border border-fuchsia-400/30">
+                            <GitBranch className="h-3 w-3"/> Bump
+                          </button>
+                        )}
+                        <button onClick={() => handleDelete(p)} title="Delete"
+                          className="ml-auto h-6 w-6 grid place-items-center rounded-md bg-red-500/20 hover:bg-red-500/30 text-red-200 border border-red-400/30">
+                          <Trash2 className="h-3 w-3"/>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Body */}
+                  <div className="p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-foreground truncate">{p.name}</div>
+                        <div className="text-[10px] text-muted-foreground capitalize truncate">{p.category}</div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="text-sm font-semibold text-foreground tabular-nums">${p.price}</div>
+                        <div className="text-[10px] text-amber-300">★ {p.rating.toFixed(1)}</div>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between text-[10px] text-muted-foreground">
+                      <span className="inline-flex items-center gap-1"><Users className="h-3 w-3"/> {p.users.toLocaleString()}</span>
+                      <span className="inline-flex items-center gap-1"><Star className="h-3 w-3"/> {p.reviews.toLocaleString()}</span>
+                      <span className="inline-flex items-center gap-1"><Tag className="h-3 w-3"/> {(p.tags||[]).length}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {filtered.length === 0 && (
+              <div className="col-span-full py-12 text-center text-sm text-muted-foreground border border-dashed border-border rounded-xl">No products match your search.</div>
+            )}
+          </div>
+        )}
+
+        {view === 'table' && (
+        <div className="rounded-xl border border-border bg-card/60 backdrop-blur overflow-hidden mt-3">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-secondary/40">
@@ -303,6 +431,8 @@ const AdminProductsPage = () => {
             </tbody>
           </table>
         </div>
+        )}
+        </>
       )}
 
       {/* ============ MEDIA & CDN TAB ============ */}

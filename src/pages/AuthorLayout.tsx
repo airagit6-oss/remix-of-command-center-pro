@@ -6,7 +6,7 @@ import {
   Upload, Bell, MessageSquare, Users, Megaphone, ShieldCheck, FileText, TrendingUp,
   Receipt, Command as CommandIcon, Plus, Activity, Layers, BadgeCheck, Globe,
   Trophy, Crown, IdCard, Palette, KeySquare, Gift, UserCircle2,
-  Eye, Bot, Wand2, Play, Repeat,
+  Eye, Bot, Wand2, Play, Repeat, Code2, FlaskConical, Map,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -87,6 +87,9 @@ const groups = [
       { to: '/author/ranking',   label: 'Marketplace rank', icon: Trophy },
       { to: '/author/reputation',label: 'Reputation',    icon: Trophy },
       { to: '/author/achievements', label: 'Achievements', icon: Crown },
+      { to: '/author/embeds',    label: 'Embed widgets', icon: Code2 },
+      { to: '/author/ab-tests',  label: 'A/B tests',     icon: FlaskConical },
+      { to: '/author/roadmap',   label: 'Roadmap',       icon: Map },
     ],
   },
   {

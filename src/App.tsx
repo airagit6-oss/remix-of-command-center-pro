@@ -106,6 +106,7 @@ import {
   AuthorLiveVisitorsPage, AuthorChatCenterPage, AuthorSubscriptionsPage,
   AuthorAiSeoPage, AuthorAiAssistantPage, AuthorDemosPage,
   AuthorChangelogPage, AuthorKycPage, AuthorReputationPage,
+  AuthorEmbedsPage, AuthorAbTestsPage, AuthorRoadmapPage,
 } from "./pages/author/AuthorPagesPremium";
 
 const queryClient = new QueryClient();
@@ -313,6 +314,9 @@ const App = () => (
                 <Route path="changelog"     element={<AuthorChangelogPage />} />
                 <Route path="kyc"           element={<AuthorKycPage />} />
                 <Route path="reputation"    element={<AuthorReputationPage />} />
+                <Route path="embeds"        element={<AuthorEmbedsPage />} />
+                <Route path="ab-tests"      element={<AuthorAbTestsPage />} />
+                <Route path="roadmap"       element={<AuthorRoadmapPage />} />
               </Route>
 
               {/* Catch-all → redirect to home (zero 404) */}

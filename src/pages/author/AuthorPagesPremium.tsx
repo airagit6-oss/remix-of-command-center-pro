@@ -770,3 +770,201 @@ export function LivePulseDock() {
     </div>
   );
 }
+/* ============================================================
+   EMBEDS — embeddable product widgets / showcase code
+   ============================================================ */
+export function AuthorEmbedsPage() {
+  const t = useTicker(2400);
+  const variants = [
+    { id: 'card',     label: 'Product card',  size: '320×420', hits: 12480 + (t%9) },
+    { id: 'banner',   label: 'Hero banner',   size: '1200×320', hits: 7841 + (t%5) },
+    { id: 'price',    label: 'Price tile',    size: '260×160', hits: 4129 + (t%4) },
+    { id: 'review',   label: 'Review wall',   size: '640×480', hits: 2987 + (t%3) },
+  ];
+  const snippet = `<script src="https://cdn.studio.app/embed.js"
+  data-product="hospital-erp"
+  data-variant="card"
+  data-theme="dark"></script>`;
+  return (
+    <div className="space-y-5">
+      <Hero eyebrow="Embed widgets" title="Showcase anywhere"
+        subtitle="Drop your products into blogs, docs, partner sites and landing pages with theme-aware embeds."
+        action={<Chip tone="cyan"><Globe className="h-3 w-3"/> CDN-delivered</Chip>}/>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Kpi icon={Eye} label="Embed views" value="27,438" sub="last 30d" accent="cyan" trend={12}/>
+        <Kpi icon={ArrowUpRight} label="Click-through" value="6.8%" sub="vs 4.2% avg" accent="fuchsia" trend={4}/>
+        <Kpi icon={Globe} label="Live sites" value="184" sub="42 countries" accent="emerald" trend={9}/>
+        <Kpi icon={Activity} label="Latency" value="42ms" sub="edge cached" accent="amber"/>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Section title="Variants" icon={Layers} className="lg:col-span-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {variants.map(v => (
+              <div key={v.id} className="rounded-lg border border-border bg-background/40 p-3 hover:border-cyan-500/30 transition">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm font-semibold text-foreground">{v.label}</div>
+                    <div className="text-[11px] text-muted-foreground">{v.size}</div>
+                  </div>
+                  <Chip tone="cyan"><Eye className="h-3 w-3"/> {v.hits.toLocaleString()}</Chip>
+                </div>
+                <div className="mt-3 aspect-video rounded-md border border-border bg-gradient-to-br from-cyan-500/10 to-fuchsia-500/10 grid place-items-center">
+                  <ImageIcon className="h-5 w-5 text-muted-foreground"/>
+                </div>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-[11px] text-muted-foreground">data-variant="{v.id}"</span>
+                  <button className="text-[11px] text-cyan-300 hover:underline inline-flex items-center gap-1">
+                    <ExternalLink className="h-3 w-3"/> Open in playground
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+        <Section title="Install snippet" icon={Cpu}>
+          <pre className="rounded-md border border-border bg-background/60 p-3 text-[10px] leading-relaxed text-cyan-200 overflow-auto whitespace-pre-wrap">{snippet}</pre>
+          <div className="mt-3 space-y-2 text-xs">
+            <div className="flex items-center justify-between"><span className="text-muted-foreground">Theme</span><span className="text-foreground">auto · dark · light</span></div>
+            <div className="flex items-center justify-between"><span className="text-muted-foreground">Lazy load</span><span className="text-emerald-300">enabled</span></div>
+            <div className="flex items-center justify-between"><span className="text-muted-foreground">Tracking</span><span className="text-cyan-300">GDPR-safe</span></div>
+          </div>
+          <button className="mt-3 w-full rounded-md bg-gradient-to-r from-cyan-500 to-fuchsia-500 px-3 py-1.5 text-xs font-medium text-white">
+            Copy snippet
+          </button>
+        </Section>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   A/B TESTS — landing variants for each product
+   ============================================================ */
+export function AuthorAbTestsPage() {
+  const t = useTicker(2200);
+  const tests = [
+    { id:'t1', name:'Hero headline', product:'Hospital ERP', a:'AI-first ERP', b:'Built for clinics', visA: 2840+(t%9), visB:2912+(t%7), cvrA:4.2, cvrB:5.6, status:'running' as const },
+    { id:'t2', name:'Pricing layout', product:'Edge Analytics', a:'3-tier', b:'Slider', visA:1280, visB:1240, cvrA:6.1, cvrB:5.4, status:'running' as const },
+    { id:'t3', name:'CTA color',     product:'AI Helpdesk', a:'Cyan', b:'Fuchsia', visA:4128, visB:4084, cvrA:7.2, cvrB:8.4, status:'winner' as const },
+    { id:'t4', name:'Demo position', product:'Fleet OS', a:'Above fold', b:'Below', visA:912, visB:891, cvrA:3.1, cvrB:2.4, status:'draft' as const },
+  ];
+  return (
+    <div className="space-y-5">
+      <Hero eyebrow="A/B testing" title="Experiment & ship winners"
+        subtitle="Run cinematic landing variants per product. Statistical significance, AI insights, instant rollout."
+        action={<button className="rounded-md bg-gradient-to-r from-cyan-500 to-fuchsia-500 px-3 py-1.5 text-xs font-medium text-white inline-flex items-center gap-1.5"><Plus className="h-3 w-3"/> New experiment</button>}/>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Kpi icon={Activity} label="Running tests" value="9"  sub="3 awaiting power" accent="cyan" trend={3}/>
+        <Kpi icon={Trophy}   label="Winners shipped" value="14" sub="this quarter" accent="fuchsia" trend={6}/>
+        <Kpi icon={TrendingUp} label="Avg lift" value="+18.4%" sub="conversion" accent="emerald" trend={5}/>
+        <Kpi icon={Zap}      label="AI insights" value="42"   sub="auto-generated" accent="amber"/>
+      </div>
+      <Section title="Experiments" icon={Cpu}>
+        <div className="space-y-2">
+          {tests.map(e => {
+            const lift = ((e.cvrB - e.cvrA) / e.cvrA) * 100;
+            return (
+              <div key={e.id} className="rounded-lg border border-border bg-background/40 p-3 hover:border-cyan-500/30 transition">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm font-semibold text-foreground">{e.name}</div>
+                      <Chip tone={e.status==='winner'?'emerald':e.status==='running'?'cyan':'muted'}>
+                        {e.status==='winner' && <Trophy className="h-3 w-3"/>}
+                        {e.status==='running' && <Activity className="h-3 w-3 animate-pulse"/>}
+                        {e.status}
+                      </Chip>
+                    </div>
+                    <div className="text-[11px] text-muted-foreground">{e.product}</div>
+                  </div>
+                  <div className={`text-sm font-semibold tabular-nums ${lift>=0?'text-emerald-300':'text-red-300'}`}>
+                    {lift>=0?'+':''}{lift.toFixed(1)}% lift
+                  </div>
+                </div>
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+                  {([['A',e.a,e.visA,e.cvrA,'cyan'],['B',e.b,e.visB,e.cvrB,'fuchsia']] as const).map(([k,label,vis,cvr,tone]) => (
+                    <div key={k} className={`rounded-md border p-2 ${tone==='cyan'?'border-cyan-500/30 bg-cyan-500/5':'border-fuchsia-500/30 bg-fuchsia-500/5'}`}>
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className={`font-semibold ${tone==='cyan'?'text-cyan-300':'text-fuchsia-300'}`}>Variant {k}</span>
+                        <span className="text-muted-foreground">{vis.toLocaleString()} visits</span>
+                      </div>
+                      <div className="text-xs text-foreground truncate">{label}</div>
+                      <div className="mt-1 flex items-center gap-2">
+                        <div className="flex-1 h-1.5 rounded-full bg-border overflow-hidden">
+                          <div className={`h-full bg-gradient-to-r ${tone==='cyan'?'from-cyan-400 to-fuchsia-500':'from-fuchsia-400 to-pink-500'}`} style={{width:`${Math.min(100,cvr*10)}%`}}/>
+                        </div>
+                        <span className="text-[10px] tabular-nums text-foreground">{cvr.toFixed(1)}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Section>
+    </div>
+  );
+}
+
+/* ============================================================
+   ROADMAP — public roadmap & community votes
+   ============================================================ */
+export function AuthorRoadmapPage() {
+  const cols = [
+    { key:'idea',     title:'Ideas',       tone:'muted'   as const, items:[
+      { t:'Webhook templates',     votes:48, eta:'—' },
+      { t:'Slack 2-way sync',      votes:36, eta:'—' },
+      { t:'Per-seat pricing',      votes:21, eta:'—' },
+    ]},
+    { key:'planned',  title:'Planned',     tone:'cyan'    as const, items:[
+      { t:'Multi-region deploy',   votes:128, eta:'Q3' },
+      { t:'OpenAPI export',        votes:96,  eta:'Q3' },
+    ]},
+    { key:'progress', title:'In progress', tone:'fuchsia' as const, items:[
+      { t:'AI summary digest',     votes:212, eta:'Aug' },
+      { t:'Custom domains',        votes:184, eta:'Sep' },
+    ]},
+    { key:'shipped',  title:'Shipped',     tone:'emerald' as const, items:[
+      { t:'Realtime presence',     votes:412, eta:'Jul' },
+      { t:'Audit log export',      votes:308, eta:'Jun' },
+    ]},
+  ];
+  return (
+    <div className="space-y-5">
+      <Hero eyebrow="Roadmap" title="Public roadmap & community votes"
+        subtitle="Show what you're building. Capture votes. Ship in the open."
+        action={<button className="rounded-md bg-gradient-to-r from-cyan-500 to-fuchsia-500 px-3 py-1.5 text-xs font-medium text-white inline-flex items-center gap-1.5"><Plus className="h-3 w-3"/> Add item</button>}/>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Kpi icon={Activity} label="Active items" value="42" sub="across stages" accent="cyan"/>
+        <Kpi icon={Heart} label="Votes (30d)" value="1,284" sub="+18% MoM" accent="fuchsia" trend={18}/>
+        <Kpi icon={Calendar} label="Shipped Q" value="9" sub="vs 6 planned" accent="emerald" trend={50}/>
+        <Kpi icon={Users} label="Subscribers" value="6,128" sub="email updates" accent="amber"/>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        {cols.map(c => (
+          <div key={c.key} className="rounded-xl border border-border bg-card/60 backdrop-blur p-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-xs font-semibold text-foreground inline-flex items-center gap-2">
+                <span className={`h-2 w-2 rounded-full ${c.tone==='emerald'?'bg-emerald-400':c.tone==='cyan'?'bg-cyan-400':c.tone==='fuchsia'?'bg-fuchsia-400 animate-pulse':'bg-muted-foreground'}`}/>
+                {c.title}
+              </div>
+              <span className="text-[10px] text-muted-foreground">{c.items.length}</span>
+            </div>
+            <div className="space-y-2">
+              {c.items.map(it => (
+                <div key={it.t} className="rounded-lg border border-border bg-background/40 p-2.5 hover:border-cyan-500/30 transition">
+                  <div className="text-xs text-foreground">{it.t}</div>
+                  <div className="mt-2 flex items-center justify-between text-[10px]">
+                    <span className="inline-flex items-center gap-1 text-fuchsia-300"><Heart className="h-3 w-3"/> {it.votes}</span>
+                    <span className="text-muted-foreground">{it.eta}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
