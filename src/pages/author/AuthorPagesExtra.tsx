@@ -236,6 +236,19 @@ export function AuthorUploadWizardPage() {
                     <input value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTag())} placeholder="add tag…" className="bg-background border border-border rounded-md px-2 py-0.5 text-xs w-28" />
                   </div>
                 </Field>
+                <div className="rounded-md border border-fuchsia-500/30 bg-gradient-to-r from-fuchsia-500/10 to-cyan-500/10 p-2.5">
+                  <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-fuchsia-200 mb-1.5">
+                    <Sparkles className="h-3 w-3"/> AI suggested tags · click to add
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {['saas','typescript','enterprise','realtime','multi-tenant','tailwind','supabase','b2b','admin','starter'].filter(s => !tags.includes(s)).slice(0,8).map(s => (
+                      <button key={s} onClick={() => setTags([...tags, s])}
+                        className="inline-flex items-center gap-1 rounded-full border border-fuchsia-500/30 bg-background/60 hover:bg-fuchsia-500/15 text-fuchsia-200 text-[11px] px-2 py-0.5 transition">
+                        <Plus className="h-2.5 w-2.5"/>{s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   {[{ k: 'SEO score', v: Math.round(seoScore), tone: 'cyan' as const }, { k: 'Readability', v: 87, tone: 'emerald' as const }, { k: 'Keyword density', v: 64, tone: 'fuchsia' as const }].map(s => (
                     <div key={s.k} className="rounded-md border border-border bg-background/40 p-2">
