@@ -715,7 +715,34 @@ export function AuthorReputationPage() {
    ============================================================ */
 export function LivePulseDock() {
   const [open, setOpen] = useState(true);
+  const [tab, setTab] = useState<'pulse'|'feed'>('pulse');
   const t = useTicker(2200);
+
+  // animated KPI values with smooth tween
+  const targets = useMemo(() => ({
+    sales:   482 + (t * 3) % 60,
+    reviews: 38  + (t * 1) % 9,
+    visits:  1284 + (t * 17) % 220,
+    payouts: 12840 + (t * 11) % 480,
+  }), [t]);
+
+  const sales   = useCounter(targets.sales);
+  const reviews = useCounter(targets.reviews);
+  const visits  = useCounter(targets.visits);
+  const payouts = useCounter(targets.payouts);
+
+  // animated mini bars (rolling history per metric)
+  const bars = useMemo(() => {
+    const make = (seed: number) =>
+      Array.from({ length: 14 }).map((_, i) => 30 + Math.abs(Math.sin((t + i + seed) * 0.7)) * 70);
+    return {
+      sales:   make(1),
+      reviews: make(7),
+      visits:  make(3),
+      payouts: make(5),
+    };
+  }, [t]);
+
   const items = useMemo(() => {
     const samples = [
       { type: 'sale',   icon: DollarSign, tone: 'emerald' as const, text: 'Hospital ERP · Pro',     meta: '+$129' },
@@ -729,40 +756,94 @@ export function LivePulseDock() {
 
   if (!open) {
     return (
-      <button onClick={()=>setOpen(true)}
-        className="fixed bottom-4 right-4 z-40 h-10 w-10 grid place-items-center rounded-full bg-gradient-to-br from-cyan-500 to-fuchsia-500 text-white shadow-[0_0_24px_-4px_rgba(34,211,238,0.7)]">
+      <button onClick={()=>setOpen(true)} aria-label="Open live pulse"
+        className="fixed bottom-4 right-4 z-40 h-11 w-11 grid place-items-center rounded-full bg-gradient-to-br from-cyan-500 to-fuchsia-500 text-white shadow-[0_0_24px_-4px_rgba(34,211,238,0.7)] active:scale-95 transition">
         <Radio className="h-4 w-4 animate-pulse"/>
+        <span className="absolute -top-1 -right-1 h-3.5 min-w-3.5 px-1 rounded-full bg-emerald-500 text-[9px] text-white grid place-items-center tabular-nums">{(t%9)+1}</span>
       </button>
     );
   }
 
+  const kpis = [
+    { key: 'sales',   label: 'Sales',   value: sales,   prefix: '',  tone: 'emerald' as const, icon: DollarSign,   bars: bars.sales },
+    { key: 'reviews', label: 'Reviews', value: reviews, prefix: '',  tone: 'amber' as const,   icon: Star,         bars: bars.reviews },
+    { key: 'visits',  label: 'Visits',  value: visits,  prefix: '',  tone: 'cyan' as const,    icon: Eye,          bars: bars.visits },
+    { key: 'payouts', label: 'Payouts', value: payouts, prefix: '$', tone: 'fuchsia' as const, icon: ArrowUpRight, bars: bars.payouts },
+  ];
+
   return (
-    <div className="fixed bottom-4 right-4 z-40 w-72 rounded-xl border border-cyan-500/20 bg-card/80 backdrop-blur-2xl shadow-[0_8px_40px_-8px_rgba(34,211,238,0.35)] overflow-hidden hidden md:block">
+    <div className="fixed z-40 left-2 right-2 bottom-2 md:left-auto md:right-4 md:bottom-4 md:w-80 rounded-xl border border-cyan-500/20 bg-card/85 backdrop-blur-2xl shadow-[0_8px_40px_-8px_rgba(34,211,238,0.35)] overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-gradient-to-r from-cyan-500/10 to-fuchsia-500/10">
         <div className="flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"/>
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60 animate-ping" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+          </span>
           Live pulse
+          <span className="text-[9px] text-muted-foreground ml-1">realtime · author</span>
         </div>
-        <button onClick={()=>setOpen(false)} className="text-[10px] text-muted-foreground hover:text-foreground">hide</button>
+        <div className="flex items-center gap-1">
+          <button onClick={()=>setTab(tab==='pulse'?'feed':'pulse')}
+            className="text-[10px] px-1.5 py-0.5 rounded border border-border text-muted-foreground hover:text-foreground">
+            {tab==='pulse' ? 'feed' : 'pulse'}
+          </button>
+          <button onClick={()=>setOpen(false)} aria-label="Hide dock"
+            className="text-[10px] px-1.5 py-0.5 rounded text-muted-foreground hover:text-foreground">hide</button>
+        </div>
       </div>
-      <ul className="divide-y divide-border max-h-72 overflow-hidden">
-        {items.map((it, i) => (
-          <li key={i} className="px-3 py-2 flex items-center gap-2 animate-fade-in">
-            <span className={`h-7 w-7 grid place-items-center rounded-md border ${
-              it.tone==='emerald'?'border-emerald-500/30 bg-emerald-500/10 text-emerald-300':
-              it.tone==='amber'?'border-amber-500/30 bg-amber-500/10 text-amber-300':
-              it.tone==='cyan'?'border-cyan-500/30 bg-cyan-500/10 text-cyan-300':
-              'border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300'}`}>
-              <it.icon className="h-3.5 w-3.5"/>
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="text-xs text-foreground truncate">{it.text}</div>
-              <div className="text-[10px] text-muted-foreground">{it.meta}</div>
+
+      {tab === 'pulse' ? (
+        <div className="grid grid-cols-2 divide-x divide-y divide-border">
+          {kpis.map(k => (
+            <div key={k.key} className="p-2.5 min-w-0">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <k.icon className={`h-3 w-3 ${
+                    k.tone==='emerald'?'text-emerald-300':
+                    k.tone==='amber'?'text-amber-300':
+                    k.tone==='cyan'?'text-cyan-300':'text-fuchsia-300'}`}/> {k.label}
+                </span>
+                <span className="text-[9px] text-emerald-300 tabular-nums">▲</span>
+              </div>
+              <div className="mt-0.5 text-base font-semibold text-foreground tabular-nums truncate">
+                {k.prefix}{Math.round(k.value).toLocaleString()}
+              </div>
+              <div className="mt-1.5 flex items-end gap-[2px] h-7">
+                {k.bars.map((h, i) => (
+                  <span key={i}
+                    style={{ height: `${h}%` }}
+                    className={`flex-1 rounded-sm transition-all duration-500 ease-out ${
+                      k.tone==='emerald'?'bg-gradient-to-t from-emerald-500/30 to-emerald-400':
+                      k.tone==='amber'?'bg-gradient-to-t from-amber-500/30 to-amber-400':
+                      k.tone==='cyan'?'bg-gradient-to-t from-cyan-500/30 to-cyan-400':
+                      'bg-gradient-to-t from-fuchsia-500/30 to-fuchsia-400'}`}
+                  />
+                ))}
+              </div>
             </div>
-            <span className="text-[10px] text-muted-foreground">now</span>
-          </li>
-        ))}
-      </ul>
+          ))}
+        </div>
+      ) : (
+        <ul className="divide-y divide-border max-h-64 overflow-y-auto">
+          {items.map((it, i) => (
+            <li key={i} className="px-3 py-2 flex items-center gap-2 animate-fade-in">
+              <span className={`h-7 w-7 grid place-items-center rounded-md border ${
+                it.tone==='emerald'?'border-emerald-500/30 bg-emerald-500/10 text-emerald-300':
+                it.tone==='amber'?'border-amber-500/30 bg-amber-500/10 text-amber-300':
+                it.tone==='cyan'?'border-cyan-500/30 bg-cyan-500/10 text-cyan-300':
+                'border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300'}`}>
+                <it.icon className="h-3.5 w-3.5"/>
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs text-foreground truncate">{it.text}</div>
+                <div className="text-[10px] text-muted-foreground">{it.meta}</div>
+              </div>
+              <span className="text-[10px] text-muted-foreground">now</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
       <div className="px-3 py-1.5 text-[10px] text-muted-foreground border-t border-border flex items-center justify-between">
         <span className="inline-flex items-center gap-1"><Cpu className="h-3 w-3 text-fuchsia-300"/> AI curated</span>
         <span className="inline-flex items-center gap-1"><Filter className="h-3 w-3"/> all events</span>
