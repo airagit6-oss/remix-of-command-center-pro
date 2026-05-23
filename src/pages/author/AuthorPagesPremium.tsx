@@ -50,6 +50,28 @@ function useTicker(ms = 2400) {
   return t;
 }
 
+/** Smoothly tween a numeric value toward `target`. */
+function useCounter(target: number, duration = 700) {
+  const [val, setVal] = useState(target);
+  const fromRef = useRef(target);
+  const startRef = useRef<number>(0);
+  useEffect(() => {
+    fromRef.current = val;
+    startRef.current = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - startRef.current) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setVal(fromRef.current + (target - fromRef.current) * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target]);
+  return val;
+}
+
 /* ============================================================
    LIVE VISITORS
    ============================================================ */
