@@ -4,6 +4,7 @@ import {
   DollarSign, Flame, Globe2, Layers, Radar as RadarIcon, Radio, Rocket,
   ShieldAlert, Signal, Sparkles, Target, TrendingDown, TrendingUp, Users, Zap,
   Pause, Play, Search, X,
+  Bell, Plus, Mail, MessageSquare, Webhook, Phone, ChevronRight, Trash2, Power,
 } from "lucide-react";
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Line,
@@ -473,6 +474,546 @@ function GeoIntel() {
 
 /* ───────────────── main page ───────────────── */
 
+/* ───────────────── AI Alert Rules Console ───────────────── */
+
+type RuleSeverity = "info" | "warning" | "critical";
+type Channel = "email" | "slack" | "webhook" | "sms";
+type Metric =
+  | "revenue_drop" | "churn_spike" | "refund_surge" | "latency_p95"
+  | "signup_anomaly" | "payment_failure" | "traffic_drop" | "conversion_dip";
+type Condition = ">" | "<" | "±%" | "z-score";
+
+interface AlertRule {
+  id: string;
+  name: string;
+  enabled: boolean;
+  metric: Metric;
+  condition: Condition;
+  threshold: number;
+  window: string;
+  confidence: number; // 0-100
+  severity: RuleSeverity;
+  channels: Channel[];
+  escalation: { level: number; after: string; to: string }[];
+  lastFired: string;
+  fires24h: number;
+}
+
+const seedRules: AlertRule[] = [
+  {
+    id: "rule-001", name: "Revenue Drop > 12% (1h)", enabled: true,
+    metric: "revenue_drop", condition: "±%", threshold: 12, window: "1h",
+    confidence: 94, severity: "critical",
+    channels: ["email", "slack", "sms"],
+    escalation: [
+      { level: 1, after: "0m", to: "On-call SRE" },
+      { level: 2, after: "5m", to: "Revenue Lead" },
+      { level: 3, after: "15m", to: "CFO + CTO" },
+    ],
+    lastFired: "2m ago", fires24h: 3,
+  },
+  {
+    id: "rule-002", name: "Churn Spike (z>2.5)", enabled: true,
+    metric: "churn_spike", condition: "z-score", threshold: 2.5, window: "24h",
+    confidence: 88, severity: "warning",
+    channels: ["slack", "email"],
+    escalation: [
+      { level: 1, after: "0m", to: "Growth Ops" },
+      { level: 2, after: "30m", to: "Head of Retention" },
+    ],
+    lastFired: "1h ago", fires24h: 1,
+  },
+  {
+    id: "rule-003", name: "Payment Failure Burst", enabled: true,
+    metric: "payment_failure", condition: ">", threshold: 40, window: "15m",
+    confidence: 97, severity: "critical",
+    channels: ["webhook", "slack", "sms"],
+    escalation: [
+      { level: 1, after: "0m", to: "Payments On-call" },
+      { level: 2, after: "3m", to: "Stripe Liaison" },
+      { level: 3, after: "10m", to: "VP Engineering" },
+    ],
+    lastFired: "12m ago", fires24h: 7,
+  },
+  {
+    id: "rule-004", name: "Conversion Dip (-8% MoM)", enabled: false,
+    metric: "conversion_dip", condition: "±%", threshold: 8, window: "7d",
+    confidence: 76, severity: "warning",
+    channels: ["email"],
+    escalation: [{ level: 1, after: "0m", to: "Growth Analyst" }],
+    lastFired: "yesterday", fires24h: 0,
+  },
+  {
+    id: "rule-005", name: "Signup Anomaly (AI)", enabled: true,
+    metric: "signup_anomaly", condition: "z-score", threshold: 3.0, window: "1h",
+    confidence: 91, severity: "info",
+    channels: ["slack"],
+    escalation: [{ level: 1, after: "0m", to: "Growth Bot" }],
+    lastFired: "8m ago", fires24h: 12,
+  },
+  {
+    id: "rule-006", name: "Refund Surge > $5k", enabled: true,
+    metric: "refund_surge", condition: ">", threshold: 5000, window: "1h",
+    confidence: 85, severity: "critical",
+    channels: ["email", "slack", "webhook"],
+    escalation: [
+      { level: 1, after: "0m", to: "Finance Ops" },
+      { level: 2, after: "10m", to: "CFO" },
+    ],
+    lastFired: "—", fires24h: 0,
+  },
+];
+
+const metricLabels: Record<Metric, string> = {
+  revenue_drop: "Revenue Drop", churn_spike: "Churn Spike",
+  refund_surge: "Refund Surge", latency_p95: "Latency p95",
+  signup_anomaly: "Signup Anomaly", payment_failure: "Payment Failures",
+  traffic_drop: "Traffic Drop", conversion_dip: "Conversion Dip",
+};
+
+const sevStyle: Record<RuleSeverity, string> = {
+  info: "text-cyan-300 bg-cyan-500/10 border-cyan-500/30",
+  warning: "text-amber-300 bg-amber-500/10 border-amber-500/30",
+  critical: "text-rose-300 bg-rose-500/10 border-rose-500/30",
+};
+
+const channelIcon: Record<Channel, typeof Mail> = {
+  email: Mail, slack: MessageSquare, webhook: Webhook, sms: Phone,
+};
+
+function AlertRulesConsole() {
+  const [rules, setRules] = useState<AlertRule[]>(seedRules);
+  const [selectedId, setSelectedId] = useState<string>(seedRules[0].id);
+  const [creating, setCreating] = useState(false);
+  const [draft, setDraft] = useState<AlertRule>({
+    id: "", name: "New Anomaly Rule", enabled: true,
+    metric: "revenue_drop", condition: "±%", threshold: 10, window: "1h",
+    confidence: 80, severity: "warning", channels: ["email"],
+    escalation: [{ level: 1, after: "0m", to: "On-call" }],
+    lastFired: "—", fires24h: 0,
+  });
+
+  const selected = rules.find((r) => r.id === selectedId) ?? rules[0];
+
+  const toggleRule = (id: string) =>
+    setRules((rs) => rs.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)));
+
+  const deleteRule = (id: string) => {
+    setRules((rs) => rs.filter((r) => r.id !== id));
+    if (selectedId === id && rules.length > 1) {
+      setSelectedId(rules.find((r) => r.id !== id)!.id);
+    }
+  };
+
+  const toggleChannel = (ch: Channel) =>
+    setDraft((d) => ({
+      ...d,
+      channels: d.channels.includes(ch) ? d.channels.filter((c) => c !== ch) : [...d.channels, ch],
+    }));
+
+  const addEscalation = () =>
+    setDraft((d) => ({
+      ...d,
+      escalation: [...d.escalation, { level: d.escalation.length + 1, after: "5m", to: "Team Lead" }],
+    }));
+
+  const saveDraft = () => {
+    const id = `rule-${Math.random().toString(36).slice(2, 7)}`;
+    setRules((rs) => [{ ...draft, id }, ...rs]);
+    setSelectedId(id);
+    setCreating(false);
+  };
+
+  const enabledCount = rules.filter((r) => r.enabled).length;
+  const critCount = rules.filter((r) => r.severity === "critical" && r.enabled).length;
+  const fires24h = rules.reduce((s, r) => s + r.fires24h, 0);
+
+  return (
+    <GlassPanel glow="rose">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06] flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <Brain className="h-3.5 w-3.5 text-rose-300" />
+          <span className="text-xs font-semibold text-slate-200 tracking-wider uppercase">
+            AI Alert Rules Console
+          </span>
+          <span className="text-[10px] font-mono text-rose-300 px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center gap-1">
+            <Bell className="h-3 w-3" /> {enabledCount}/{rules.length} active
+          </span>
+          <span className="text-[10px] font-mono text-amber-300 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30">
+            {critCount} critical
+          </span>
+          <span className="text-[10px] font-mono text-slate-400 px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.06]">
+            {fires24h} fires/24h
+          </span>
+        </div>
+        <button
+          onClick={() => setCreating((v) => !v)}
+          className={cn(
+            "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-mono uppercase tracking-wider border transition",
+            creating
+              ? "bg-slate-500/10 border-slate-500/30 text-slate-300"
+              : "bg-emerald-500/10 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/20",
+          )}
+        >
+          {creating ? <X className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
+          {creating ? "Cancel" : "New Rule"}
+        </button>
+      </div>
+
+      <div className="grid lg:grid-cols-[1fr_1.3fr] gap-0">
+        {/* List */}
+        <div className="border-r border-white/[0.06] max-h-[520px] overflow-y-auto">
+          {rules.map((r) => {
+            const active = r.id === selectedId;
+            return (
+              <button
+                key={r.id}
+                onClick={() => { setSelectedId(r.id); setCreating(false); }}
+                className={cn(
+                  "w-full text-left px-3 py-2.5 border-b border-white/[0.04] transition group",
+                  active ? "bg-white/[0.04]" : "hover:bg-white/[0.02]",
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      "h-1.5 w-1.5 rounded-full",
+                      r.enabled ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]" : "bg-slate-600",
+                    )}
+                  />
+                  <span className="text-xs font-medium text-slate-100 truncate flex-1">{r.name}</span>
+                  <span className={cn("text-[9px] font-mono uppercase px-1.5 py-0.5 rounded border", sevStyle[r.severity])}>
+                    {r.severity}
+                  </span>
+                </div>
+                <div className="mt-1 flex items-center gap-2 text-[10px] font-mono text-slate-500">
+                  <span>{metricLabels[r.metric]}</span>
+                  <span className="text-slate-600">·</span>
+                  <span className="text-cyan-400/80">{r.condition} {r.threshold}{r.condition === "±%" ? "%" : ""}</span>
+                  <span className="text-slate-600">·</span>
+                  <span>{r.window}</span>
+                  <span className="ml-auto text-slate-500">{r.lastFired}</span>
+                  <ChevronRight className={cn("h-3 w-3 transition", active ? "text-rose-300 translate-x-0.5" : "text-slate-600")} />
+                </div>
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  <div className="flex-1 h-1 rounded-full bg-white/[0.04] overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-violet-400"
+                      style={{ width: `${r.confidence}%` }}
+                    />
+                  </div>
+                  <span className="text-[9px] font-mono text-slate-400 w-14 text-right">conf {r.confidence}%</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Detail / Create */}
+        <div className="p-3 max-h-[520px] overflow-y-auto">
+          {creating ? (
+            <div className="space-y-3">
+              <div className="text-[10px] uppercase tracking-wider text-rose-300 font-mono flex items-center gap-1.5">
+                <Sparkles className="h-3 w-3" /> AI-Assisted Rule Builder
+              </div>
+              <input
+                value={draft.name}
+                onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-md px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/40"
+                placeholder="Rule name"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">Metric</span>
+                  <select
+                    value={draft.metric}
+                    onChange={(e) => setDraft({ ...draft, metric: e.target.value as Metric })}
+                    className="mt-1 w-full bg-white/[0.03] border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/40"
+                  >
+                    {(Object.keys(metricLabels) as Metric[]).map((m) => (
+                      <option key={m} value={m} className="bg-slate-900">{metricLabels[m]}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">Condition</span>
+                  <select
+                    value={draft.condition}
+                    onChange={(e) => setDraft({ ...draft, condition: e.target.value as Condition })}
+                    className="mt-1 w-full bg-white/[0.03] border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/40"
+                  >
+                    {[">", "<", "±%", "z-score"].map((c) => (
+                      <option key={c} value={c} className="bg-slate-900">{c}</option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">Threshold</span>
+                  <input
+                    type="number"
+                    value={draft.threshold}
+                    onChange={(e) => setDraft({ ...draft, threshold: +e.target.value })}
+                    className="mt-1 w-full bg-white/[0.03] border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/40"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">Window</span>
+                  <select
+                    value={draft.window}
+                    onChange={(e) => setDraft({ ...draft, window: e.target.value })}
+                    className="mt-1 w-full bg-white/[0.03] border border-white/[0.08] rounded-md px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-cyan-500/40"
+                  >
+                    {["5m", "15m", "1h", "24h", "7d"].map((w) => (
+                      <option key={w} value={w} className="bg-slate-900">{w}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">
+                    AI Confidence Floor
+                  </span>
+                  <span className="text-xs font-mono text-cyan-300">{draft.confidence}%</span>
+                </div>
+                <input
+                  type="range" min={50} max={99} value={draft.confidence}
+                  onChange={(e) => setDraft({ ...draft, confidence: +e.target.value })}
+                  className="mt-1 w-full accent-cyan-400"
+                />
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">Severity</span>
+                <div className="mt-1 grid grid-cols-3 gap-1.5">
+                  {(["info", "warning", "critical"] as RuleSeverity[]).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setDraft({ ...draft, severity: s })}
+                      className={cn(
+                        "px-2 py-1.5 rounded-md border text-[10px] font-mono uppercase tracking-wider transition",
+                        draft.severity === s ? sevStyle[s] : "border-white/[0.06] text-slate-500 hover:text-slate-300",
+                      )}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <span className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">Channels</span>
+                <div className="mt-1 grid grid-cols-4 gap-1.5">
+                  {(Object.keys(channelIcon) as Channel[]).map((c) => {
+                    const Icon = channelIcon[c];
+                    const on = draft.channels.includes(c);
+                    return (
+                      <button
+                        key={c}
+                        onClick={() => toggleChannel(c)}
+                        className={cn(
+                          "flex flex-col items-center gap-1 px-2 py-2 rounded-md border transition",
+                          on
+                            ? "border-cyan-500/30 bg-cyan-500/10 text-cyan-300"
+                            : "border-white/[0.06] text-slate-500 hover:text-slate-300",
+                        )}
+                      >
+                        <Icon className="h-3.5 w-3.5" />
+                        <span className="text-[9px] uppercase tracking-wider font-mono">{c}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">
+                    Escalation Path
+                  </span>
+                  <button
+                    onClick={addEscalation}
+                    className="text-[10px] font-mono text-cyan-300 hover:text-cyan-200 flex items-center gap-1"
+                  >
+                    <Plus className="h-3 w-3" /> Add level
+                  </button>
+                </div>
+                <div className="mt-1.5 space-y-1.5">
+                  {draft.escalation.map((e, i) => (
+                    <div key={i} className="flex items-center gap-1.5 text-[10px] font-mono">
+                      <span className="px-1.5 py-0.5 rounded bg-rose-500/10 border border-rose-500/30 text-rose-300">
+                        L{e.level}
+                      </span>
+                      <span className="text-slate-500">after</span>
+                      <input
+                        value={e.after}
+                        onChange={(ev) => {
+                          const arr = [...draft.escalation];
+                          arr[i] = { ...e, after: ev.target.value };
+                          setDraft({ ...draft, escalation: arr });
+                        }}
+                        className="w-12 bg-white/[0.03] border border-white/[0.08] rounded px-1.5 py-0.5 text-slate-100 focus:outline-none focus:border-cyan-500/40"
+                      />
+                      <span className="text-slate-500">→</span>
+                      <input
+                        value={e.to}
+                        onChange={(ev) => {
+                          const arr = [...draft.escalation];
+                          arr[i] = { ...e, to: ev.target.value };
+                          setDraft({ ...draft, escalation: arr });
+                        }}
+                        className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded px-1.5 py-0.5 text-slate-100 focus:outline-none focus:border-cyan-500/40"
+                      />
+                      <button
+                        onClick={() => setDraft({ ...draft, escalation: draft.escalation.filter((_, j) => j !== i) })}
+                        className="text-slate-500 hover:text-rose-300"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  onClick={saveDraft}
+                  className="flex-1 py-2 rounded-md bg-gradient-to-r from-cyan-500/20 to-violet-500/20 border border-cyan-500/40 text-xs font-medium text-cyan-100 hover:from-cyan-500/30 hover:to-violet-500/30 transition"
+                >
+                  Deploy Rule
+                </button>
+                <button
+                  onClick={() => setCreating(false)}
+                  className="px-3 py-2 rounded-md border border-white/[0.06] text-xs text-slate-400 hover:text-slate-200"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : selected ? (
+            <div className="space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <div className="text-sm font-semibold text-slate-100">{selected.name}</div>
+                  <div className="mt-0.5 text-[10px] font-mono text-slate-500">
+                    {metricLabels[selected.metric]} · trigger when {selected.condition} {selected.threshold}
+                    {selected.condition === "±%" ? "%" : ""} over {selected.window}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => toggleRule(selected.id)}
+                    className={cn(
+                      "p-1.5 rounded-md border transition",
+                      selected.enabled
+                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                        : "border-white/[0.06] text-slate-500 hover:text-slate-300",
+                    )}
+                    title={selected.enabled ? "Disable" : "Enable"}
+                  >
+                    <Power className="h-3 w-3" />
+                  </button>
+                  <button
+                    onClick={() => deleteRule(selected.id)}
+                    className="p-1.5 rounded-md border border-white/[0.06] text-slate-500 hover:text-rose-300 hover:border-rose-500/30"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5">
+                  <div className="text-[9px] uppercase tracking-wider text-slate-500 font-mono">Confidence</div>
+                  <div className="mt-1 font-mono text-lg text-cyan-300">{selected.confidence}%</div>
+                  <div className="mt-1 h-1 rounded-full bg-white/[0.04] overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-violet-400"
+                      style={{ width: `${selected.confidence}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5">
+                  <div className="text-[9px] uppercase tracking-wider text-slate-500 font-mono">Severity</div>
+                  <div className={cn("mt-1 inline-block px-2 py-0.5 rounded border text-xs font-mono uppercase", sevStyle[selected.severity])}>
+                    {selected.severity}
+                  </div>
+                </div>
+                <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5">
+                  <div className="text-[9px] uppercase tracking-wider text-slate-500 font-mono">Fires 24h</div>
+                  <div className="mt-1 font-mono text-lg text-rose-300">{selected.fires24h}</div>
+                  <div className="text-[9px] font-mono text-slate-500">last {selected.lastFired}</div>
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-slate-500 font-mono mb-1.5">
+                  Notification Channels
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {selected.channels.map((c) => {
+                    const Icon = channelIcon[c];
+                    return (
+                      <span
+                        key={c}
+                        className="flex items-center gap-1 px-2 py-1 rounded-md border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 text-[10px] font-mono uppercase tracking-wider"
+                      >
+                        <Icon className="h-3 w-3" /> {c}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[10px] uppercase tracking-wider text-slate-500 font-mono mb-1.5">
+                  Escalation Path
+                </div>
+                <div className="relative pl-4">
+                  <div className="absolute left-1 top-1 bottom-1 w-px bg-gradient-to-b from-rose-500/60 via-amber-500/40 to-transparent" />
+                  {selected.escalation.map((e) => (
+                    <div key={e.level} className="relative pb-2 last:pb-0">
+                      <div className="absolute -left-3 top-1 h-2 w-2 rounded-full bg-rose-400 shadow-[0_0_6px_rgba(251,113,133,0.8)]" />
+                      <div className="flex items-center gap-2 text-[11px] font-mono">
+                        <span className="px-1.5 py-0.5 rounded bg-rose-500/10 border border-rose-500/30 text-rose-300 text-[9px] uppercase">
+                          Level {e.level}
+                        </span>
+                        <span className="text-slate-500">+{e.after}</span>
+                        <ChevronRight className="h-3 w-3 text-slate-600" />
+                        <span className="text-slate-200">{e.to}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-violet-500/20 bg-violet-500/[0.04] p-2.5">
+                <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-violet-300 font-mono mb-1">
+                  <Bot className="h-3 w-3" /> AI Recommendation
+                </div>
+                <div className="text-[11px] text-slate-300 leading-relaxed">
+                  Based on the last 30 days, lowering the threshold to{" "}
+                  <span className="text-cyan-300 font-mono">
+                    {Math.max(1, Math.round(selected.threshold * 0.85))}
+                    {selected.condition === "±%" ? "%" : ""}
+                  </span>{" "}
+                  could catch anomalies <span className="text-emerald-300">~22% earlier</span> with{" "}
+                  <span className="text-amber-300">+4% false positive risk</span>.
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-full text-xs text-slate-500">
+              No rules configured.
+            </div>
+          )}
+        </div>
+      </div>
+    </GlassPanel>
+  );
+}
+
 export default function RevenuePage() {
   const tick = useTick(2200);
 
@@ -705,6 +1246,9 @@ export default function RevenuePage() {
             </div>
           </GlassPanel>
         </div>
+
+        {/* AI Alert Rules Console */}
+        <AlertRulesConsole />
 
         {/* Tx stream */}
         <GlassPanel glow="emerald">
