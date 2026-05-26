@@ -204,8 +204,8 @@ function CommandBar() {
 
 /* ───────────────── live feed ───────────────── */
 
-type Severity = "info" | "success" | "warning" | "critical";
-type FeedItem = { id: number; kind: string; tone: string; severity: Severity; msg: string; meta: string; t: string };
+type RuleSeverity = "info" | "success" | "warning" | "critical";
+type FeedItem = { id: number; kind: string; tone: string; severity: RuleSeverity; msg: string; meta: string; t: string };
 
 const feedSeed: Omit<FeedItem, "id" | "t">[] = [
   { kind: "PAY", tone: "emerald", severity: "success",  msg: "Payment captured · Acme Corp",        meta: "$12,400 · Enterprise" },
@@ -222,7 +222,7 @@ const feedSeed: Omit<FeedItem, "id" | "t">[] = [
   { kind: "SUB", tone: "cyan",    severity: "info",     msg: "Trial converted · Helios",            meta: "MRR +$249" },
 ];
 
-const severityFilters: { id: Severity | "all"; label: string; cls: string }[] = [
+const severityFilters: { id: RuleSeverity | "all"; label: string; cls: string }[] = [
   { id: "all",      label: "All",      cls: "text-slate-300 border-white/10 bg-white/[0.03]" },
   { id: "info",     label: "Info",     cls: "text-cyan-300 border-cyan-400/30 bg-cyan-500/10" },
   { id: "success",  label: "Success",  cls: "text-emerald-300 border-emerald-400/30 bg-emerald-500/10" },
@@ -234,7 +234,7 @@ function LiveFeed() {
   const [items, setItems] = useState<FeedItem[]>([]);
   const [paused, setPaused] = useState(false);
   const [query, setQuery] = useState("");
-  const [sev, setSev] = useState<Severity | "all">("all");
+  const [sev, setSev] = useState<RuleSeverity | "all">("all");
   const pausedRef = useRef(paused);
   pausedRef.current = paused;
 
@@ -476,7 +476,7 @@ function GeoIntel() {
 
 /* ───────────────── AI Alert Rules Console ───────────────── */
 
-type Severity = "info" | "warning" | "critical";
+type RuleSeverity = "info" | "warning" | "critical";
 type Channel = "email" | "slack" | "webhook" | "sms";
 type Metric =
   | "revenue_drop" | "churn_spike" | "refund_surge" | "latency_p95"
@@ -492,7 +492,7 @@ interface AlertRule {
   threshold: number;
   window: string;
   confidence: number; // 0-100
-  severity: Severity;
+  severity: RuleSeverity;
   channels: Channel[];
   escalation: { level: number; after: string; to: string }[];
   lastFired: string;
@@ -571,7 +571,7 @@ const metricLabels: Record<Metric, string> = {
   traffic_drop: "Traffic Drop", conversion_dip: "Conversion Dip",
 };
 
-const sevStyle: Record<Severity, string> = {
+const sevStyle: Record<RuleSeverity, string> = {
   info: "text-cyan-300 bg-cyan-500/10 border-cyan-500/30",
   warning: "text-amber-300 bg-amber-500/10 border-amber-500/30",
   critical: "text-rose-300 bg-rose-500/10 border-rose-500/30",
@@ -785,9 +785,9 @@ function AlertRulesConsole() {
               </div>
 
               <div>
-                <span className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">Severity</span>
+                <span className="text-[10px] uppercase tracking-wider text-slate-500 font-mono">RuleSeverity</span>
                 <div className="mt-1 grid grid-cols-3 gap-1.5">
-                  {(["info", "warning", "critical"] as Severity[]).map((s) => (
+                  {(["info", "warning", "critical"] as RuleSeverity[]).map((s) => (
                     <button
                       key={s}
                       onClick={() => setDraft({ ...draft, severity: s })}
@@ -935,7 +935,7 @@ function AlertRulesConsole() {
                   </div>
                 </div>
                 <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-2.5">
-                  <div className="text-[9px] uppercase tracking-wider text-slate-500 font-mono">Severity</div>
+                  <div className="text-[9px] uppercase tracking-wider text-slate-500 font-mono">RuleSeverity</div>
                   <div className={cn("mt-1 inline-block px-2 py-0.5 rounded border text-xs font-mono uppercase", sevStyle[selected.severity])}>
                     {selected.severity}
                   </div>
