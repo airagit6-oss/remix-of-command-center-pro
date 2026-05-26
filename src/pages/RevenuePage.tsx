@@ -203,33 +203,54 @@ function CommandBar() {
 
 /* ───────────────── live feed ───────────────── */
 
-type FeedItem = { id: number; kind: string; tone: string; msg: string; meta: string; t: string };
+type Severity = "info" | "success" | "warning" | "critical";
+type FeedItem = { id: number; kind: string; tone: string; severity: Severity; msg: string; meta: string; t: string };
 
 const feedSeed: Omit<FeedItem, "id" | "t">[] = [
-  { kind: "PAY", tone: "emerald", msg: "Payment captured · Acme Corp", meta: "$12,400 · Enterprise" },
-  { kind: "SUB", tone: "cyan", msg: "Subscription renewed · TechStart", meta: "$890 · MRR +$890" },
-  { kind: "AI",  tone: "violet", msg: "Anomaly: spike in LATAM signups", meta: "+212% in 4m" },
-  { kind: "ERR", tone: "rose",   msg: "Failed charge · CloudNine", meta: "3DS decline" },
-  { kind: "UPG", tone: "amber",  msg: "Plan upgrade · DataFlow → Ent", meta: "ARR +$48k" },
-  { kind: "FRA", tone: "rose",   msg: "Fraud signal · suspicious VPN", meta: "score 92" },
-  { kind: "PAY", tone: "emerald", msg: "Payment captured · OrbitalAI", meta: "$5,200 · Pro" },
-  { kind: "AI",  tone: "violet", msg: "Upsell recommendation engaged", meta: "+$1.2k expected" },
+  { kind: "PAY", tone: "emerald", severity: "success",  msg: "Payment captured · Acme Corp",        meta: "$12,400 · Enterprise" },
+  { kind: "SUB", tone: "cyan",    severity: "info",     msg: "Subscription renewed · TechStart",    meta: "$890 · MRR +$890" },
+  { kind: "AI",  tone: "violet",  severity: "info",     msg: "Anomaly: spike in LATAM signups",     meta: "+212% in 4m" },
+  { kind: "ERR", tone: "rose",    severity: "critical", msg: "Failed charge · CloudNine",           meta: "3DS decline" },
+  { kind: "UPG", tone: "amber",   severity: "warning",  msg: "Plan upgrade · DataFlow → Ent",       meta: "ARR +$48k" },
+  { kind: "FRA", tone: "rose",    severity: "critical", msg: "Fraud signal · suspicious VPN",       meta: "score 92" },
+  { kind: "PAY", tone: "emerald", severity: "success",  msg: "Payment captured · OrbitalAI",        meta: "$5,200 · Pro" },
+  { kind: "AI",  tone: "violet",  severity: "info",     msg: "Upsell recommendation engaged",       meta: "+$1.2k expected" },
+  { kind: "REF", tone: "amber",   severity: "warning",  msg: "Refund issued · NorthwindCo",         meta: "-$2,100" },
+  { kind: "PAY", tone: "emerald", severity: "success",  msg: "Payment captured · Vertex Labs",      meta: "$8,750 · Pro" },
+  { kind: "ERR", tone: "rose",    severity: "critical", msg: "Webhook timeout · billing.v2",        meta: "5xx · retry queued" },
+  { kind: "SUB", tone: "cyan",    severity: "info",     msg: "Trial converted · Helios",            meta: "MRR +$249" },
+];
+
+const severityFilters: { id: Severity | "all"; label: string; cls: string }[] = [
+  { id: "all",      label: "All",      cls: "text-slate-300 border-white/10 bg-white/[0.03]" },
+  { id: "info",     label: "Info",     cls: "text-cyan-300 border-cyan-400/30 bg-cyan-500/10" },
+  { id: "success",  label: "Success",  cls: "text-emerald-300 border-emerald-400/30 bg-emerald-500/10" },
+  { id: "warning",  label: "Warning",  cls: "text-amber-300 border-amber-400/30 bg-amber-500/10" },
+  { id: "critical", label: "Critical", cls: "text-rose-300 border-rose-400/30 bg-rose-500/10" },
 ];
 
 function LiveFeed() {
   const [items, setItems] = useState<FeedItem[]>([]);
+  const [paused, setPaused] = useState(false);
+  const [query, setQuery] = useState("");
+  const [sev, setSev] = useState<Severity | "all">("all");
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
+
   useEffect(() => {
     let id = 0;
     const push = () => {
+      if (pausedRef.current) return;
       const seed = feedSeed[Math.floor(Math.random() * feedSeed.length)];
       setItems((prev) =>
-        [{ ...seed, id: id++, t: new Date().toLocaleTimeString("en-US", { hour12: false }) }, ...prev].slice(0, 18),
+        [{ ...seed, id: id++, t: new Date().toLocaleTimeString("en-US", { hour12: false }) }, ...prev].slice(0, 80),
       );
     };
     push(); push(); push();
     const i = setInterval(push, 1800);
     return () => clearInterval(i);
   }, []);
+
   const toneMap: Record<string, string> = {
     emerald: "text-emerald-300 bg-emerald-500/10 border-emerald-400/30",
     cyan: "text-cyan-300 bg-cyan-500/10 border-cyan-400/30",
@@ -237,19 +258,109 @@ function LiveFeed() {
     rose: "text-rose-300 bg-rose-500/10 border-rose-400/30",
     amber: "text-amber-300 bg-amber-500/10 border-amber-400/30",
   };
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return items.filter((it) => {
+      if (sev !== "all" && it.severity !== sev) return false;
+      if (!q) return true;
+      return (
+        it.msg.toLowerCase().includes(q) ||
+        it.meta.toLowerCase().includes(q) ||
+        it.kind.toLowerCase().includes(q)
+      );
+    });
+  }, [items, query, sev]);
+
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { all: items.length, info: 0, success: 0, warning: 0, critical: 0 };
+    items.forEach((i) => { c[i.severity] = (c[i.severity] || 0) + 1; });
+    return c;
+  }, [items]);
+
   return (
-    <GlassPanel glow="cyan" className="h-full">
+    <GlassPanel glow="cyan" className="h-full flex flex-col">
+      {/* header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
           <Radio className="h-3.5 w-3.5 text-cyan-300" />
           <span className="text-xs font-semibold text-slate-200 tracking-wider uppercase">Ops Stream</span>
+          <span className="text-[10px] text-slate-500 font-mono">· {filtered.length}/{items.length}</span>
         </div>
-        <span className="text-[10px] text-emerald-300 font-mono flex items-center gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" /> LIVE
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={cn(
+            "text-[10px] font-mono flex items-center gap-1",
+            paused ? "text-amber-300" : "text-emerald-300",
+          )}>
+            <span className={cn(
+              "h-1.5 w-1.5 rounded-full",
+              paused ? "bg-amber-400" : "bg-emerald-400 animate-pulse",
+            )} />
+            {paused ? "PAUSED" : "LIVE"}
+          </span>
+          <button
+            onClick={() => setPaused((p) => !p)}
+            className={cn(
+              "h-6 px-2 inline-flex items-center gap-1 rounded border text-[10px] font-semibold tracking-wider uppercase transition",
+              paused
+                ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
+                : "border-amber-400/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20",
+            )}
+            title={paused ? "Resume stream" : "Pause stream"}
+          >
+            {paused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
+            {paused ? "Resume" : "Pause"}
+          </button>
+        </div>
       </div>
-      <div className="max-h-[420px] overflow-auto divide-y divide-white/[0.04]">
-        {items.map((it) => (
+
+      {/* search + filters */}
+      <div className="px-3 py-2 border-b border-white/[0.06] flex flex-col gap-2">
+        <div className="relative">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-500" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search transactions, accounts, tags…"
+            className="w-full h-7 pl-7 pr-7 rounded border border-white/10 bg-white/[0.03] text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/40 focus:bg-white/[0.05]"
+          />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+            >
+              <X className="h-3 w-3" />
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-1 flex-wrap">
+          {severityFilters.map((f) => {
+            const active = sev === f.id;
+            return (
+              <button
+                key={f.id}
+                onClick={() => setSev(f.id)}
+                className={cn(
+                  "h-6 px-2 rounded border text-[10px] font-semibold tracking-wider uppercase flex items-center gap-1 transition",
+                  active ? f.cls + " ring-1 ring-white/10" : "border-white/10 bg-white/[0.02] text-slate-400 hover:bg-white/[0.05] hover:text-slate-200",
+                )}
+              >
+                {f.label}
+                <span className="text-[9px] font-mono opacity-70">{counts[f.id] ?? 0}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* list */}
+      <div className="flex-1 max-h-[420px] overflow-auto divide-y divide-white/[0.04]">
+        {filtered.length === 0 && (
+          <div className="px-3 py-8 text-center text-[11px] text-slate-500 font-mono">
+            No events match your filters.
+          </div>
+        )}
+        {filtered.map((it) => (
           <div key={it.id} className="px-3 py-2 flex items-start gap-2 animate-fade-in hover:bg-white/[0.02]">
             <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded border tabular-nums tracking-wider", toneMap[it.tone])}>
               {it.kind}
