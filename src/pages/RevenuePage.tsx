@@ -4,6 +4,7 @@ import {
   DollarSign, Flame, Globe2, Layers, Radar as RadarIcon, Radio, Rocket,
   ShieldAlert, Signal, Sparkles, Target, TrendingDown, TrendingUp, Users, Zap,
   Pause, Play, Search, X,
+  Bell, Plus, Mail, MessageSquare, Webhook, Phone, ChevronRight, Trash2, Power,
 } from "lucide-react";
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Line,
