@@ -3,6 +3,7 @@ import {
   Activity, AlertTriangle, ArrowDownRight, ArrowUpRight, Bot, Brain, Cpu,
   DollarSign, Flame, Globe2, Layers, Radar as RadarIcon, Radio, Rocket,
   ShieldAlert, Signal, Sparkles, Target, TrendingDown, TrendingUp, Users, Zap,
+  Pause, Play, Search, X,
 } from "lucide-react";
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, ComposedChart, Line,
