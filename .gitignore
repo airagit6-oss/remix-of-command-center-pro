@@ -10,21 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-dist-server
 *.local
-
-# Environment files - only .env (live secrets) excluded, examples/production template committed
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Keep these in repo
-!.env.example
-!.env.production
-!.env.production.example
-!.env.staging.example
 
 # Editor directories and files
 .vscode/*
@@ -36,7 +22,3 @@ dist-server
 *.njsproj
 *.sln
 *.sw?
-
-# Coverage
-coverage/
-playwright-report/
