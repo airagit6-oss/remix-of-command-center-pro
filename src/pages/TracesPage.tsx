@@ -199,7 +199,7 @@ function CommandBar() {
 type Kpi = {
   label: string; value: number; suffix?: string; prefix?: string;
   delta: number; color: "cyan" | "violet" | "emerald" | "rose" | "amber";
-  icon: React.ComponentType<{ className?: string }>; spark: number[];
+  icon: React.ComponentType<{ className?: string; color?: string }>; spark: number[];
 };
 
 const SPARK = (n = 24) => Array.from({ length: n }, () => rand(20, 95));
@@ -213,7 +213,7 @@ function KpiCell({ k }: { k: Kpi }) {
     <Panel className="p-3" glow={k.color}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <k.icon className={`h-3.5 w-3.5 text-${k.color}-400`} style={{ color: colorMap[k.color] }} />
+          <k.icon className="h-3.5 w-3.5" color={colorMap[k.color]} />
           <span className="text-[10px] uppercase tracking-[0.18em] text-white/50">{k.label}</span>
         </div>
         <span className={`text-[10px] font-medium ${k.delta >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
