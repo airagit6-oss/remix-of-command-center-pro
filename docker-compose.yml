@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: command-center-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+      args:
+        VITE_API_BASE: https://technologywala.com/api/v1
+    container_name: command-center-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      SERVER_PORT: 4000
+      CLIENT_ORIGIN: https://technologywala.com
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "127.0.0.1:4000:4000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    volumes:
+      - uploads_data:/app/uploads
+      - /root/apps/logs:/root/apps/logs
+
+volumes:
+  redis_data:
+  uploads_data:
