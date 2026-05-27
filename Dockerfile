@@ -1,43 +1,35 @@
-# Multi-stage production build
-FROM node:22-alpine AS base
-RUN apk add --no-cache libc6-compat openssl
+# Frontend Dockerfile
+FROM node:20-alpine AS builder
 
-# Install all deps (including dev for build)
-FROM base AS deps
 WORKDIR /app
-COPY package.json package-lock.json* ./
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
 RUN npm ci
 
-# Build stage - frontend + backend
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Copy source code
 COPY . .
-ARG VITE_API_BASE=https://technologywala.com/api/v1
-ENV VITE_API_BASE=$VITE_API_BASE
+
+# Build application
 RUN npm run build
-RUN npm run server:build
-RUN npx prisma generate
 
-# Production runtime image
-FROM base AS runner
-WORKDIR /app
-ENV NODE_ENV=production
+# Production stage with nginx
+FROM nginx:alpine
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nodejs
+# Copy built assets from builder
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/dist-server ./dist-server
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/package.json ./package.json
+# Copy nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-USER nodejs
+# Expose port
+EXPOSE 80
 
-EXPOSE 4000
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:4000/health || exit 1
-
-CMD ["node", "dist-server/index.js"]
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]

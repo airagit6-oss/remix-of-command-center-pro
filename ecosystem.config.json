@@ -1,0 +1,39 @@
+{
+  "apps": [
+    {
+      "name": "nexus-backend",
+      "script": "backend/dist/main.js",
+      "cwd": "/root/apps/remix-of-command-center-pro",
+      "instances": 2,
+      "exec_mode": "cluster",
+      "env": {
+        "NODE_ENV": "production",
+        "PORT": 3000
+      },
+      "error_file": "/root/apps/remix-of-command-center-pro/logs/backend-error.log",
+      "out_file": "/root/apps/remix-of-command-center-pro/logs/backend-out.log",
+      "log_date_format": "YYYY-MM-DD HH:mm:ss Z",
+      "merge_logs": true,
+      "autorestart": true,
+      "max_restarts": 10,
+      "min_uptime": "10s"
+    },
+    {
+      "name": "nexus-frontend",
+      "script": "server.js",
+      "cwd": "/root/apps/remix-of-command-center-pro",
+      "instances": 1,
+      "env": {
+        "NODE_ENV": "production",
+        "PORT": 8080
+      },
+      "error_file": "/root/apps/remix-of-command-center-pro/logs/frontend-error.log",
+      "out_file": "/root/apps/remix-of-command-center-pro/logs/frontend-out.log",
+      "log_date_format": "YYYY-MM-DD HH:mm:ss Z",
+      "merge_logs": true,
+      "autorestart": true,
+      "max_restarts": 10,
+      "min_uptime": "10s"
+    }
+  ]
+}
