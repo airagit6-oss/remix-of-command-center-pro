@@ -3,10 +3,13 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+<<<<<<< HEAD
+=======
   "workspaces": [
     "packages/*",
     "apps/*"
   ],
+>>>>>>> 9d5c7142de34928df544f515aec409a9e1aaef5e
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -14,10 +17,45 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
+<<<<<<< HEAD
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:unit": "vitest run --reporter=verbose server/__tests__/unit",
+    "test:integration": "vitest run --reporter=verbose server/__tests__/integration",
+    "test:security": "vitest run --reporter=verbose server/__tests__/security",
+    "test:performance": "vitest run --reporter=verbose server/__tests__/performance",
+    "test:waf": "vitest run --reporter=verbose server/__tests__/waf.test.ts",
+    "test:auth": "vitest run --reporter=verbose server/__tests__/unit/auth.unit.test.ts",
+    "test:forensic": "vitest run --reporter=verbose server/__tests__/unit/forensicDebug.unit.test.ts",
+    "test:telemetry": "vitest run --reporter=verbose server/__tests__/unit/telemetry.unit.test.ts",
+    "test:ci": "vitest run --coverage --reporter=verbose --reporter=json --outputFile=test-results/report.json",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:security": "playwright test e2e/security.spec.ts",
+    "test:e2e:media": "playwright test e2e/media.spec.ts",
+    "test:e2e:auth": "playwright test e2e/auth.spec.ts",
+    "test:validate-storage": "bash scripts/validate-storage.sh",
+    "qa:health": "tsx server/qa/self-healing/selfHealingEngine.ts",
+    "server:dev": "tsx watch server/index.ts",
+    "server:build": "tsc -p server/tsconfig.json",
+    "server:start": "node dist-server/index.js",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reset": "prisma migrate reset && tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.734.0",
+    "@aws-sdk/s3-request-presigner": "^3.734.0",
+    "@hookform/resolvers": "^3.10.0",
+    "@prisma/client": "^5.22.0",
+=======
     "test:watch": "vitest"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
+>>>>>>> 9d5c7142de34928df544f515aec409a9e1aaef5e
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -46,6 +84,28 @@
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@tanstack/react-query": "^5.83.0",
+<<<<<<< HEAD
+    "bcryptjs": "^2.4.3",
+    "bullmq": "^5.25.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "date-fns": "^3.6.0",
+    "dotenv": "^16.4.7",
+    "embla-carousel-react": "^8.6.0",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.4.1",
+    "helmet": "^8.0.0",
+    "input-otp": "^1.4.2",
+    "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.462.0",
+    "multer": "^1.4.5-lts.1",
+    "next-themes": "^0.3.0",
+    "nodemailer": "^6.9.16",
+=======
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -57,10 +117,25 @@
     "input-otp": "^1.4.2",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
+>>>>>>> 9d5c7142de34928df544f515aec409a9e1aaef5e
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.61.1",
+<<<<<<< HEAD
+    "react-resizable-panels": "^2.1.9",
+    "react-router-dom": "^6.30.1",
+    "recharts": "^2.15.4",
+    "redis": "^4.7.0",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "sonner": "^1.7.4",
+    "stripe": "^17.4.0",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7",
+    "vaul": "^0.9.9",
+    "vite_react_shadcn_ts": "file:",
+=======
     "react-i18next": "^17.0.8",
     "react-resizable-panels": "^2.1.9",
     "react-router-dom": "^6.30.1",
@@ -69,6 +144,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
+>>>>>>> 9d5c7142de34928df544f515aec409a9e1aaef5e
     "zod": "^3.25.76"
   },
   "devDependencies": {
@@ -77,6 +153,15 @@
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.0.0",
+<<<<<<< HEAD
+    "@types/bcryptjs": "^2.4.6",
+    "@types/compression": "^1.7.5",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.7",
+=======
+>>>>>>> 9d5c7142de34928df544f515aec409a9e1aaef5e
     "@types/node": "^22.16.5",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
@@ -89,7 +174,13 @@
     "jsdom": "^20.0.3",
     "lovable-tagger": "^1.1.13",
     "postcss": "^8.5.6",
+<<<<<<< HEAD
+    "prisma": "^5.22.0",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+=======
+    "tailwindcss": "^3.4.17",
+>>>>>>> 9d5c7142de34928df544f515aec409a9e1aaef5e
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vite": "^5.4.19",

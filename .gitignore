@@ -7,64 +7,65 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build outputs
 dist
 dist-ssr
+dist-server
+build
+*.tsbuildinfo
 *.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
 
 # Environment variables (CRITICAL - contains secrets)
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .env.*.local
 backend/.env
 apps/api/.env
 apps/*/dist
 packages/*/dist
 
-# Build artifacts
-build
-*.tsbuildinfo
+# Keep these in repo (templates / non-secret)
+!.env.example
+!.env.production
+!.env.production.example
+!.env.staging.example
 
-# Package manager locks (workspace managed)
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-backend/package-lock.json
-apps/*/package-lock.json
-packages/*/package-lock.json
+# Editor / IDE
+.vscode/*
+!.vscode/extensions.json
+.idea
+.idea/*
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
+*~
 
-# Temporary files
+# OS
+Thumbs.db
+
+# Coverage / test artifacts
+coverage/
+.nyc_output
+playwright-report/
+test-results/
+
+# Cache
 *.tmp
 *.temp
 .cache
 .parcel-cache
 
-# OS files
-Thumbs.db
-.DS_Store
-
-# IDE
-.vscode/*
-.idea/*
-*.swp
-*.swo
-*~
-
-# Testing
-coverage
-.nyc_output
-
-# Misc
+# Misc backups
 *.md.backup
 *.md.old
