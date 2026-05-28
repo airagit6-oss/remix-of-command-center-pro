@@ -30,6 +30,7 @@
     "useDefineForClassFields": true
   },
   "include": [
-    "src"
+    "src",
+    "packages/permissions/src"
   ]
 }
