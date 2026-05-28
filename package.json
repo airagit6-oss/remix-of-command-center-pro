@@ -6,19 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:prod": "vite build",
-    "start:prod": "node server/server.cjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "i18n:audit": "node scripts/localization-audit.js",
-    "i18n:validate": "node scripts/localization-audit.js --strict",
-    "i18n:template": "node scripts/i18n-template.js",
-    "i18n:selfheal": "node scripts/selfheal-localization.js --repair",
-    "i18n:gen-locales": "node scripts/generate-locale-files.js",
-    "i18n:export-hardcoded": "node scripts/export-hardcoded-texts.js"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -70,9 +62,6 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
     "zod": "^3.25.76"
-  },
-  "engines": {
-    "node": ">=18.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
