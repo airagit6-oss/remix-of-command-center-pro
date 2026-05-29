@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Activity,
   ArrowUpRight,
@@ -131,6 +132,7 @@ const Logo = ({ name }: { name: string }) => {
 };
 
 const VendorsPage = () => {
+  const { t } = useTranslation('common');
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<'All' | Vendor['status']>('All');
   const [open, setOpen] = useState<string | null>('VND-1108');
@@ -149,10 +151,10 @@ const VendorsPage = () => {
   const flaggedCount = seed.filter(v => v.fraud > 40 || v.payoutStatus === 'Frozen' || v.payoutStatus === 'On Hold').length;
 
   const kpis = [
-    { label: 'Marketplace GMV', value: `$${(totalRevenue / 1000).toFixed(0)}k`, sub: '+18.2% vs last mo', icon: TrendingUp, tone: 'sky' as const, spark: [20,26,30,38,46,52,60,68,76,84,92,104] },
-    { label: 'Active Vendors', value: activeCount.toString(), sub: `${seed.length} total accounts`, icon: Store, tone: 'emerald' as const, spark: [4,4,5,5,6,6,6,7,7,7,8,8] },
-    { label: 'Approval Queue', value: pendingCount.toString(), sub: 'AI scoring 1 high-trust', icon: ShieldCheck, tone: 'sky' as const, spark: [2,3,2,3,4,3,2,3,4,3,2,1] },
-    { label: 'Risk Radar', value: flaggedCount.toString(), sub: 'Auto-holds engaged', icon: Activity, tone: 'rose' as const, spark: [4,5,6,4,5,6,7,6,5,6,7,8] },
+    { label: t('marketplace_gmv', { defaultValue: 'Marketplace GMV' }), value: `$${(totalRevenue / 1000).toFixed(0)}k`, sub: '+18.2% vs last mo', icon: TrendingUp, tone: 'sky' as const, spark: [20,26,30,38,46,52,60,68,76,84,92,104] },
+    { label: t('active_vendors', { defaultValue: 'Active Vendors' }), value: activeCount.toString(), sub: `${seed.length} total accounts`, icon: Store, tone: 'emerald' as const, spark: [4,4,5,5,6,6,6,7,7,7,8,8] },
+    { label: t('approval_queue', { defaultValue: 'Approval Queue' }), value: pendingCount.toString(), sub: 'AI scoring 1 high-trust', icon: ShieldCheck, tone: 'sky' as const, spark: [2,3,2,3,4,3,2,3,4,3,2,1] },
+    { label: t('risk_radar', { defaultValue: 'Risk Radar' }), value: flaggedCount.toString(), sub: 'Auto-holds engaged', icon: Activity, tone: 'rose' as const, spark: [4,5,6,4,5,6,7,6,5,6,7,8] },
   ];
 
   return (
@@ -168,10 +170,10 @@ const VendorsPage = () => {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300/70" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-300" />
               </span>
-              Live · Vendor Command
+              {t('live_vendor_command', { defaultValue: 'Live · Vendor Command' })}
             </div>
             <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-white/95">
-              Global Vendor <span className="bg-gradient-to-r from-sky-200 via-violet-200 to-amber-100 bg-clip-text text-transparent">Operations</span>
+              {t('global_vendor', { defaultValue: 'Global Vendor' })} <span className="bg-gradient-to-r from-sky-200 via-violet-200 to-amber-100 bg-clip-text text-transparent">{t('operations', { defaultValue: 'Operations' })}</span>
             </h1>
             <p className="mt-1.5 max-w-xl text-sm text-white/50">
               Realtime intelligence over every seller, KYC pulse, payout cycle and AI fraud signal across the marketplace.
@@ -240,7 +242,7 @@ const VendorsPage = () => {
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search vendor, owner, country, ID…"
+            placeholder={t('search_vendor_placeholder', { defaultValue: 'Search vendor, owner, country, ID…' })},
             className="w-full rounded-xl border border-white/10 bg-white/[0.03] py-2.5 pl-10 pr-4 text-sm text-white/90 placeholder:text-white/35 backdrop-blur focus:border-white/25 focus:outline-none"
           />
         </div>

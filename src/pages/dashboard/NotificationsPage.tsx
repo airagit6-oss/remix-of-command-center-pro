@@ -1,6 +1,7 @@
 import { Bell } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const STORAGE_KEY = 'saashub_notification_prefs';
 type Prefs = { email: boolean; push: boolean; marketing: boolean; billing: boolean };
@@ -16,6 +17,7 @@ function loadPrefs(): Prefs {
 }
 
 const NotificationsPage = () => {
+  const { t } = useTranslation('common');
   const [prefs, setPrefs] = useState<Prefs>(loadPrefs);
   const [saving, setSaving] = useState(false);
 
@@ -28,20 +30,20 @@ const NotificationsPage = () => {
     setTimeout(() => {
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs)); } catch { /* ignore */ }
       setSaving(false);
-      toast.success('Notification preferences saved');
+      toast.success(t('notification_prefs_saved', { defaultValue: 'Notification preferences saved' }));
     }, 400);
   };
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-foreground mb-1">Notifications</h1>
-      <p className="text-sm text-muted-foreground mb-6">Choose what you want to be notified about.</p>
+      <h1 className="text-2xl font-bold text-foreground mb-1">{t('notifications', { defaultValue: 'Notifications' })}</h1>
+      <p className="text-sm text-muted-foreground mb-6">{t('notifications_subtitle', { defaultValue: 'Choose what you want to be notified about.' })}</p>
       <div className="rounded-xl border border-border bg-card divide-y divide-border">
         {[
-          { key: 'email', title: 'Email notifications', desc: 'Receive updates via email' },
-          { key: 'push', title: 'Push notifications', desc: 'Browser push notifications' },
-          { key: 'billing', title: 'Billing alerts', desc: 'Payment receipts and renewals' },
-          { key: 'marketing', title: 'Marketing emails', desc: 'Product news and promotions' },
+          { key: 'email', title: t('email_notifications', { defaultValue: 'Email notifications' }), desc: t('email_notifications_desc', { defaultValue: 'Receive updates via email' }) },
+          { key: 'push', title: t('push_notifications', { defaultValue: 'Push notifications' }), desc: t('push_notifications_desc', { defaultValue: 'Browser push notifications' }) },
+          { key: 'billing', title: t('billing_alerts', { defaultValue: 'Billing alerts' }), desc: t('billing_alerts_desc', { defaultValue: 'Payment receipts and renewals' }) },
+          { key: 'marketing', title: t('marketing_emails', { defaultValue: 'Marketing emails' }), desc: t('marketing_emails_desc', { defaultValue: 'Product news and promotions' }) },
         ].map(item => (
           <div key={item.key} className="flex items-center justify-between p-4">
             <div className="flex items-start gap-3">

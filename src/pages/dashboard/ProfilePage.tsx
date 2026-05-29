@@ -2,8 +2,10 @@ import { User } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const ProfilePage = () => {
+  const { t } = useTranslation('common');
   const { user, updateProfile } = useAuth();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -13,16 +15,16 @@ const ProfilePage = () => {
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.name.trim().length < 2) return toast.error('Name is too short');
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return toast.error('Invalid email');
+    if (form.name.trim().length < 2) return toast.error(t('name_too_short', { defaultValue: 'Name is too short' }));
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return toast.error(t('invalid_email', { defaultValue: 'Invalid email' }));
     setSaving(true);
     setTimeout(() => {
       try {
         updateProfile({ name: form.name, email: form.email });
-        toast.success('Profile updated');
+        toast.success(t('profile_updated', { defaultValue: 'Profile updated' }));
         setEditing(false);
       } catch {
-        toast.error('Could not save profile');
+        toast.error(t('could_not_save_profile', { defaultValue: 'Could not save profile' }));
       } finally {
         setSaving(false);
       }
@@ -32,7 +34,7 @@ const ProfilePage = () => {
   return (
     <div className="max-w-2xl">
       <div className="flex items-center justify-between mb-1">
-        <h1 className="text-2xl font-bold text-foreground">Profile</h1>
+        <h1 className="text-2xl font-bold text-foreground">{t('profile', { defaultValue: 'Profile' })}</h1>
         {!editing && (
           <button onClick={() => setEditing(true)}
             className="text-sm rounded-md border border-border bg-card px-3 py-1.5 hover:bg-accent transition-colors">
@@ -40,7 +42,7 @@ const ProfilePage = () => {
           </button>
         )}
       </div>
-      <p className="text-sm text-muted-foreground mb-6">Manage your personal information.</p>
+      <p className="text-sm text-muted-foreground mb-6">{t('profile_subtitle', { defaultValue: 'Manage your personal information.' })},</p>
 
       <div className="rounded-xl border border-border bg-card p-6 space-y-4">
         <div className="flex items-center gap-4">

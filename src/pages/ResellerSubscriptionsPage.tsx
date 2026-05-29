@@ -41,6 +41,7 @@ const emptyForm = () => ({
 });
 
 const ResellerSubscriptionsPage = () => {
+  const { t } = useTranslation('common');
   const { user } = useAuth();
   const resellerId = user?.id ?? 'anonymous';
   const userId = user?.id ?? 'anonymous';
@@ -73,21 +74,21 @@ const ResellerSubscriptionsPage = () => {
     <div className="space-y-5 max-w-[1200px]">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold" style={{ color: '#1a1a1a' }}>Subscriptions</h2>
-          <p className="text-sm mt-0.5" style={{ color: '#6d7175' }}>Manage client subscriptions and access control</p>
+          <h2 className="text-xl font-semibold" style={{ color: '#1a1a1a' }}>{t('subscriptions', { defaultValue: 'Subscriptions' })}</h2>
+          <p className="text-sm mt-0.5" style={{ color: '#6d7175' }}>{t('subscriptions_subtitle', { defaultValue: 'Manage client subscriptions and access control' })}</p>
         </div>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ background: '#008060' }}>
           <Plus className="h-4 w-4" />
-          Create subscription
+          {t('create_subscription', { defaultValue: 'Create subscription' })}
         </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Total', value: subs.length },
-          { label: 'Active', value: active, color: '#008060' },
-          { label: 'Expired', value: expired, color: '#d32f2f' },
+          { label: t('total', { defaultValue: 'Total' }), value: subs.length },
+          { label: t('active', { defaultValue: 'Active' }), value: active, color: '#008060' },
+          { label: t('expired', { defaultValue: 'Expired' }), value: expired, color: '#d32f2f' },
         ].map(k => (
           <div key={k.label} className="bg-white rounded-xl border p-4" style={{ borderColor: '#e1e3e5' }}>
             <p className="text-xs font-medium" style={{ color: '#6d7175' }}>{k.label}</p>
@@ -101,13 +102,13 @@ const ResellerSubscriptionsPage = () => {
         <table className="w-full text-sm">
           <thead>
             <tr style={{ background: '#fafbfb', borderBottom: '1px solid #e1e3e5' }}>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Client</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>App</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Plan</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Status</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Start</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Expiry</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Action</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('client', { defaultValue: 'Client' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('app', { defaultValue: 'App' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('plan', { defaultValue: 'Plan' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('status', { defaultValue: 'Status' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('start', { defaultValue: 'Start' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('expiry', { defaultValue: 'Expiry' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('action', { defaultValue: 'Action' })}</th>
             </tr>
           </thead>
           <tbody>
@@ -134,7 +135,7 @@ const ResellerSubscriptionsPage = () => {
                         background: s.status === 'Active' ? '#fce4ec' : '#e4f3e8',
                         color: s.status === 'Active' ? '#d32f2f' : '#008060',
                       }}>
-                        {s.status === 'Active' ? 'Disable' : 'Enable'}
+                        {s.status === 'Active' ? t('disable', { defaultValue: 'Disable' }) : t('enable', { defaultValue: 'Enable' })}
                       </button>
                     )}
                   </td>
@@ -149,44 +150,44 @@ const ResellerSubscriptionsPage = () => {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold mb-4" style={{ color: '#1a1a1a' }}>Create Subscription</h2>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: '#1a1a1a' }}>{t('create_subscription_modal', { defaultValue: 'Create Subscription' })}</h2>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>Client Name</label>
-                <input type="text" placeholder="Client name" list="user-list" value={form.userName}
+                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('client_name', { defaultValue: 'Client Name' })}</label>
+                <input type="text" placeholder={t('client_name_placeholder', { defaultValue: 'Client name' })}, list="user-list" value={form.userName}
                   onChange={e => setForm(prev => ({ ...prev, userName: e.target.value }))}
                   className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2" style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}
                 />
                 <datalist id="user-list">{mockUsers.map(u => <option key={u} value={u} />)}</datalist>
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>Email</label>
-                <input type="email" placeholder="client@example.com" value={form.userEmail}
+                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('email', { defaultValue: 'Email' })}</label>
+                <input type="email" placeholder={t('email_placeholder', { defaultValue: 'client@example.com' })}, value={form.userEmail}
                   onChange={e => setForm(prev => ({ ...prev, userEmail: e.target.value }))}
                   className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2" style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>App</label>
+                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('app', { defaultValue: 'App' })}</label>
                 <select value={form.productName} onChange={e => setForm(prev => ({ ...prev, productName: e.target.value }))} className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2" style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}>
                   {products.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>Plan</label>
+                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('plan', { defaultValue: 'Plan' })}</label>
                 <select value={form.plan} onChange={e => setForm(prev => ({ ...prev, plan: e.target.value }))} className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2" style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}>
                   {plans.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>Start</label>
+                  <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('start', { defaultValue: 'Start' })}</label>
                   <input type="date" value={form.startDate} onChange={e => setForm(prev => ({ ...prev, startDate: e.target.value }))}
                     className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2" style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>Expiry</label>
+                  <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('expiry', { defaultValue: 'Expiry' })}</label>
                   <input type="date" value={form.expiryDate} onChange={e => setForm(prev => ({ ...prev, expiryDate: e.target.value }))}
                     className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2" style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}
                   />
@@ -194,8 +195,8 @@ const ResellerSubscriptionsPage = () => {
               </div>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={addSubscription} className="flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ background: '#008060' }}>Create</button>
-              <button onClick={() => { setShowModal(false); setForm(emptyForm()); }} className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium" style={{ borderColor: '#c9cccf', color: '#6d7175' }}>Cancel</button>
+              <button onClick={addSubscription} className="flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ background: '#008060' }}>{t('create', { defaultValue: 'Create' })}</button>
+              <button onClick={() => { setShowModal(false); setForm(emptyForm()); }} className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium" style={{ borderColor: '#c9cccf', color: '#6d7175' }}>{t('cancel', { defaultValue: 'Cancel' })}</button>
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { FileBarChart, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface Report { name: string; type: string; size: string; }
 
@@ -19,6 +20,7 @@ const mimeFor: Record<string, string> = {
 };
 
 const ReportsPage = () => {
+  const { t } = useTranslation('common');
   const handleDownload = (r: Report) => {
     const ext = r.type.toLowerCase();
     const content = `${r.name}\nGenerated: ${new Date().toISOString()}\nType: ${r.type}\nSize: ${r.size}\n`;
@@ -32,13 +34,13 @@ const ReportsPage = () => {
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast.success(`${r.name} downloaded`);
+    toast.success(t('downloaded', { name: r.name, defaultValue: `${r.name} downloaded` }));
   };
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-foreground mb-1">Reports</h1>
-      <p className="text-sm text-muted-foreground mb-6">Generate and download platform reports.</p>
+      <h1 className="text-2xl font-bold text-foreground mb-1">{t('reports', { defaultValue: 'Reports' })}</h1>
+      <p className="text-sm text-muted-foreground mb-6">{t('reports_subtitle', { defaultValue: 'Generate and download platform reports.' })}</p>
       <div className="grid grid-cols-2 gap-4">
         {reports.map(r => (
           <div key={r.name} className="rounded-xl border border-border bg-card p-4 flex items-start justify-between">

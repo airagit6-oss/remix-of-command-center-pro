@@ -1,14 +1,16 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { generateServers } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 
 export default function InfrastructurePage() {
+  const { t } = useTranslation("common");
   const [servers] = useState(generateServers());
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-medium text-foreground">Infrastructure</h2>
+      <h2 className="text-sm font-medium text-foreground">{t('infrastructure', { defaultValue: 'Infrastructure' })}</h2>
       <div className="grid grid-cols-2 gap-3">
         {servers.map((s) => (
           <div key={s.name} className="dd-panel p-3">
@@ -21,21 +23,21 @@ export default function InfrastructurePage() {
             </div>
             <div className="grid grid-cols-3 gap-3 mb-3">
               <div>
-                <div className="text-xs text-muted-foreground mb-1">CPU</div>
+                <div className="text-xs text-muted-foreground mb-1">{t('cpu', { defaultValue: 'CPU' })}</div>
                 <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                   <div className={cn("h-full rounded-full transition-all", s.cpu > 80 ? "bg-dd-error" : s.cpu > 60 ? "bg-dd-warning" : "bg-dd-info")} style={{ width: `${s.cpu}%` }} />
                 </div>
                 <div className="text-xs font-mono text-foreground mt-0.5">{s.cpu}%</div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground mb-1">RAM</div>
+                <div className="text-xs text-muted-foreground mb-1">{t('ram', { defaultValue: 'RAM' })}</div>
                 <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                   <div className={cn("h-full rounded-full", s.ram > 80 ? "bg-dd-error" : s.ram > 60 ? "bg-dd-warning" : "bg-dd-success")} style={{ width: `${s.ram}%` }} />
                 </div>
                 <div className="text-xs font-mono text-foreground mt-0.5">{s.ram}%</div>
               </div>
               <div>
-                <div className="text-xs text-muted-foreground mb-1">Disk</div>
+                <div className="text-xs text-muted-foreground mb-1">{t('disk', { defaultValue: 'Disk' })}</div>
                 <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
                   <div className="h-full rounded-full bg-dd-chart-purple" style={{ width: `${s.disk}%` }} />
                 </div>

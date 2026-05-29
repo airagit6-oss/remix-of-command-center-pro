@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { generateAlerts } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 import { AlertTriangle, CheckCircle, XCircle, Clock } from "lucide-react";
 
 export default function AlertsPage() {
+  const { t } = useTranslation("common");
   const [alerts] = useState(generateAlerts());
 
   const severityIcon = (s: string) => {
@@ -18,19 +20,19 @@ export default function AlertsPage() {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-4">
-        <h2 className="text-sm font-medium text-foreground">Alerts</h2>
-        <span className="dd-badge-error">{criticalCount} critical</span>
-        <span className="dd-badge-warning">{activeCount} active</span>
+        <h2 className="text-sm font-medium text-foreground">{t('alerts', { defaultValue: 'Alerts' })}</h2>
+        <span className="dd-badge-error">{criticalCount} {t('critical', { defaultValue: 'critical' })}</span>
+        <span className="dd-badge-warning">{activeCount} {t('active', { defaultValue: 'active' })}</span>
       </div>
 
       <div className="dd-panel">
         <div className="grid grid-cols-[32px_1fr_90px_80px_90px_140px] gap-2 px-3 py-2 border-b border-border text-xs text-muted-foreground uppercase tracking-wider font-medium">
           <span></span>
-          <span>Alert</span>
-          <span>Severity</span>
-          <span>Status</span>
-          <span>Time</span>
-          <span>Rule</span>
+          <span>{t('alert', { defaultValue: 'Alert' })}</span>
+          <span>{t('severity', { defaultValue: 'Severity' })}</span>
+          <span>{t('status', { defaultValue: 'Status' })}</span>
+          <span>{t('time', { defaultValue: 'Time' })}</span>
+          <span>{t('rule', { defaultValue: 'Rule' })}</span>
         </div>
         {alerts.map((alert) => (
           <div key={alert.id} className={cn(

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Package, UserCheck, UserX, Star, BarChart3, ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Product {
   id: string;

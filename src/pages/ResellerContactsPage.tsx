@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { UserPlus, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Contact {
   id: string;
@@ -36,6 +37,7 @@ const emptyContact = (): Omit<Contact, 'id' | 'createdAt' | 'linkedLead'> => ({
 });
 
 const ResellerContactsPage = () => {
+  const { t } = useTranslation('common');
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -64,21 +66,21 @@ const ResellerContactsPage = () => {
     <div className="space-y-5 max-w-[1200px]">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold" style={{ color: '#1a1a1a' }}>Clients</h2>
-          <p className="text-sm mt-0.5" style={{ color: '#6d7175' }}>Manage your client contact database</p>
+          <h2 className="text-xl font-semibold" style={{ color: '#1a1a1a' }}>{t('contacts', { defaultValue: 'Contacts' })}</h2>
+          <p className="text-sm mt-0.5" style={{ color: '#6d7175' }}>{t('contacts_subtitle', { defaultValue: 'Manage your client contact database' })}</p>
         </div>
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ background: '#008060' }}>
           <UserPlus className="h-4 w-4" />
-          Add client
+          {t('add_contact', { defaultValue: 'Add contact' })}
         </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Total Clients', value: contacts.length },
-          { label: 'Linked Referrals', value: contacts.filter(c => c.linkedLead).length, color: '#008060' },
-          { label: 'Sources', value: new Set(contacts.map(c => c.source)).size },
+          { label: t('total_clients', { defaultValue: 'Total Clients' }), value: contacts.length },
+          { label: t('linked_referrals', { defaultValue: 'Linked Referrals' }), value: contacts.filter(c => c.linkedLead).length, color: '#008060' },
+          { label: t('sources', { defaultValue: 'Sources' }), value: new Set(contacts.map(c => c.source)).size },
         ].map(k => (
           <div key={k.label} className="bg-white rounded-xl border p-4" style={{ borderColor: '#e1e3e5' }}>
             <p className="text-xs font-medium" style={{ color: '#6d7175' }}>{k.label}</p>
@@ -92,7 +94,7 @@ const ResellerContactsPage = () => {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: '#8c9196' }} />
         <input
           type="text"
-          placeholder="Search clients..."
+          placeholder={t('search_contacts_placeholder', { defaultValue: 'Search contacts...' })},
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="w-full rounded-lg border pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2"
@@ -105,12 +107,12 @@ const ResellerContactsPage = () => {
         <table className="w-full text-sm">
           <thead>
             <tr style={{ background: '#fafbfb', borderBottom: '1px solid #e1e3e5' }}>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Client</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Phone</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Source</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Tags</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Referral</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Added</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('contact', { defaultValue: 'Contact' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('phone', { defaultValue: 'Phone' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('source', { defaultValue: 'Source' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('tags', { defaultValue: 'Tags' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('referral', { defaultValue: 'Referral' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('added', { defaultValue: 'Added' })}</th>
             </tr>
           </thead>
           <tbody>
@@ -140,7 +142,7 @@ const ResellerContactsPage = () => {
                     background: c.linkedLead ? '#e4f3e8' : '#f6f6f7',
                     color: c.linkedLead ? '#008060' : '#6d7175',
                   }}>
-                    {c.linkedLead ? 'Linked' : '—'}
+                    {c.linkedLead ? t('linked', { defaultValue: 'Linked' }) : '—'}
                   </span>
                 </td>
                 <td className="px-5 py-3 text-[13px]" style={{ color: '#6d7175' }}>{c.createdAt}</td>

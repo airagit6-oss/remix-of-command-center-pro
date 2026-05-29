@@ -1,0 +1,585 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Base
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  role          UserRole  @default(CUSTOMER)
+  isVerified    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  authorProfile    AuthorProfile?
+  resellerProfile  ResellerProfile?
+  orders           Order[]
+  referrals        Referral[]  @relation("Referrer")
+  referredBy       Referral?   @relation("ReferredUser")
+  leads            Lead[]
+  commissions     Commission[]
+  payouts         Payout[]
+  auditLogs        AuditLog[]
+  notifications    Notification[]
+
+  @@index([email])
+  @@index([role])
+}
+
+enum UserRole {
+  GUEST
+  CUSTOMER
+  AUTHOR
+  RESELLER
+  ADMIN
+  SUPER_ADMIN
+}
+
+// Author Profile
+model AuthorProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  bio             String?
+  website         String?
+  socialLinks     Json?
+  
+  isKYCVerified   Boolean  @default(false)
+  kycSubmittedAt  DateTime?
+  kycVerifiedAt   DateTime?
+  kycDocuments    Json?
+  
+  totalRevenue    Decimal  @default(0) @db.Decimal(20, 2)
+  totalSales      Int      @default(0)
+  followers       Int      @default(0)
+  rating          Decimal  @default(0) @db.Decimal(3, 2)
+  
+  availableBalance Decimal @default(0) @db.Decimal(20, 2)
+  pendingBalance    Decimal @default(0) @db.Decimal(20, 2)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  products        Product[]
+  earnings        AuthorEarnings[]
+  authorAnalytics AuthorAnalytics[]
+
+  @@index([userId])
+  @@index([isKYCVerified])
+}
+
+// Reseller Profile
+model ResellerProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  referralCode    String   @unique
+  referralLink    String?
+  
+  totalReferrals  Int      @default(0)
+  totalLeads      Int      @default(0)
+  conversionRate  Decimal  @default(0) @db.Decimal(5, 2)
+  
+  totalCommissions Decimal @default(0) @db.Decimal(20, 2)
+  availableBalance Decimal @default(0) @db.Decimal(20, 2)
+  pendingBalance    Decimal @default(0) @db.Decimal(20, 2)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  leads           Lead[]
+  commissions     Commission[]
+  earnings        ResellerEarnings[]
+  resellerAnalytics ResellerAnalytics[]
+
+  @@index([userId])
+  @@index([referralCode])
+}
+
+// Product
+model Product {
+  id          String       @id @default(cuid())
+  authorId    String
+  author      AuthorProfile @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String
+  price       Decimal      @db.Decimal(20, 2)
+  status      ProductStatus @default(DRAFT)
+  
+  media       Json?
+  tags        String[]
+  category    String?
+  
+  sales       Int          @default(0)
+  revenue     Decimal      @default(0) @db.Decimal(20, 2)
+  rating      Decimal      @default(0) @db.Decimal(3, 2)
+  reviews     Int          @default(0)
+  
+  publishedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  orderItems  OrderItem[]
+  mediaFiles  ProductMedia[]
+
+  @@index([authorId])
+  @@index([status])
+  @@index([category])
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  SUSPENDED
+}
+
+// Product Media
+model ProductMedia {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  type      MediaType
+  url       String
+  alt       String?
+  order     Int      @default(0)
+  
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  AUDIO
+}
+
+// Order
+model Order {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  totalAmount Decimal  @db.Decimal(20, 2)
+  status      OrderStatus @default(PENDING)
+  
+  referralId  String?
+  referral    Referral? @relation(fields: [referralId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems  OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([referralId])
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+// Order Item
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  
+  quantity  Int
+  price     Decimal  @db.Decimal(20, 2)
+  total     Decimal  @db.Decimal(20, 2)
+  
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+// Referral
+model Referral {
+  id              String   @id @default(cuid())
+  referrerId      String
+  referrer        User     @relation("Referrer", fields: [referrerId], references: [id])
+  referredUserId  String   @unique
+  referredUser    User     @relation("ReferredUser", fields: [referredUserId], references: [id])
+  
+  code            String
+  status          ReferralStatus @default(PENDING)
+  commission      Decimal? @db.Decimal(20, 2)
+  
+  orderId         String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([referrerId])
+  @@index([referredUserId])
+  @@index([code])
+  @@index([status])
+}
+
+enum ReferralStatus {
+  PENDING
+  CONVERTED
+  EXPIRED
+  CANCELLED
+}
+
+// Lead
+model Lead {
+  id          String     @id @default(cuid())
+  resellerId  String
+  reseller    ResellerProfile @relation(fields: [resellerId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?      @relation(fields: [userId], references: [id])
+  
+  name        String
+  email       String
+  phone       String?
+  source      String
+  notes       String?
+  status      LeadStatus @default(NEW)
+  value       Decimal?   @db.Decimal(20, 2)
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  activities  LeadActivity[]
+
+  @@index([resellerId])
+  @@index([userId])
+  @@index([email])
+  @@index([status])
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  LOST
+}
+
+// Lead Activity
+model LeadActivity {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  
+  action    String
+  notes     String?
+  
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
+}
+
+// Commission
+model Commission {
+  id          String           @id @default(cuid())
+  resellerId  String
+  reseller    ResellerProfile  @relation(fields: [resellerId], references: [id])
+  userId      String
+  user        User             @relation(fields: [userId], references: [id])
+  
+  orderId     String?
+  referralId  String?
+  
+  type        CommissionType
+  amount      Decimal          @db.Decimal(20, 2)
+  rate        Decimal          @db.Decimal(5, 2)
+  
+  status      CommissionStatus @default(PENDING)
+  
+  processedAt DateTime?
+  approvedBy  String?
+  
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([resellerId])
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+}
+
+enum CommissionType {
+  REFERRAL
+  LEAD_CONVERSION
+  RECURRING
+  BONUS
+}
+
+enum CommissionStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
+  HELD
+}
+
+// Commission Rule
+model CommissionRule {
+  id          String   @id @default(cuid())
+  name        String
+  type        CommissionType
+  
+  rate        Decimal  @db.Decimal(5, 2)
+  minAmount   Decimal? @db.Decimal(20, 2)
+  maxAmount   Decimal? @db.Decimal(20, 2)
+  
+  conditions  Json?
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([isActive])
+}
+
+// Payout
+model Payout {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  
+  amount      Decimal      @db.Decimal(20, 2)
+  method      PayoutMethod
+  status      PayoutStatus @default(PENDING)
+  
+  accountDetails Json?
+  
+  requestedAt DateTime     @default(now())
+  processedAt DateTime?
+  
+  transactionId String?
+  notes       String?
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([requestedAt])
+}
+
+enum PayoutMethod {
+  BANK_TRANSFER
+  PAYPAL
+  CRYPTO
+  CHECK
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Author Earnings
+model AuthorEarnings {
+  id          String   @id @default(cuid())
+  authorId    String
+  author      AuthorProfile @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  orderId     String?
+  productId   String?
+  
+  type        EarningType
+  amount      Decimal  @db.Decimal(20, 2)
+  
+  status      EarningStatus @default(PENDING)
+  
+  createdAt   DateTime @default(now())
+
+  @@index([authorId])
+  @@index([status])
+  @@index([type])
+}
+
+enum EarningType {
+  SALE
+  REFUND
+  BONUS
+  ADJUSTMENT
+}
+
+enum EarningStatus {
+  PENDING
+  AVAILABLE
+  PAID
+  HELD
+}
+
+// Reseller Earnings
+model ResellerEarnings {
+  id          String   @id @default(cuid())
+  resellerId  String
+  reseller    ResellerProfile @relation(fields: [resellerId], references: [id], onDelete: Cascade)
+  
+  commissionId String?
+  
+  type        EarningType
+  amount      Decimal  @db.Decimal(20, 2)
+  
+  status      EarningStatus @default(PENDING)
+  
+  createdAt   DateTime @default(now())
+
+  @@index([resellerId])
+  @@index([status])
+  @@index([type])
+}
+
+// Author Analytics
+model AuthorAnalytics {
+  id          String   @id @default(cuid())
+  authorId    String
+  author      AuthorProfile @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  date        DateTime @db.Date
+  metric      String
+  value       Decimal  @db.Decimal(20, 2)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+
+  @@unique([authorId, date, metric])
+  @@index([authorId])
+  @@index([date])
+}
+
+// Reseller Analytics
+model ResellerAnalytics {
+  id          String   @id @default(cuid())
+  resellerId  String
+  reseller    ResellerProfile @relation(fields: [resellerId], references: [id], onDelete: Cascade)
+  
+  date        DateTime @db.Date
+  metric      String
+  value       Decimal  @db.Decimal(20, 2)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+
+  @@unique([resellerId, date, metric])
+  @@index([resellerId])
+  @@index([date])
+}
+
+// KYC Record
+model KYCRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  
+  type        KYCType
+  status      KYCStatus @default(PENDING)
+  
+  documents   Json
+  notes       String?
+  
+  submittedAt DateTime @default(now())
+  reviewedAt  DateTime?
+  reviewedBy  String?
+  
+  rejectionReason String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum KYCType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum KYCStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+// Notification
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  
+  isRead    Boolean  @default(false)
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  ORDER
+  PAYOUT
+  COMMISSION
+  REFERRAL
+  LEAD
+  PRODUCT
+  SYSTEM
+  ALERT
+}
+
+// Audit Log
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  
+  action      String
+  entity      String
+  entityId    String?
+  
+  changes     Json?
+  metadata    Json?
+  
+  ipAddress   String?
+  userAgent   String?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+}

@@ -1,8 +1,10 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, ArrowLeft, Search } from "lucide-react";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 const NotFound = () => {
+  const { t } = useTranslation("common");
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -16,9 +18,9 @@ const NotFound = () => {
         <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 border border-primary/30">
           <span className="text-4xl font-bold text-primary">404</span>
         </div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Page not found</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-2">{t('page_not_found', { defaultValue: 'Page not found' })}</h1>
         <p className="text-sm text-muted-foreground mb-2">
-          The page you're looking for doesn't exist or has been moved.
+          {t('page_not_found_desc', { defaultValue: "The page you're looking for doesn't exist or has been moved." })}
         </p>
         <code className="inline-block text-xs text-muted-foreground bg-secondary px-2 py-1 rounded mb-8 break-all">
           {location.pathname}
@@ -30,28 +32,28 @@ const NotFound = () => {
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors w-full sm:w-auto"
           >
             <Home className="h-4 w-4" />
-            Go Home
+            {t('go_home', { defaultValue: 'Go Home' })}
           </Link>
           <button
             onClick={() => navigate(-1)}
             className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-6 py-2.5 text-sm font-medium text-foreground hover:bg-accent transition-colors w-full sm:w-auto"
           >
             <ArrowLeft className="h-4 w-4" />
-            Go Back
+            {t('go_back', { defaultValue: 'Go Back' })}
           </button>
           <Link
             to="/search"
             className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-6 py-2.5 text-sm font-medium text-foreground hover:bg-accent transition-colors w-full sm:w-auto"
           >
             <Search className="h-4 w-4" />
-            Search
+            {t('search', { defaultValue: 'Search' })}
           </Link>
         </div>
 
         <div className="mt-10 text-xs text-muted-foreground">
-          Need help?{" "}
+          {t('need_help', { defaultValue: 'Need help?' })}{" "}
           <Link to="/support" className="text-primary hover:underline font-medium">
-            Contact support
+            {t('contact_support', { defaultValue: 'Contact support' })}
           </Link>
         </div>
       </div>

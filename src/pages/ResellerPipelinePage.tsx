@@ -67,17 +67,17 @@ const ResellerPipelinePage = () => {
   return (
     <div className="space-y-5 max-w-[1200px]">
       <div>
-        <h2 className="text-xl font-semibold" style={{ color: '#1a1a1a' }}>Pipeline</h2>
-        <p className="text-sm mt-0.5" style={{ color: '#6d7175' }}>Drag merchants across stages to track your sales pipeline</p>
+        <h2 className="text-xl font-semibold" style={{ color: '#1a1a1a' }}>{t('pipeline', { defaultValue: 'Pipeline' })}</h2>
+        <p className="text-sm mt-0.5" style={{ color: '#6d7175' }}>{t('pipeline_subtitle', { defaultValue: 'Drag merchants across stages to track your sales pipeline' })}</p>
       </div>
 
       {/* Summary */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Total Leads', value: totalLeads },
-          { label: 'Pipeline Value', value: `$${totalValue.toLocaleString()}` },
-          { label: 'Won', value: `$${convertedValue.toLocaleString()}`, color: '#008060' },
-          { label: 'Conversion', value: `${conversionRate}%` },
+          { label: t('total_leads', { defaultValue: 'Total Leads' }), value: totalLeads },
+          { label: t('pipeline_value', { defaultValue: 'Pipeline Value' }), value: `$${totalValue.toLocaleString()}` },
+          { label: t('won', { defaultValue: 'Won' }), value: `$${convertedValue.toLocaleString()}`, color: '#008060' },
+          { label: t('conversion', { defaultValue: 'Conversion' }), value: `${conversionRate}%` },
         ].map(k => (
           <div key={k.label} className="bg-white rounded-xl border p-4" style={{ borderColor: '#e1e3e5' }}>
             <p className="text-xs font-medium" style={{ color: '#6d7175' }}>{k.label}</p>
@@ -139,7 +139,7 @@ const ResellerPipelinePage = () => {
 
               {board[stage].length === 0 && (
                 <div className="rounded-xl border-2 border-dashed p-6 text-center" style={{ borderColor: '#e1e3e5' }}>
-                  <p className="text-xs" style={{ color: '#8c9196' }}>Drop here</p>
+                  <p className="text-xs" style={{ color: '#8c9196' }}>{t('drop_here', { defaultValue: 'Drop here' })}</p>
                 </div>
               )}
             </div>

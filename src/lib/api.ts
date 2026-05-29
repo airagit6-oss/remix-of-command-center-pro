@@ -1,136 +1,116 @@
-import { products as mockProducts, getReviews as mockGetReviews } from './marketplaceData';
-import type { Product, Review } from './marketplaceData';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
-// Versioned API base — all new endpoints use /api/v1
-// Legacy marketplace endpoints remain on /api for backward compatibility.
-const API_BASE = '/api';
-export const API_V1 = '/api/v1';
+class ApiClient {
+  private baseUrl: string;
+  private token: string | null = null;
 
-async function apiFetch<T>(_url: string, _options?: RequestInit): Promise<T> {
-  // Backend not wired in this build — force fallback path in callers.
-  throw new Error('backend_disabled');
-}
-
-// ── Re-export versioned production modules ────────────────────────────────────
-// Consumers import from @/lib/api for a single entry-point experience.
-
-export {
-  fetchAuditLogs,
-  createAuditLog,
-  audit,
-} from './auditLog';
-export type { AuditLog } from './auditLog';
-
-export {
-  fetchRoles,
-  assignRole,
-  hasPermission,
-  roleCheck,
-  resolveRole,
-} from './roles';
-export type { Role, UserRole, RoleName } from './roles';
-
-export {
-  handlePaymentWebhook,
-  validateWebhookSignature,
-} from './webhooks';
-export type { WebhookPayload, WebhookResult, WebhookEventType } from './webhooks';
-
-export {
-  fetchNotifications,
-  createNotification,
-  markNotificationRead,
-  notify,
-} from './notifications';
-export type { Notification, NotificationType, NotificationStatus } from './notifications';
-
-export {
-  triggerBackup,
-  triggerRestore,
-  listLocalBackups,
-} from './backup';
-export type { BackupMeta, RestoreResult } from './backup';
-
-export {
-  fetchFeatureFlags,
-  setFeatureFlag,
-  isFeatureEnabled,
-} from './featureFlags';
-export type { FeatureFlag, FeatureName } from './featureFlags';
-
-export {
-  fetchActivityLogs,
-  logActivity,
-  activity,
-} from './activityTimeline';
-export type { ActivityLog } from './activityTimeline';
-
-export {
-  globalSearch,
-} from './search';
-export type { SearchResult, SearchResponse, SearchEntityType } from './search';
-
-export {
-  uploadFile,
-  fetchFiles,
-  deleteFile,
-} from './storage';
-export type { StoredFile, FileType } from './storage';
-
-// GET /api/products/:id
-export async function fetchProduct(id: string): Promise<Product> {
-  try {
-    return await apiFetch<Product>(`${API_BASE}/products/${encodeURIComponent(id)}`);
-  } catch {
-    const product = mockProducts.find(p => p.id === id);
-    if (!product) throw new Error('Product not found');
-    return product;
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
   }
-}
 
-// GET /api/products/:id/reviews
-export async function fetchProductReviews(id: string): Promise<Review[]> {
-  try {
-    return await apiFetch<Review[]>(`${API_BASE}/products/${encodeURIComponent(id)}/reviews`);
-  } catch {
-    return mockGetReviews();
+  setToken(token: string) {
+    this.token = token;
   }
-}
 
-// GET /api/products/:id/related
-export async function fetchRelatedProducts(id: string): Promise<Product[]> {
-  try {
-    return await apiFetch<Product[]>(`${API_BASE}/products/${encodeURIComponent(id)}/related`);
-  } catch {
-    const product = mockProducts.find(p => p.id === id);
-    if (!product) return [];
-    return mockProducts
-      .filter(p => p.categorySlug === product.categorySlug && p.id !== id)
-      .slice(0, 4);
+  clearToken() {
+    this.token = null;
   }
-}
 
-// POST /api/cart
-export async function apiAddToCart(productId: string, quantity: number): Promise<void> {
-  try {
-    await apiFetch<void>(`${API_BASE}/cart`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId, quantity }),
+  private getHeaders() {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (this.token) {
+      headers['Authorization'] = `Bearer ${this.token}`;
+    }
+
+    return headers;
+  }
+
+  async get<T>(endpoint: string): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      method: 'GET',
+      headers: this.getHeaders(),
     });
-  } catch {
-    // Cart is managed client-side; API failure is non-blocking
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  async post<T>(endpoint: string, data?: any): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: data ? JSON.stringify(data) : undefined,
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  async patch<T>(endpoint: string, data?: any): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      method: 'PATCH',
+      headers: this.getHeaders(),
+      body: data ? JSON.stringify(data) : undefined,
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  async delete<T>(endpoint: string): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      method: 'DELETE',
+      headers: this.getHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
   }
 }
 
-// POST /api/checkout
-export async function apiCheckout(
-  productId: string,
-  planId: string
-): Promise<{ orderId: string }> {
-  return apiFetch<{ orderId: string }>(`${API_BASE}/checkout`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ productId, planId }),
-  });
+export const api = new ApiClient(API_BASE_URL);
+
+// Auth helpers
+export function setAuthToken(token: string) {
+  api.setToken(token);
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('auth_token', token);
+  }
+}
+
+export function getAuthToken(): string | null {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('auth_token');
+  }
+  return null;
+}
+
+export function clearAuthToken() {
+  api.clearToken();
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('auth_token');
+  }
+}
+
+// Initialize token from localStorage
+if (typeof window !== 'undefined') {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    api.setToken(token);
+  }
 }

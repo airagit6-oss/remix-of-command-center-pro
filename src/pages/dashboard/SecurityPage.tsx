@@ -3,8 +3,10 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const SecurityPage = () => {
+  const { t } = useTranslation('common');
   const { logout } = useAuth();
   const navigate = useNavigate();
   const [twoFA, setTwoFA] = useState(false);
@@ -15,12 +17,12 @@ const SecurityPage = () => {
 
   const changePassword = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pwd.current || !pwd.next || !pwd.confirm) { toast.error('All fields are required'); return; }
-    if (pwd.next.length < 8) { toast.error('New password must be at least 8 characters'); return; }
-    if (pwd.next !== pwd.confirm) { toast.error('Passwords do not match'); return; }
+    if (!pwd.current || !pwd.next || !pwd.confirm) { toast.error(t('all_fields_required', { defaultValue: 'All fields are required' })); return; }
+    if (pwd.next.length < 8) { toast.error(t('password_min_8', { defaultValue: 'New password must be at least 8 characters' })); return; }
+    if (pwd.next !== pwd.confirm) { toast.error(t('passwords_not_match', { defaultValue: 'Passwords do not match' })); return; }
     setBusy(true);
     setTimeout(() => {
-      toast.success('Password updated');
+      toast.success(t('password_updated', { defaultValue: 'Password updated' }));
       setPwd({ current: '', next: '', confirm: '' });
       setShowPwd(false); setBusy(false);
     }, 400);
@@ -28,20 +30,20 @@ const SecurityPage = () => {
 
   const toggle2FA = () => {
     setTwoFA(v => !v);
-    toast.success(twoFA ? 'Two-factor authentication disabled' : 'Two-factor authentication enabled');
+    toast.success(twoFA ? t('2fa_disabled', { defaultValue: 'Two-factor authentication disabled' }) : t('2fa_enabled', { defaultValue: 'Two-factor authentication enabled' }));
   };
 
   const deleteAccount = () => {
-    const t = window.prompt('Type DELETE to permanently remove your account:');
-    if (t !== 'DELETE') { if (t !== null) toast.error('Confirmation text did not match'); return; }
-    toast.success('Account deleted. Logging out…');
+    const t = window.prompt(t('confirm_delete_account', { defaultValue: 'Type DELETE to permanently remove your account:' }));
+    if (t !== 'DELETE') { if (t !== null) toast.error(t('confirmation_not_match', { defaultValue: 'Confirmation text did not match' })); return; }
+    toast.success(t('account_deleted', { defaultValue: 'Account deleted. Logging out…' }));
     setTimeout(() => { logout(); navigate('/'); }, 600);
   };
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-foreground mb-1">Security</h1>
-      <p className="text-sm text-muted-foreground mb-6">Keep your account safe.</p>
+      <h1 className="text-2xl font-bold text-foreground mb-1">{t('security', { defaultValue: 'Security' })}</h1>
+      <p className="text-sm text-muted-foreground mb-6">{t('security_subtitle', { defaultValue: 'Keep your account safe.' })}</p>
       <div className="space-y-4">
         <div className="rounded-xl border border-border bg-card p-5 flex items-start justify-between">
           <div className="flex gap-3">

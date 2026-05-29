@@ -1,6 +1,7 @@
 import { MetricPanel } from "@/components/dashboard/MetricPanel";
 import { generateTimeSeries } from "@/lib/mockData";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Bar, BarChart, ComposedChart, Line } from "recharts";
 
 const tt = {
@@ -10,6 +11,7 @@ const tt = {
 };
 
 export default function RevenuePage() {
+  const { t } = useTranslation('common');
   const [revenueMin] = useState(generateTimeSeries(40, 1000, 5000));
   const [subGrowth] = useState(generateTimeSeries(30, 40000, 55000));
   const [paymentData] = useState(() => generateTimeSeries(20, 80, 100).map(d => ({
@@ -25,9 +27,9 @@ export default function RevenuePage() {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-medium text-foreground">Revenue Metrics</h2>
+      <h2 className="text-sm font-medium text-foreground">{t('revenue_metrics', { defaultValue: 'Revenue Metrics' })}</h2>
       <div className="grid grid-cols-2 gap-3">
-        <MetricPanel title="Revenue Per Minute ($)">
+        <MetricPanel title={t('revenue_per_minute', { defaultValue: 'Revenue Per Minute ($)' })}>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={revenueMin}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(215,18%,14%)" />
@@ -45,7 +47,7 @@ export default function RevenuePage() {
           </ResponsiveContainer>
         </MetricPanel>
 
-        <MetricPanel title="Subscription Growth">
+        <MetricPanel title={t('subscription_growth', { defaultValue: 'Subscription Growth' })}>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={subGrowth}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(215,18%,14%)" />
@@ -63,7 +65,7 @@ export default function RevenuePage() {
           </ResponsiveContainer>
         </MetricPanel>
 
-        <MetricPanel title="Payment Success vs Failure (%)">
+        <MetricPanel title={t('payment_success_vs_failure', { defaultValue: 'Payment Success vs Failure (%)' })}>
           <ResponsiveContainer width="100%" height={220}>
             <ComposedChart data={paymentData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(215,18%,14%)" />
@@ -76,7 +78,7 @@ export default function RevenuePage() {
           </ResponsiveContainer>
         </MetricPanel>
 
-        <MetricPanel title="Top Paying Customers">
+        <MetricPanel title={t('top_paying_customers', { defaultValue: 'Top Paying Customers' })}>
           <div className="space-y-2">
             {topPayers.map((p, i) => (
               <div key={p.name} className="flex items-center gap-3 p-2 rounded-md hover:bg-accent/50 transition-colors">

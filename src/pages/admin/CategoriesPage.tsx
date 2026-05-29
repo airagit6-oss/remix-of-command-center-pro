@@ -1,6 +1,7 @@
 import { FolderTree, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface Category { name: string; subs: string[]; count: number; }
 
@@ -12,6 +13,7 @@ const seed: Category[] = [
 ];
 
 const CategoriesPage = () => {
+  const { t } = useTranslation('common');
   const [cats, setCats] = useState<Category[]>(seed);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
@@ -21,9 +23,9 @@ const CategoriesPage = () => {
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
-    if (!trimmed) { toast.error('Category name is required'); return; }
+    if (!trimmed) { toast.error(t('category_name_required', { defaultValue: 'Category name is required' })); return; }
     if (cats.some(c => c.name.toLowerCase() === trimmed.toLowerCase())) {
-      toast.error('A category with that name already exists');
+      toast.error(t('category_exists', { defaultValue: 'A category with that name already exists' }));
       return;
     }
     setBusy(true);
@@ -32,26 +34,26 @@ const CategoriesPage = () => {
         ...prev,
         { name: trimmed, subs: subs.split(',').map(s => s.trim()).filter(Boolean), count: 0 },
       ]);
-      toast.success(`Category "${trimmed}" created`);
+      toast.success(t('category_created', { defaultValue: `Category "${trimmed}" created` }));
       setName(''); setSubs(''); setOpen(false); setBusy(false);
     }, 250);
   };
 
   const handleDelete = (n: string) => {
-    if (!window.confirm(`Delete category "${n}"?`)) return;
+    if (!window.confirm(t('confirm_delete_category', { defaultValue: `Delete category "${n}"?` }))) return;
     setCats(prev => prev.filter(c => c.name !== n));
-    toast.success(`Category "${n}" deleted`);
+    toast.success(t('category_deleted', { defaultValue: `Category "${n}" deleted` }));
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">Categories</h1>
-          <p className="text-sm text-muted-foreground">Organize the marketplace taxonomy.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-1">{t('categories', { defaultValue: 'Categories' })}</h1>
+          <p className="text-sm text-muted-foreground">{t('categories_subtitle', { defaultValue: 'Organize the marketplace taxonomy.' })}</p>
         </div>
         <button onClick={() => setOpen(true)} className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
-          <Plus className="h-4 w-4" /> New category
+          <Plus className="h-4 w-4" /> {t('new_category', { defaultValue: 'New category' })}
         </button>
       </div>
       <div className="grid grid-cols-2 gap-4">

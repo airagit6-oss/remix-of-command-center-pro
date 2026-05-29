@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { UserPlus, Power, PowerOff, Package, Store, MoreHorizontal } from 'lucide-react';
 import { useReseller, ManagedUser } from '@/contexts/ResellerContext';
+import { useTranslation } from 'react-i18next';
 
 const PRODUCTS = ['EduFlow Pro', 'MediCore 360', 'ShopEngine', 'HotelNest', 'AnalyticsHub'];
 const PLANS = ['Basic', 'Pro', 'Unlimited'];
@@ -8,6 +9,7 @@ const PLANS = ['Basic', 'Pro', 'Unlimited'];
 const emptyForm = () => ({ name: '', email: '', phone: '', plan: 'Basic', assignedProduct: PRODUCTS[0] });
 
 const ResellerUsersPage = () => {
+  const { t } = useTranslation('common');
   const { managedUsers, createUser, toggleUserStatus, assignProduct } = useReseller();
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(emptyForm());
@@ -33,8 +35,8 @@ const ResellerUsersPage = () => {
     <div className="space-y-5 max-w-[1200px]">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold" style={{ color: '#1a1a1a' }}>Managed Stores</h2>
-          <p className="text-sm mt-0.5" style={{ color: '#6d7175' }}>Create and manage client stores, assign apps and plans</p>
+          <h2 className="text-xl font-semibold" style={{ color: '#1a1a1a' }}>{t('managed_stores', { defaultValue: 'Managed Stores' })}</h2>
+          <p className="text-sm mt-0.5" style={{ color: '#6d7175' }}>{t('managed_stores_subtitle', { defaultValue: 'Create and manage client stores, assign apps and plans' })}</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -42,16 +44,16 @@ const ResellerUsersPage = () => {
           style={{ background: '#008060' }}
         >
           <UserPlus className="h-4 w-4" />
-          Add store
+          {t('add_store', { defaultValue: 'Add store' })}
         </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Total Stores', value: managedUsers.length, color: '#1a1a1a' },
-          { label: 'Active', value: activeCount, color: '#008060' },
-          { label: 'Inactive', value: managedUsers.length - activeCount, color: '#6d7175' },
+          { label: t('total_stores', { defaultValue: 'Total Stores' }), value: managedUsers.length, color: '#1a1a1a' },
+          { label: t('active', { defaultValue: 'Active' }), value: activeCount, color: '#008060' },
+          { label: t('inactive', { defaultValue: 'Inactive' }), value: managedUsers.length - activeCount, color: '#6d7175' },
         ].map(k => (
           <div key={k.label} className="bg-white rounded-xl border p-4" style={{ borderColor: '#e1e3e5' }}>
             <p className="text-xs font-medium" style={{ color: '#6d7175' }}>{k.label}</p>
@@ -65,13 +67,13 @@ const ResellerUsersPage = () => {
         <table className="w-full text-sm">
           <thead>
             <tr style={{ background: '#fafbfb', borderBottom: '1px solid #e1e3e5' }}>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Store</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Phone</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>App</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Plan</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Status</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Created</th>
-              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>Actions</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('store', { defaultValue: 'Store' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('phone', { defaultValue: 'Phone' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('app', { defaultValue: 'App' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('plan', { defaultValue: 'Plan' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('status', { defaultValue: 'Status' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('created', { defaultValue: 'Created' })}</th>
+              <th className="px-5 py-2.5 text-left text-xs font-medium" style={{ color: '#6d7175' }}>{t('actions', { defaultValue: 'Actions' })}</th>
             </tr>
           </thead>
           <tbody>
@@ -119,14 +121,14 @@ const ResellerUsersPage = () => {
                         color: u.status === 'Active' ? '#d32f2f' : '#008060',
                       }}
                     >
-                      {u.status === 'Active' ? 'Deactivate' : 'Activate'}
+                      {u.status === 'Active' ? t('deactivate', { defaultValue: 'Deactivate' }) : t('activate', { defaultValue: 'Activate' })}
                     </button>
                   </div>
                 </td>
               </tr>
             ))}
             {managedUsers.length === 0 && (
-              <tr><td colSpan={7} className="px-5 py-8 text-center text-sm" style={{ color: '#6d7175' }}>No stores yet. Add your first store.</td></tr>
+              <tr><td colSpan={7} className="px-5 py-8 text-center text-sm" style={{ color: '#6d7175' }}>{t('no_stores_message', { defaultValue: 'No stores yet. Add your first store.' })}</td></tr>
             )}
           </tbody>
         </table>
@@ -136,12 +138,12 @@ const ResellerUsersPage = () => {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold mb-4" style={{ color: '#1a1a1a' }}>Add New Store</h2>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: '#1a1a1a' }}>{t('add_new_store', { defaultValue: 'Add New Store' })}</h2>
             <div className="space-y-3">
               {([
-                { label: 'Store Name', key: 'name', type: 'text', placeholder: 'My Store' },
-                { label: 'Email', key: 'email', type: 'email', placeholder: 'store@example.com' },
-                { label: 'Phone', key: 'phone', type: 'text', placeholder: '+1-555-0000' },
+                { label: t('store_name', { defaultValue: 'Store Name' }), key: 'name', type: 'text', placeholder: 'My Store' },
+                { label: t('email', { defaultValue: 'Email' }), key: 'email', type: 'email', placeholder: 'store@example.com' },
+                { label: t('phone', { defaultValue: 'Phone' }), key: 'phone', type: 'text', placeholder: '+1-555-0000' },
               ] as const).map(f => (
                 <div key={f.key}>
                   <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{f.label}</label>
@@ -156,7 +158,7 @@ const ResellerUsersPage = () => {
                 </div>
               ))}
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>Assign App</label>
+                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('assign_app', { defaultValue: 'Assign App' })}</label>
                 <select value={form.assignedProduct} onChange={e => setForm(prev => ({ ...prev, assignedProduct: e.target.value }))} className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2" style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}>
                   {PRODUCTS.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
@@ -169,8 +171,8 @@ const ResellerUsersPage = () => {
               </div>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={handleCreate} disabled={!form.name || !form.email} className="flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-50" style={{ background: '#008060' }}>Add Store</button>
-              <button onClick={() => { setShowModal(false); setForm(emptyForm()); }} className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium" style={{ borderColor: '#c9cccf', color: '#6d7175' }}>Cancel</button>
+              <button onClick={handleCreate} disabled={!form.name || !form.email} className="flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-50" style={{ background: '#008060' }}>{t('add_store', { defaultValue: 'Add Store' })}</button>
+              <button onClick={() => { setShowModal(false); setForm(emptyForm()); }} className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium" style={{ borderColor: '#c9cccf', color: '#6d7175' }}>{t('cancel', { defaultValue: 'Cancel' })}</button>
             </div>
           </div>
         </div>
@@ -180,25 +182,25 @@ const ResellerUsersPage = () => {
       {assignModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
-            <h2 className="text-lg font-semibold mb-1" style={{ color: '#1a1a1a' }}>Assign App</h2>
-            <p className="text-sm mb-4" style={{ color: '#6d7175' }}>for <span className="font-medium" style={{ color: '#1a1a1a' }}>{assignModal.name}</span></p>
+            <h2 className="text-lg font-semibold mb-1" style={{ color: '#1a1a1a' }}>{t('assign_app_title', { defaultValue: 'Assign App' })}</h2>
+            <p className="text-sm mb-4" style={{ color: '#6d7175' }}>{t('for')} <span className="font-medium" style={{ color: '#1a1a1a' }}>{assignModal.name}</span></p>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>App</label>
+                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('app', { defaultValue: 'App' })}</label>
                 <select value={assignForm.product} onChange={e => setAssignForm(prev => ({ ...prev, product: e.target.value }))} className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2" style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}>
                   {PRODUCTS.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>Plan</label>
+                <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('plan', { defaultValue: 'Plan' })}</label>
                 <select value={assignForm.plan} onChange={e => setAssignForm(prev => ({ ...prev, plan: e.target.value }))} className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2" style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}>
                   {PLANS.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
             </div>
             <div className="flex gap-3 mt-5">
-              <button onClick={handleAssign} className="flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ background: '#008060' }}>Save</button>
-              <button onClick={() => setAssignModal(null)} className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium" style={{ borderColor: '#c9cccf', color: '#6d7175' }}>Cancel</button>
+              <button onClick={handleAssign} className="flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ background: '#008060' }}>{t('save', { defaultValue: 'Save' })}</button>
+              <button onClick={() => setAssignModal(null)} className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium" style={{ borderColor: '#c9cccf', color: '#6d7175' }}>{t('cancel', { defaultValue: 'Cancel' })}</button>
             </div>
           </div>
         </div>

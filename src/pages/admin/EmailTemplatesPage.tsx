@@ -1,6 +1,7 @@
 import { Mail, Edit3 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface Template { name: string; desc: string; updated: string; subject: string; body: string; }
 
@@ -14,6 +15,7 @@ const seed: Template[] = [
 ];
 
 const EmailTemplatesPage = () => {
+  const { t } = useTranslation('common');
   const [templates, setTemplates] = useState<Template[]>(seed);
   const [editing, setEditing] = useState<Template | null>(null);
   const [draft, setDraft] = useState({ subject: '', body: '' });
@@ -25,22 +27,22 @@ const EmailTemplatesPage = () => {
   const save = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
-    if (!draft.subject.trim()) { toast.error('Subject is required'); return; }
-    if (!draft.body.trim()) { toast.error('Body cannot be empty'); return; }
+    if (!draft.subject.trim()) { toast.error(t('subject_required', { defaultValue: 'Subject is required' })); return; }
+    if (!draft.body.trim()) { toast.error(t('body_required', { defaultValue: 'Body cannot be empty' })); return; }
     setBusy(true);
     setTimeout(() => {
       setTemplates(prev => prev.map(t => t.name === editing.name
         ? { ...t, subject: draft.subject, body: draft.body, updated: 'just now' }
         : t));
-      toast.success(`Template "${editing.name}" saved`);
+      toast.success(t('template_saved', { name: editing?.name, defaultValue: `Template "${editing?.name}" saved` }));
       setBusy(false); setEditing(null);
     }, 250);
   };
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-foreground mb-1">Email templates</h1>
-      <p className="text-sm text-muted-foreground mb-6">Customize transactional and marketing emails.</p>
+      <h1 className="text-2xl font-bold text-foreground mb-1">{t('email_templates', { defaultValue: 'Email templates' })}</h1>
+      <p className="text-sm text-muted-foreground mb-6">{t('email_templates_subtitle', { defaultValue: 'Customize transactional and marketing emails.' })}</p>
       <div className="grid grid-cols-2 gap-4">
         {templates.map(t => (
           <div key={t.name} className="rounded-xl border border-border bg-card p-4 flex items-start justify-between">
@@ -49,7 +51,7 @@ const EmailTemplatesPage = () => {
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground">{t.name}</p>
                 <p className="text-xs text-muted-foreground">{t.desc}</p>
-                <p className="text-xs text-muted-foreground/70 mt-1">Updated {t.updated}</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">{t('updated', { time: t.updated, defaultValue: `Updated ${t.updated}` })}</p>
               </div>
             </div>
             <button onClick={() => open(t)} aria-label={`Edit ${t.name}`}
@@ -68,22 +70,22 @@ const EmailTemplatesPage = () => {
               <p className="text-xs text-muted-foreground">{editing.desc}</p>
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Subject</label>
+              <label className="block text-sm font-medium text-foreground mb-1.5">{t('subject', { defaultValue: 'Subject' })}</label>
               <input value={draft.subject} onChange={e => setDraft(d => ({ ...d, subject: e.target.value }))} required
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Body</label>
+              <label className="block text-sm font-medium text-foreground mb-1.5">{t('body', { defaultValue: 'Body' })}</label>
               <textarea value={draft.body} onChange={e => setDraft(d => ({ ...d, body: e.target.value }))} required rows={8}
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono outline-none focus:border-primary resize-y" />
-              <p className="text-xs text-muted-foreground mt-1">Use placeholders like <code className="font-mono">{'{{name}}'}</code>.</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('use_placeholders', { defaultValue: 'Use placeholders like' })} <code className="font-mono">{'{{name}}'}</code>.</p>
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button type="button" onClick={close} disabled={busy}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50">Cancel</button>
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-accent disabled:opacity-50">{t('cancel', { defaultValue: 'Cancel' })}</button>
               <button type="submit" disabled={busy}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
-                {busy ? 'Saving…' : 'Save changes'}
+                {busy ? t('saving', { defaultValue: 'Saving…' }) : t('save_changes', { defaultValue: 'Save changes' })}
               </button>
             </div>
           </form>

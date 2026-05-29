@@ -1,6 +1,7 @@
 import { Star, Flag } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface Review { id: number; user: string; product: string; rating: number; text: string; flagged: boolean; status: 'pending' | 'approved' | 'removed'; }
 
@@ -11,24 +12,25 @@ const seed: Review[] = [
 ];
 
 const ReviewsPage = () => {
+  const { t } = useTranslation('common');
   const [reviews, setReviews] = useState<Review[]>(seed);
 
   const approve = (id: number) => {
     setReviews(prev => prev.map(r => r.id === id ? { ...r, status: 'approved', flagged: false } : r));
-    toast.success('Review approved');
+    toast.success(t('review_approved', { defaultValue: 'Review approved' }));
   };
   const remove = (id: number) => {
-    if (!window.confirm('Remove this review?')) return;
+    if (!window.confirm(t('confirm_remove_review', { defaultValue: 'Remove this review?' }))) return;
     setReviews(prev => prev.filter(r => r.id !== id));
-    toast.success('Review removed');
+    toast.success(t('review_removed', { defaultValue: 'Review removed' }));
   };
 
   const visible = reviews.filter(r => r.status !== 'removed');
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-foreground mb-1">Reviews</h1>
-      <p className="text-sm text-muted-foreground mb-6">Moderate user reviews and ratings.</p>
+      <h1 className="text-2xl font-bold text-foreground mb-1">{t('reviews', { defaultValue: 'Reviews' })}</h1>
+      <p className="text-sm text-muted-foreground mb-6">{t('reviews_subtitle', { defaultValue: 'Moderate user reviews and ratings.' })}</p>
       <div className="space-y-3">
         {visible.map(r => (
           <div key={r.id} className="rounded-xl border border-border bg-card p-4">
@@ -43,11 +45,11 @@ const ReviewsPage = () => {
               </div>
               <div className="flex items-center gap-2">
                 {r.status === 'approved' && (
-                  <span className="text-xs px-2 py-1 rounded bg-green-500/10 text-green-500">Approved</span>
+                  <span className="text-xs px-2 py-1 rounded bg-green-500/10 text-green-500">{t('approved', { defaultValue: 'Approved' })}</span>
                 )}
                 {r.flagged && (
                   <span className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-destructive/10 text-destructive">
-                    <Flag className="h-3 w-3" /> Flagged
+                    <Flag className="h-3 w-3" /> {t('flagged', { defaultValue: 'Flagged' })}
                   </span>
                 )}
               </div>

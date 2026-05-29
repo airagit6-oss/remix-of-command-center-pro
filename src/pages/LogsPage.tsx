@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { generateLogs, generateLog } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 import { Search, Filter } from "lucide-react";
 
 export default function LogsPage() {
+  const { t } = useTranslation('common');
   const [logs, setLogs] = useState(generateLogs(80));
   const [filter, setFilter] = useState("");
   const [eventFilter, setEventFilter] = useState("all");
@@ -36,7 +38,7 @@ export default function LogsPage() {
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Filter by user, app, message..."
+            placeholder={t('filter_placeholder', { defaultValue: 'Filter by user, app, message...' })}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             className="w-full h-8 pl-8 pr-3 bg-secondary border border-border rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
@@ -58,19 +60,19 @@ export default function LogsPage() {
         </div>
         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <Filter className="w-3 h-3" />
-          <span>{filtered.length} events</span>
+          <span>{filtered.length} {t('events', { defaultValue: 'events' })}</span>
         </div>
       </div>
 
       {/* Logs Table */}
       <div className="dd-panel flex-1 flex flex-col min-h-0">
         <div className="grid grid-cols-[140px_100px_100px_120px_70px_1fr] gap-2 px-3 py-2 border-b border-border text-xs text-muted-foreground uppercase tracking-wider font-medium">
-          <span>Timestamp</span>
-          <span>Event</span>
-          <span>User ID</span>
-          <span>App</span>
-          <span>Status</span>
-          <span>Message</span>
+          <span>{t('timestamp', { defaultValue: 'Timestamp' })}</span>
+          <span>{t('event', { defaultValue: 'Event' })}</span>
+          <span>{t('user_id', { defaultValue: 'User ID' })}</span>
+          <span>{t('app', { defaultValue: 'App' })}</span>
+          <span>{t('status', { defaultValue: 'Status' })}</span>
+          <span>{t('message', { defaultValue: 'Message' })}</span>
         </div>
         <div ref={scrollRef} className="flex-1 overflow-auto">
           {filtered.map((log) => (

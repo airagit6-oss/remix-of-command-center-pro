@@ -2,6 +2,7 @@ import { MetricPanel } from "@/components/dashboard/MetricPanel";
 import { generateTimeSeries } from "@/lib/mockData";
 import { useState } from "react";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Line, LineChart } from "recharts";
+import { useTranslation } from "react-i18next";
 
 const tt = {
   contentStyle: { background: "hsl(215,28%,9%)", border: "1px solid hsl(215,18%,14%)", borderRadius: 6, fontSize: 12 },
@@ -10,6 +11,7 @@ const tt = {
 };
 
 export default function MetricsPage() {
+  const { t } = useTranslation("common");
   const [cpuData] = useState(generateTimeSeries(50, 20, 90));
   const [memData] = useState(generateTimeSeries(50, 30, 85));
   const [netData] = useState(generateTimeSeries(50, 100, 800));
@@ -17,9 +19,9 @@ export default function MetricsPage() {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-medium text-foreground">Metrics Explorer</h2>
+      <h2 className="text-sm font-medium text-foreground">{t('metrics_explorer', { defaultValue: 'Metrics Explorer' })}</h2>
       <div className="grid grid-cols-2 gap-3">
-        <MetricPanel title="CPU Utilization (%)">
+        <MetricPanel title={t('cpu_utilization', { defaultValue: 'CPU Utilization (%)' })}>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={cpuData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(215,18%,14%)" />
@@ -37,7 +39,7 @@ export default function MetricsPage() {
           </ResponsiveContainer>
         </MetricPanel>
 
-        <MetricPanel title="Memory Usage (%)">
+        <MetricPanel title={t('memory_usage', { defaultValue: 'Memory Usage (%)' })}>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={memData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(215,18%,14%)" />
@@ -55,7 +57,7 @@ export default function MetricsPage() {
           </ResponsiveContainer>
         </MetricPanel>
 
-        <MetricPanel title="Network I/O (MB/s)">
+        <MetricPanel title={t('network_io', { defaultValue: 'Network I/O (MB/s)' })}>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={netData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(215,18%,14%)" />
@@ -67,7 +69,7 @@ export default function MetricsPage() {
           </ResponsiveContainer>
         </MetricPanel>
 
-        <MetricPanel title="Disk I/O (ops/s)">
+        <MetricPanel title={t('disk_io', { defaultValue: 'Disk I/O (ops/s)' })}>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={ioData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(215,18%,14%)" />

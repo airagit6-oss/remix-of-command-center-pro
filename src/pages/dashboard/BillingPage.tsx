@@ -1,6 +1,7 @@
 import { CreditCard, Plus, Download } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface Card { id: string; brand: string; last4: string; exp: string; }
 interface Invoice { id: string; amount: string; date: string; status: 'Paid' | 'Pending'; }
@@ -15,6 +16,7 @@ const invoices: Invoice[] = [
 ];
 
 const BillingPage = () => {
+  const { t } = useTranslation('common');
   const [cards, setCards] = useState<Card[]>(initialCards);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ number: '', exp: '', cvc: '' });
@@ -23,9 +25,9 @@ const BillingPage = () => {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const digits = form.number.replace(/\s+/g, '');
-    if (!/^\d{13,19}$/.test(digits)) { toast.error('Card number must be 13–19 digits'); return; }
-    if (!/^\d{2}\/\d{2}$/.test(form.exp)) { toast.error('Expiry must be MM/YY'); return; }
-    if (!/^\d{3,4}$/.test(form.cvc)) { toast.error('CVC must be 3 or 4 digits'); return; }
+    if (!/^\d{13,19}$/.test(digits)) { toast.error(t('card_number_error', { defaultValue: 'Card number must be 13–19 digits' })); return; }
+    if (!/^\d{2}\/\d{2}$/.test(form.exp)) { toast.error(t('expiry_error', { defaultValue: 'Expiry must be MM/YY' })); return; }
+    if (!/^\d{3,4}$/.test(form.cvc)) { toast.error(t('cvc_error', { defaultValue: 'CVC must be 3 or 4 digits' })); return; }
     setBusy(true);
     setTimeout(() => {
       const brand = digits.startsWith('4') ? 'Visa' : digits.startsWith('5') ? 'Mastercard' : digits.startsWith('3') ? 'Amex' : 'Card';
@@ -37,10 +39,10 @@ const BillingPage = () => {
   };
 
   const removeCard = (id: string) => {
-    if (cards.length === 1) { toast.error('You must keep at least one payment method'); return; }
-    if (!window.confirm('Remove this payment method?')) return;
+    if (cards.length === 1) { toast.error(t('keep_one_payment', { defaultValue: 'You must keep at least one payment method' })); return; }
+    if (!window.confirm(t('confirm_remove_payment', { defaultValue: 'Remove this payment method?' }))) return;
     setCards(prev => prev.filter(c => c.id !== id));
-    toast.success('Payment method removed');
+    toast.success(t('payment_removed', { defaultValue: 'Payment method removed' }));
   };
 
   const downloadInvoice = (inv: Invoice) => {
@@ -56,10 +58,10 @@ const BillingPage = () => {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="text-2xl font-bold text-foreground mb-1">Billing</h1>
-      <p className="text-sm text-muted-foreground mb-6">Manage payment methods and invoices.</p>
+      <h1 className="text-2xl font-bold text-foreground mb-1">{t('billing', { defaultValue: 'Billing' })}</h1>
+      <p className="text-sm text-muted-foreground mb-6">{t('billing_subtitle', { defaultValue: 'Manage payment methods and invoices.' })}</p>
       <div className="rounded-xl border border-border bg-card p-6 mb-4">
-        <h2 className="text-sm font-semibold text-foreground mb-4">Payment methods</h2>
+        <h2 className="text-sm font-semibold text-foreground mb-4">{t('payment_methods', { defaultValue: 'Payment methods' })}</h2>
         <div className="space-y-2">
           {cards.map((c, i) => (
             <div key={c.id} className="flex items-center justify-between rounded-lg border border-border p-4">

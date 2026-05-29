@@ -7,61 +7,64 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { ResellerProvider } from '@/contexts/ResellerContext';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
   SidebarHeader, SidebarFooter, useSidebar,
 } from '@/components/ui/sidebar';
 
-const groups = [
+const getGroups = (t: any) => [
   {
-    label: 'Overview',
+    label: t('overview', { defaultValue: 'Overview' }),
     items: [
-      { to: '/reseller/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { to: '/reseller/dashboard', label: t('dashboard', { defaultValue: 'Dashboard' }), icon: LayoutDashboard },
     ],
   },
   {
-    label: 'Sales',
+    label: t('sales', { defaultValue: 'Sales' }),
     items: [
-      { to: '/reseller/leads', label: 'Referrals', icon: UserPlus, badge: '6' },
-      { to: '/reseller/pipeline', label: 'Pipeline', icon: Kanban },
-      { to: '/reseller/contacts', label: 'Clients', icon: BookUser },
+      { to: '/reseller/leads', label: t('referrals', { defaultValue: 'Referrals' }), icon: UserPlus, badge: '6' },
+      { to: '/reseller/pipeline', label: t('pipeline', { defaultValue: 'Pipeline' }), icon: Kanban },
+      { to: '/reseller/contacts', label: t('clients', { defaultValue: 'Clients' }), icon: BookUser },
     ],
   },
   {
-    label: 'Business',
+    label: t('business', { defaultValue: 'Business' }),
     items: [
-      { to: '/reseller/users', label: 'Managed Stores', icon: Store },
-      { to: '/reseller/subscriptions', label: 'Subscriptions', icon: CreditCard },
-      { to: '/reseller/products', label: 'Apps', icon: Package },
+      { to: '/reseller/users', label: t('managed_stores', { defaultValue: 'Managed Stores' }), icon: Store },
+      { to: '/reseller/subscriptions', label: t('subscriptions', { defaultValue: 'Subscriptions' }), icon: CreditCard },
+      { to: '/reseller/products', label: t('apps', { defaultValue: 'Apps' }), icon: Package },
     ],
   },
   {
-    label: 'Earnings',
+    label: t('earnings', { defaultValue: 'Earnings' }),
     items: [
-      { to: '/reseller/earnings', label: 'Payouts', icon: TrendingUp },
-      { to: '/reseller/commissions', label: 'Commissions', icon: Percent },
-      { to: '/reseller/payouts-history', label: 'Payout history', icon: History },
+      { to: '/reseller/earnings', label: t('payouts', { defaultValue: 'Payouts' }), icon: TrendingUp },
+      { to: '/reseller/commissions', label: t('commissions', { defaultValue: 'Commissions' }), icon: Percent },
+      { to: '/reseller/payouts-history', label: t('payout_history', { defaultValue: 'Payout history' }), icon: History },
     ],
   },
   {
-    label: 'Resources',
+    label: t('resources', { defaultValue: 'Resources' }),
     items: [
-      { to: '/reseller/marketing', label: 'Marketing assets', icon: Megaphone },
-      { to: '/reseller/reports', label: 'Reports', icon: FileBarChart },
+      { to: '/reseller/marketing', label: t('marketing_assets', { defaultValue: 'Marketing assets' }), icon: Megaphone },
+      { to: '/reseller/reports', label: t('reports', { defaultValue: 'Reports' }), icon: FileBarChart },
     ],
   },
   {
-    label: 'Account',
+    label: t('account', { defaultValue: 'Account' }),
     items: [
-      { to: '/reseller/settings', label: 'Settings', icon: Settings },
+      { to: '/reseller/settings', label: t('settings', { defaultValue: 'Settings' }), icon: Settings },
     ],
   },
 ];
 
-const allItems = groups.flatMap(g => g.items);
-
 const ResellerSidebar = () => {
+  const { t } = useTranslation('common');
+  const groups = getGroups(t);
+  const allItems = groups.flatMap(g => g.items);
+
   const { state } = useSidebar();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -147,14 +150,14 @@ const ResellerSidebar = () => {
             className="flex items-center gap-2.5 rounded-lg px-3 py-[7px] text-[13px] font-medium text-white/60 hover:text-white hover:bg-white/5 transition-all"
           >
             <ExternalLink className="h-[16px] w-[16px] shrink-0" />
-            {!collapsed && <span>Visit Marketplace</span>}
+            {!collapsed && <span>{t('visit_marketplace', { defaultValue: 'Visit Marketplace' })}</span>}
           </NavLink>
           <button
             onClick={() => { logout(); navigate('/'); }}
             className="flex w-full items-center gap-2.5 rounded-lg px-3 py-[7px] text-[13px] font-medium text-white/60 hover:text-red-400 hover:bg-white/5 transition-all"
           >
             <LogOut className="h-[16px] w-[16px] shrink-0" />
-            {!collapsed && <span>Log out</span>}
+            {!collapsed && <span>{t('log_out', { defaultValue: 'Log out' })}</span>}
           </button>
         </SidebarFooter>
       </div>
@@ -168,7 +171,8 @@ const ResellerLayout = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const currentPage = allItems.find(n => location.pathname.startsWith(n.to));
-  const pageTitle = currentPage?.label ?? 'Partner Dashboard';
+  const { t } = useTranslation('common');
+  const pageTitle = currentPage?.label ?? t('partner_dashboard', { defaultValue: 'Partner Dashboard' });
   const matches = searchQuery.trim()
     ? allItems.filter(item => item.label.toLowerCase().includes(searchQuery.trim().toLowerCase()))
     : [];
@@ -191,7 +195,7 @@ const ResellerLayout = () => {
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter' && matches[0]) navigate(matches[0].to); }}
-                    placeholder="Search pages..."
+                    placeholder={t('search_pages_placeholder', { defaultValue: 'Search pages...' })}
                     className="h-8 w-48 rounded-lg border px-3 text-[13px] outline-none"
                     style={{ borderColor: '#e1e3e5', color: '#1a1a1a' }}
                   />
@@ -206,14 +210,14 @@ const ResellerLayout = () => {
                   )}
                 </div>
               )}
-              <button onClick={() => setSearchOpen(!searchOpen)} className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors" aria-label="Search">
+              <button onClick={() => setSearchOpen(!searchOpen)} className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors" aria-label={t('search', { defaultValue: 'Search' })}>
                 <Search className="h-4 w-4" style={{ color: '#6d7175' }} />
               </button>
-              <button onClick={() => navigate('/dashboard/notifications')} className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors relative" aria-label="Notifications">
+              <button onClick={() => navigate('/dashboard/notifications')} className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors relative" aria-label={t('notifications', { defaultValue: 'Notifications' })}>
                 <Bell className="h-4 w-4" style={{ color: '#6d7175' }} />
                 <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full" style={{ background: '#e51c00' }} />
               </button>
-              <button onClick={() => window.open('https://docs.lovable.dev', '_blank', 'noopener')} className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors" aria-label="Help">
+              <button onClick={() => window.open('https://docs.lovable.dev', '_blank', 'noopener')} className="h-8 w-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors" aria-label={t('help', { defaultValue: 'Help' })}>
                 <HelpCircle className="h-4 w-4" style={{ color: '#6d7175' }} />
               </button>
             </div>
