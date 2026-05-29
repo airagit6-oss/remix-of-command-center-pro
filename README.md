@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# Boss Application
 
 TODO: Document your project here
