@@ -103,6 +103,7 @@ export enum EnterprisePermission {
   FINANCE_REPORTS = 'finance:reports',
   FINANCE_TRANSACTIONS = 'finance:transactions',
   FINANCE_PAYOUTS = 'finance:payouts',
+  FINANCE_MANAGE = 'finance:manage',
 
   // AI
   AI_RUN = 'ai:run',
