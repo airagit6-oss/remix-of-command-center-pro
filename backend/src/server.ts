@@ -6,6 +6,8 @@ import { authorRoutes } from './routes/author.routes';
 import { resellerRoutes } from './routes/reseller.routes';
 import { authRoutes } from './routes/auth.routes';
 import { orderRoutes } from './routes/order.routes';
+import { cartRoutes } from './routes/cart.routes';
+import { paymentRoutes } from './routes/payment.routes';
 import { authenticate, requireRole } from './middleware/auth.middleware';
 import { errorHandler, notFoundHandler } from './middleware/error.middleware';
 import { rateLimitOptions, strictRateLimitOptions } from './middleware/rate-limit.middleware';
@@ -43,6 +45,8 @@ fastify.register(authRoutes, { prefix: '/api/v1' });
 fastify.register(authorRoutes, { prefix: '/api/v1' });
 fastify.register(resellerRoutes, { prefix: '/api/v1' });
 fastify.register(orderRoutes, { prefix: '/api/v1' });
+fastify.register(cartRoutes, { prefix: '/api/v1' });
+fastify.register(paymentRoutes, { prefix: '/api/v1' });
 
 // Start server
 const start = async () => {

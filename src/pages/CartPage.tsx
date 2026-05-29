@@ -1,125 +1,130 @@
-import { Link } from 'react-router-dom';
-import { Trash2, ShoppingBag, ArrowLeft, Shield, Zap, RotateCcw } from 'lucide-react';
-import { Navbar } from '@/components/marketplace/Navbar';
-import { useCart } from '@/contexts/CartContext';
+import React from 'react';
+import { useCart } from '../contexts/CartContext';
+import { useNavigate } from 'react-router-dom';
+import { ShoppingCart, Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 
-const CartPage = () => {
-  const { items, removeFromCart, clearCart, totalPrice } = useCart();
+export default function CartPage() {
+  const { cart, loading, removeFromCart, updateQuantity, clearCart } = useCart();
+  const navigate = useNavigate();
 
-  const tax = Math.round(totalPrice * 0.1 * 100) / 100;
-  const grandTotal = Math.round((totalPrice + tax) * 100) / 100;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
 
-  const getItemPrice = (item: typeof items[0]) =>
-    item.plan === 'monthly' ? item.product.subscription.monthly
-    : item.plan === 'yearly' ? item.product.subscription.yearly
-    : item.product.price;
+  if (!cart || cart.items.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <ShoppingBag className="w-24 h-24 mx-auto text-gray-300 mb-4" />
+          <h2 className="text-2xl font-semibold text-gray-700 mb-2">Your cart is empty</h2>
+          <p className="text-gray-500 mb-6">Add some products to get started</p>
+          <button
+            onClick={() => navigate('/')}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            Browse Products
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const total = cart.items.reduce((sum, item) => {
+    return sum + (Number(item.product?.price || 0) * item.quantity);
+  }, 0);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="mx-auto max-w-[960px] px-6 pt-24 pb-16">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="font-display text-2xl font-bold text-foreground">Your Cart</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{items.length} item{items.length !== 1 ? 's' : ''} in your cart</p>
-          </div>
-          <Link to="/" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Continue Shopping
-          </Link>
-        </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-6xl mx-auto px-4">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
 
-        {items.length === 0 ? (
-          <div className="flex h-[40vh] flex-col items-center justify-center rounded-xl border border-border bg-card">
-            <ShoppingBag className="mb-4 h-14 w-14 text-muted-foreground/20" />
-            <p className="text-lg font-medium text-foreground">Your cart is empty</p>
-            <p className="mt-1 text-sm text-muted-foreground">Add some products to get started</p>
-            <Link to="/" className="mt-6 rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
-              Browse Marketplace
-            </Link>
-          </div>
-        ) : (
-          <div className="grid gap-8 lg:grid-cols-5">
-            {/* Cart Items */}
-            <div className="lg:col-span-3 space-y-3">
-              {items.map(item => (
-                <div key={item.product.id} className="flex items-center gap-4 rounded-xl border border-border bg-card p-4 transition-colors hover:border-border">
-                  <img src={item.product.thumbnail} alt={item.product.name} className="h-16 w-16 flex-shrink-0 rounded-lg object-cover" />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-foreground truncate">{item.product.name}</h3>
-                    <p className="text-xs text-muted-foreground">{item.product.category}</p>
-                    <span className="mt-1 inline-block rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary capitalize">{item.plan} plan</span>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-base font-bold text-foreground">${getItemPrice(item)}</p>
-                    {item.plan !== 'lifetime' && (
-                      <p className="text-[10px] text-muted-foreground">/{item.plan === 'monthly' ? 'mo' : 'yr'}</p>
-                    )}
-                    <button onClick={() => removeFromCart(item.product.id)} className="mt-1 text-muted-foreground hover:text-destructive transition-colors">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {items.length > 1 && (
-                <button onClick={clearCart} className="text-xs text-muted-foreground hover:text-destructive transition-colors">
-                  Remove all items
-                </button>
-              )}
-            </div>
-
-            {/* Summary Box */}
-            <div className="lg:col-span-2">
-              <div className="sticky top-20 rounded-xl border border-border bg-card p-6">
-                <h3 className="font-display text-base font-bold text-foreground mb-4">Order Summary</h3>
-                <div className="space-y-2 border-b border-border pb-4">
-                  {items.map(item => (
-                    <div key={item.product.id} className="flex justify-between text-xs">
-                      <span className="text-muted-foreground truncate mr-2">{item.product.name}</span>
-                      <span className="text-foreground font-medium flex-shrink-0">${getItemPrice(item)}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-3 space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span className="text-foreground">${totalPrice}</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">Tax (10%)</span>
-                    <span className="text-foreground">${tax}</span>
-                  </div>
-                </div>
-                <div className="mt-4 flex justify-between border-t border-border pt-4">
-                  <span className="text-sm font-semibold text-foreground">Total</span>
-                  <span className="font-display text-xl font-bold text-foreground">${grandTotal}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
+            {cart.items.map((item) => (
+              <div
+                key={item.id}
+                className="bg-white rounded-lg shadow-sm p-6 flex items-center gap-6"
+              >
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">{item.product?.name}</h3>
+                  <p className="text-sm text-gray-500 mt-1">{item.product?.description}</p>
+                  <p className="text-lg font-bold text-gray-900 mt-2">
+                    ${Number(item.product?.price || 0).toFixed(2)}
+                  </p>
                 </div>
 
-                <Link
-                  to="/checkout"
-                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                    className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="w-8 text-center font-medium">{item.quantity}</span>
+                  <button
+                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    className="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="text-right w-24">
+                  <p className="font-semibold text-gray-900">
+                    ${(Number(item.product?.price || 0) * item.quantity).toFixed(2)}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => removeFromCart(item.id)}
+                  className="text-red-500 hover:text-red-700 transition"
                 >
-                  <ShoppingBag className="h-4 w-4" /> Proceed to Checkout
-                </Link>
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+          </div>
 
-                <div className="mt-4 space-y-2">
-                  {[
-                    { icon: Shield, text: 'Secure SSL payment' },
-                    { icon: Zap, text: 'Instant digital access' },
-                    { icon: RotateCcw, text: '30-day money-back guarantee' },
-                  ].map(({ icon: Icon, text }) => (
-                    <div key={text} className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                      <Icon className="h-3 w-3" />
-                      {text}
-                    </div>
-                  ))}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between text-gray-600">
+                  <span>Subtotal</span>
+                  <span>${total.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>Tax</span>
+                  <span>$0.00</span>
+                </div>
+                <div className="border-t pt-3 flex justify-between font-semibold text-gray-900">
+                  <span>Total</span>
+                  <span>${total.toFixed(2)}</span>
                 </div>
               </div>
+
+              <button
+                onClick={() => navigate('/checkout')}
+                className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
+              >
+                Proceed to Checkout
+              </button>
+
+              <button
+                onClick={clearCart}
+                className="w-full py-3 mt-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+              >
+                Clear Cart
+              </button>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
-};
-
-export default CartPage;
+}

@@ -20,6 +20,7 @@ model User {
 
   authorProfile    AuthorProfile?
   resellerProfile  ResellerProfile?
+  cart             Cart?
   orders           Order[]
   referrals        Referral[]  @relation("Referrer")
   referredBy       Referral?   @relation("ReferredUser")
@@ -183,6 +184,11 @@ model Order {
   updatedAt   DateTime @updatedAt
 
   orderItems  OrderItem[]
+  paymentIntents PaymentIntent[]
+  invoices    Invoice[]
+  licenses    License[]
+  refunds     Refund[]
+  taxRecords  TaxRecord[]
 
   @@index([userId])
   @@index([status])
@@ -581,5 +587,302 @@ model AuditLog {
   @@index([userId])
   @@index([action])
   @@index([entity])
+  @@index([createdAt])
+}
+
+// Cart
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  sessionId String?
+  
+  items     CartItem[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([sessionId])
+}
+
+// Cart Item
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  
+  productId String
+  quantity  Int
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cartId])
+  @@index([productId])
+}
+
+// Payment Intent
+model PaymentIntent {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  
+  amount      Decimal  @db.Decimal(20, 2)
+  currency    String   @default("USD")
+  
+  provider    PaymentProvider
+  providerId  String?
+  
+  status      PaymentStatus @default(PENDING)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([providerId])
+  @@index([status])
+}
+
+enum PaymentProvider {
+  STRIPE
+  PAYPAL
+  CRYPTO
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+// Transaction
+model Transaction {
+  id          String   @id @default(cuid())
+  paymentId   String
+  payment     PaymentIntent @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  
+  type        TransactionType
+  amount      Decimal  @db.Decimal(20, 2)
+  
+  gateway     String
+  gatewayId   String?
+  
+  status      TransactionStatus @default(PENDING)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([paymentId])
+  @@index([gatewayId])
+  @@index([status])
+}
+
+enum TransactionType {
+  CHARGE
+  REFUND
+  PARTIAL_REFUND
+  DISPUTE
+  CHARGEBACK
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Invoice
+model Invoice {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  
+  invoiceNumber String @unique
+  
+  subtotal    Decimal  @db.Decimal(20, 2)
+  tax         Decimal  @db.Decimal(20, 2) @default(0)
+  discount    Decimal  @db.Decimal(20, 2) @default(0)
+  total       Decimal  @db.Decimal(20, 2)
+  
+  currency    String   @default("USD")
+  
+  billedTo    Json
+  billedFrom  Json
+  
+  status      InvoiceStatus @default(DRAFT)
+  
+  paidAt      DateTime?
+  dueDate     DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([invoiceNumber])
+  @@index([status])
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+// License
+model License {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  productId   String
+  
+  licenseKey  String   @unique
+  type        LicenseType
+  
+  status      LicenseStatus @default(ACTIVE)
+  
+  validFrom   DateTime @default(now())
+  validUntil  DateTime?
+  
+  maxActivations Int @default(1)
+  currentActivations Int @default(0)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  activations LicenseActivation[]
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([licenseKey])
+  @@index([status])
+}
+
+enum LicenseType {
+  STANDARD
+  PREMIUM
+  ENTERPRISE
+  LIFETIME
+  TRIAL
+}
+
+enum LicenseStatus {
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  REVOKED
+}
+
+// License Activation
+model LicenseActivation {
+  id          String   @id @default(cuid())
+  licenseId   String
+  license     License  @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+  
+  deviceId    String?
+  deviceName  String?
+  ipAddress   String?
+  userAgent   String?
+  
+  activatedAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+  
+  isActive    Boolean  @default(true)
+
+  @@index([licenseId])
+  @@index([deviceId])
+  @@index([isActive])
+}
+
+// Refund
+model Refund {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  transactionId String?
+  
+  amount      Decimal  @db.Decimal(20, 2)
+  reason      String?
+  
+  status      RefundStatus @default(PENDING)
+  
+  processedBy String?
+  processedAt DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([transactionId])
+  @@index([status])
+}
+
+enum RefundStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// Tax Record
+model TaxRecord {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  
+  country     String
+  state       String?
+  city        String?
+  
+  taxRate     Decimal  @db.Decimal(5, 4)
+  taxAmount   Decimal  @db.Decimal(20, 2)
+  
+  taxId       String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([orderId])
+  @@index([country])
+}
+
+// Payment Webhook Log
+model PaymentWebhookLog {
+  id          String   @id @default(cuid())
+  provider    PaymentProvider
+  eventType   String
+  
+  payload     Json
+  signature   String?
+  
+  processed   Boolean  @default(false)
+  error       String?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([provider])
+  @@index([eventType])
+  @@index([processed])
   @@index([createdAt])
 }

@@ -1,61 +1,120 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import type { Product } from '@/lib/marketplaceData';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { api } from '../lib/api';
 
-export interface CartItem {
-  product: Product;
+interface CartItem {
+  id: string;
+  productId: string;
   quantity: number;
-  plan: 'monthly' | 'yearly' | 'lifetime';
+  product?: {
+    id: string;
+    name: string;
+    price: number;
+    description: string;
+  };
+}
+
+interface Cart {
+  id: string;
+  items: CartItem[];
 }
 
 interface CartContextType {
-  items: CartItem[];
-  addToCart: (product: Product, plan?: CartItem['plan']) => void;
-  removeFromCart: (productId: string) => void;
-  clearCart: () => void;
-  totalItems: number;
-  totalPrice: number;
-  showMiniCart: boolean;
-  setShowMiniCart: (v: boolean) => void;
+  cart: Cart | null;
+  total: number;
+  loading: boolean;
+  addToCart: (productId: string, quantity: number) => Promise<void>;
+  removeFromCart: (itemId: string) => Promise<void>;
+  updateQuantity: (itemId: string, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
+  refreshCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [showMiniCart, setShowMiniCart] = useState(false);
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [cart, setCart] = useState<Cart | null>(null);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  const addToCart = useCallback((product: Product, plan: CartItem['plan'] = 'yearly') => {
-    setItems(prev => {
-      const exists = prev.find(i => i.product.id === product.id);
-      if (exists) return prev;
-      return [...prev, { product, quantity: 1, plan }];
-    });
-    setShowMiniCart(true);
-    setTimeout(() => setShowMiniCart(false), 3000);
+  const refreshCart = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get<{ cart: Cart; total: number }>('/cart');
+      setCart(response.cart);
+      setTotal(response.total);
+    } catch (error) {
+      console.error('Failed to fetch cart:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshCart();
   }, []);
 
-  const removeFromCart = useCallback((productId: string) => {
-    setItems(prev => prev.filter(i => i.product.id !== productId));
-  }, []);
+  const addToCart = async (productId: string, quantity: number) => {
+    try {
+      await api.post('/cart', { productId, quantity });
+      await refreshCart();
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      throw error;
+    }
+  };
 
-  const clearCart = useCallback(() => setItems([]), []);
+  const removeFromCart = async (itemId: string) => {
+    try {
+      await api.delete(`/cart/${itemId}`);
+      await refreshCart();
+    } catch (error) {
+      console.error('Failed to remove from cart:', error);
+      throw error;
+    }
+  };
 
-  const totalItems = items.length;
-  const totalPrice = items.reduce((sum, item) => {
-    if (item.plan === 'monthly') return sum + item.product.subscription.monthly;
-    if (item.plan === 'yearly') return sum + item.product.subscription.yearly;
-    return sum + item.product.price;
-  }, 0);
+  const updateQuantity = async (itemId: string, quantity: number) => {
+    try {
+      await api.patch(`/cart/${itemId}`, { quantity });
+      await refreshCart();
+    } catch (error) {
+      console.error('Failed to update cart item:', error);
+      throw error;
+    }
+  };
+
+  const clearCart = async () => {
+    try {
+      await api.delete('/cart');
+      await refreshCart();
+    } catch (error) {
+      console.error('Failed to clear cart:', error);
+      throw error;
+    }
+  };
 
   return (
-    <CartContext.Provider value={{ items, addToCart, removeFromCart, clearCart, totalItems, totalPrice, showMiniCart, setShowMiniCart }}>
+    <CartContext.Provider
+      value={{
+        cart,
+        total,
+        loading,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        refreshCart
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
-};
+}
 
-export const useCart = () => {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error('useCart must be used within CartProvider');
-  return ctx;
-};
+export function useCart() {
+  const context = useContext(CartContext);
+  if (context === undefined) {
+    throw new Error('useCart must be used within a CartProvider');
+  }
+  return context;
+}

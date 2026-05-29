@@ -1,61 +1,80 @@
-import { Link } from 'react-router-dom';
-import { CheckCircle, ArrowRight, Download, Mail } from 'lucide-react';
-import { Navbar } from '@/components/marketplace/Navbar';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { CheckCircle, Download, Home, FileText } from 'lucide-react';
 
-const SuccessPage = () => {
+export default function SuccessPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [orderId, setOrderId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (location.state?.orderId) {
+      setOrderId(location.state.orderId);
+    } else {
+      navigate('/');
+    }
+  }, [location, navigate]);
+
+  if (!orderId) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <div className="flex items-center justify-center px-6 pt-24 pb-16" style={{ minHeight: 'calc(100vh - 4rem)' }}>
-        <div className="max-w-md w-full text-center">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-mp-success/10">
-            <CheckCircle className="h-10 w-10 text-mp-success" />
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="max-w-2xl mx-auto px-4">
+        <div className="bg-white rounded-lg shadow-sm p-8 text-center">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
 
-          <h1 className="font-display text-2xl font-bold text-foreground">Payment Successful!</h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Your purchase is complete. You now have full access to your products.
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment Successful!</h1>
+          <p className="text-gray-600 mb-6">
+            Thank you for your purchase. Your order has been confirmed.
           </p>
 
-          <div className="mt-6 rounded-xl border border-border bg-card p-5 text-left space-y-3">
-            <div className="flex items-center gap-3">
-              <Mail className="h-4 w-4 text-primary" />
-              <div>
-                <p className="text-xs font-medium text-foreground">Confirmation email sent</p>
-                <p className="text-[10px] text-muted-foreground">Check your inbox for receipt and access details</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Download className="h-4 w-4 text-primary" />
-              <div>
-                <p className="text-xs font-medium text-foreground">Instant access granted</p>
-                <p className="text-[10px] text-muted-foreground">Your apps are ready to use from your dashboard</p>
-              </div>
-            </div>
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <p className="text-sm text-gray-600">Order ID</p>
+            <p className="font-mono font-semibold text-gray-900">{orderId}</p>
           </div>
 
-          <div className="mt-8 space-y-3">
-            <Link
-              to="/dashboard"
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              Go to Dashboard <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              to="/"
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-border py-3 text-sm font-medium text-foreground hover:bg-accent transition-colors"
-            >
-              Browse More Apps
-            </Link>
-          </div>
+          <div className="space-y-3">
+            <button className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold flex items-center justify-center gap-2">
+              <Download className="w-5 h-5" />
+              Download Your Products
+            </button>
 
-          <p className="mt-6 text-[10px] text-muted-foreground">
-            Order #SH-{Math.random().toString(36).substring(2, 10).toUpperCase()} · {new Date().toLocaleDateString()}
-          </p>
+            <button className="w-full py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold flex items-center justify-center gap-2">
+              <FileText className="w-5 h-5" />
+              View Invoice
+            </button>
+
+            <button
+              onClick={() => navigate('/orders')}
+              className="w-full py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold"
+            >
+              View Order History
+            </button>
+
+            <button
+              onClick={() => navigate('/')}
+              className="w-full py-3 text-gray-600 hover:text-gray-900 transition flex items-center justify-center gap-2"
+            >
+              <Home className="w-5 h-5" />
+              Return to Home
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-6 bg-blue-50 rounded-lg p-4">
+          <h3 className="font-semibold text-blue-900 mb-2">What's Next?</h3>
+          <ul className="text-sm text-blue-800 space-y-1">
+            <li>• Check your email for order confirmation</li>
+            <li>• Download your products from the order page</li>
+            <li>• Your license keys are available in your account</li>
+            <li>• Contact support if you have any questions</li>
+          </ul>
         </div>
       </div>
     </div>
   );
-};
-
-export default SuccessPage;
+}
