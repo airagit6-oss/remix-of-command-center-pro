@@ -1,0 +1,205 @@
+﻿Diagnose log at 2026-05-26T21:38:46Z
+
+AppPath: C:\Program Files\Git\mingw64\bin\git-credential-manager.exe
+InstallDir: C:\Program Files\Git\mingw64\bin\
+Version: 2.7.3+5fa7116896c82164996a609accd1c5ad90fe730a
+
+------------
+Diagnostic: Environment
+Skipped: False
+Success: True
+Exception: None
+Log:
+OSType: Windows
+OSVersion: 10.0 (build 26200)
+Reading environment variables... OK
+ Variables:
+SESSIONNAME=Console
+ProgramFiles(x86)=C:\Program Files (x86)
+MSYSTEM=MINGW64
+ProgramW6432=C:\Program Files
+PAGER=cat
+WINDSURF_CASCADE_TERMINAL_KIND=inherit
+PROCESSOR_IDENTIFIER=AMD64 Family 23 Model 160 Stepping 0, AuthenticAMD
+TMP=C:\Users\DOLLY\AppData\Local\Temp
+PROCESSOR_ARCHITECTURE=AMD64
+VSCODE_GIT_ASKPASS_MAIN=c:\Users\DOLLY\AppData\Roaming\Windsurf\User\globalStorage\vscode.git\askpass\f5617cf681e26a4c\askpass-main.js
+Path=C:/Program Files/Git/mingw64/libexec/git-core;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Users\DOLLY\bin;C:\Users\DOLLY\AppData\Local\Programs\Windsurf;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Program Files\Git\cmd;C:\Users\DOLLY\AppData\Local\Microsoft\WindowsApps;C:\Users\DOLLY\AppData\Roaming\npm;C:\Users\DOLLY\AppData\Local\Microsoft\WinGet\Packages\Oven-sh.Bun_Microsoft.Winget.Source_8wekyb3d8bbwe\.\bun-windows-x64;C:\Users\DOLLY\AppData\Local\Programs\Windsurf\bin;C:\Users\DOLLY\AppData\Local\Programs\Microsoft VS Code\bin
+USERPROFILE=C:\Users\DOLLY
+GCM_CREDENTIAL_STORE=plaintext
+PROCESSOR_REVISION=a000
+EFC_6388_2283032206=1
+TEMP=C:\Users\DOLLY\AppData\Local\Temp
+FPS_BROWSER_APP_PROFILE_STRING=Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING=Default
+LOGONSERVER=\\DESKTOP-1OG6NEM
+TERM=xterm-256color
+EFC_6388_4126798990=1
+USERNAME=DOLLY
+SystemRoot=C:\WINDOWS
+CHROME_CRASHPAD_PIPE_NAME=\\.\pipe\crashpad_6584_RELOXDOROOROBNCJ
+GIT_EXEC_PATH=C:/Program Files/Git/mingw64/libexec/git-core
+PLINK_PROTOCOL=ssh
+GIT_PAGER=cat
+OneDrive=C:\Users\DOLLY\OneDrive
+USERDOMAIN_ROAMINGPROFILE=DESKTOP-1OG6NEM
+CommonProgramFiles=C:\Program Files\Common Files
+VSCODE_INJECTION=1
+VSCODE_PYTHON_AUTOACTIVATE_GUARD=1
+EFC_6388_1262719628=1
+ProgramData=C:\ProgramData
+LANG=en_US.UTF-8
+HOMEPATH=\Users\DOLLY
+COMPUTERNAME=DESKTOP-1OG6NEM
+EFC_6388_1592913036=1
+ALLUSERSPROFILE=C:\ProgramData
+GIT_PASSWORD=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
+GK_GL_PATH=C:\Users\DOLLY\AppData\Local\Temp\gitkraken\gitlens\gitlens-ipc-server-6584-64747.json
+EFC_6388_2775293581=1
+EFC_6388_3789132940=1
+DriverData=C:\Windows\System32\Drivers\DriverData
+HOMEDRIVE=C:
+WINDSURF_CASCADE_TERMINAL=1
+windir=C:\WINDOWS
+GIT_TRACE2_PARENT_SID=73603c2a-a39f-4da3-a7b6-ab28af716a4a
+SystemDrive=C:
+NUMBER_OF_PROCESSORS=8
+OS=Windows_NT
+ProgramFiles=C:\Program Files
+ComSpec=C:\WINDOWS\system32\cmd.exe
+PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.CPL
+HOME=C:\Users\DOLLY
+PSModulePath=C:\Users\DOLLY\Documents\WindowsPowerShell\Modules;C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
+TMPDIR=C:\Users\DOLLY\AppData\Local\Temp
+APPDATA=C:\Users\DOLLY\AppData\Roaming
+USERDOMAIN=DESKTOP-1OG6NEM
+PROCESSOR_LEVEL=23
+LOCALAPPDATA=C:\Users\DOLLY\AppData\Local
+VSCODE_GIT_IPC_HANDLE=\\.\pipe\vscode-git-a78b6b2605-sock
+CommonProgramW6432=C:\Program Files\Common Files
+VSCODE_GIT_ASKPASS_NODE=C:\Users\DOLLY\AppData\Local\Programs\Windsurf\Windsurf.exe
+TERM_PROGRAM_VERSION=1.110.1-windsurf
+GIT_USERNAME=airagit6-oss
+CommonProgramFiles(x86)=C:\Program Files (x86)\Common Files
+COLORTERM=truecolor
+PUBLIC=C:\Users\Public
+TERM_PROGRAM=vscode
+VSCODE_GIT_ASKPASS_EXTRA_ARGS=
+GK_GL_ADDR=http://127.0.0.1:64747
+
+
+------------
+Diagnostic: File system
+Skipped: False
+Success: True
+Exception: None
+Log:
+Temporary directory is 'C:\Users\DOLLY\AppData\Local\Temp\'...
+Checking basic file I/O...
+Writing to temporary file 'C:\Users\DOLLY\AppData\Local\Temp\9a1b41d6ad4ec77dd8e54fc4'... OK
+Reading from temporary file 'C:\Users\DOLLY\AppData\Local\Temp\9a1b41d6ad4ec77dd8e54fc4'... OK
+Deleting temporary file 'C:\Users\DOLLY\AppData\Local\Temp\9a1b41d6ad4ec77dd8e54fc4'... OK
+Testing IFileSystem instance...
+UserHomePath: C:\Users\DOLLY
+UserDataDirectoryPath: C:\Users\DOLLY\.gcm
+GetCurrentDirectory(): C:\Users\DOLLY\Desktop\remix-of-command-center-pro
+
+------------
+Diagnostic: Networking
+Skipped: False
+Success: True
+Exception: None
+Log:
+Checking networking and HTTP stack...
+Creating HTTP client... OK
+IsNetworkAvailable: True
+Sending HEAD request to http://example.com...Sending HEAD request to https://example.com... OK
+ OK
+Acquiring free TCP port... OK
+Testing local HTTP loopback connections...
+Creating new HTTP listener for http://localhost:53762/... OK
+Waiting for loopback connection... OK
+Writing response... OK
+Waiting for response data... OK
+Loopback connection data OK
+
+------------
+Diagnostic: Git
+Skipped: False
+Success: True
+Exception: None
+Log:
+Getting Git version... OK
+Git version is '2.54.0.windows.1'
+Locating current repository...Git repository at 'C:/Users/DOLLY/Desktop/remix-of-command-center-pro/.git'
+ OK
+Listing all Git configuration... OK
+Git configuration:
+file:C:/Program Files/Git/etc/gitconfig	diff.astextplain.textconv=astextplain
+file:C:/Program Files/Git/etc/gitconfig	filter.lfs.clean=git-lfs clean -- %f
+file:C:/Program Files/Git/etc/gitconfig	filter.lfs.smudge=git-lfs smudge -- %f
+file:C:/Program Files/Git/etc/gitconfig	filter.lfs.process=git-lfs filter-process
+file:C:/Program Files/Git/etc/gitconfig	filter.lfs.required=true
+file:C:/Program Files/Git/etc/gitconfig	http.sslbackend=schannel
+file:C:/Program Files/Git/etc/gitconfig	core.autocrlf=true
+file:C:/Program Files/Git/etc/gitconfig	core.fscache=true
+file:C:/Program Files/Git/etc/gitconfig	core.symlinks=false
+file:C:/Program Files/Git/etc/gitconfig	pull.rebase=false
+file:C:/Program Files/Git/etc/gitconfig	credential.helper=manager
+file:C:/Program Files/Git/etc/gitconfig	credential.https://dev.azure.com.usehttppath=true
+file:C:/Program Files/Git/etc/gitconfig	init.defaultbranch=master
+file:C:/Users/DOLLY/.gitconfig	filter.lfs.clean=git-lfs clean -- %f
+file:C:/Users/DOLLY/.gitconfig	filter.lfs.smudge=git-lfs smudge -- %f
+file:C:/Users/DOLLY/.gitconfig	filter.lfs.process=git-lfs filter-process
+file:C:/Users/DOLLY/.gitconfig	filter.lfs.required=true
+file:C:/Users/DOLLY/.gitconfig	user.name=airagit6-oss
+file:C:/Users/DOLLY/.gitconfig	user.email=airagit6@gmail.com
+file:.git/config	core.repositoryformatversion=0
+file:.git/config	core.filemode=false
+file:.git/config	core.bare=false
+file:.git/config	core.logallrefupdates=true
+file:.git/config	core.symlinks=false
+file:.git/config	core.ignorecase=true
+file:.git/config	submodule.active=.
+file:.git/config	remote.origin.url=https://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@github.com/airagit6-oss/remix-of-command-center-pro.git
+file:.git/config	remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
+file:.git/config	branch.main.remote=origin
+file:.git/config	branch.main.merge=refs/heads/main
+file:.git/config	branch.main.vscode-merge-base=origin/main
+
+
+------------
+Diagnostic: Credential storage
+Skipped: False
+Success: True
+Exception: None
+Log:
+ICredentialStore instance is of type: CredentialStore
+Writing test credential... OK
+Reading test credential... OK
+Deleting test credential... OK
+
+------------
+Diagnostic: Microsoft authentication (AAD/MSA)
+Skipped: False
+Success: True
+Exception: None
+Log:
+Broker is not enabled.
+Flow type is: Auto
+Gathering MSAL token cache data... OK
+CacheDirectory: C:\Users\DOLLY\AppData\Local\.IdentityService
+CacheFileName: msal.cache
+CacheFilePath: C:\Users\DOLLY\AppData\Local\.IdentityService\msal.cache
+Creating cache helper... OK
+Verifying MSAL token cache persistence... OK
+
+------------
+Diagnostic: GitHub API
+Skipped: False
+Success: True
+Exception: None
+Log:
+Using 'https://github.com/' as API target.
+Querying '/meta' endpoint... OK
+
