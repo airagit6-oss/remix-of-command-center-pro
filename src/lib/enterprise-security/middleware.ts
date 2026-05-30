@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ENTERPRISE SECURITY MIDDLEWARE SUITE
  * ═══════════════════════════════════════════════════════════

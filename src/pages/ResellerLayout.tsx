@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NavLink, Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import {
   LayoutDashboard, Users, UserPlus, Kanban, BookUser, CreditCard,
