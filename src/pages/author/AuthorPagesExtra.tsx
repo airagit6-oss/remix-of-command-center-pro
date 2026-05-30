@@ -97,21 +97,21 @@ export function AuthorUploadWizardPage() {
   const seoScore = Math.min(100, 30 + title.length * 0.4 + summary.length * 0.3 + tags.length * 6);
   const aiScore  = Math.min(100, 55 + tags.length * 4 + (files.length ? 10 : 0));
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      setFiles(fs => fs.map(f => f.progress < 100 ? { ...f, progress: Math.min(100, f.progress + 7 + Math.random() * 10) } : f));
-    }, 300);
-    return () => clearInterval(id);
-  }, []);
-
-  const addFiles = (list: FileList | null) => {
+  const addFiles = async (list: FileList | null) => {
     if (!list) return;
-    const next = Array.from(list).slice(0, 8).map(f => ({ name: f.name, size: f.size, progress: 5 }));
-    setFiles(prev => [...prev, ...next].slice(0, 10));
-  };
-  const addMock = () => {
-    const names = ['hero-overview.png', 'analytics-grid.png', 'mobile-flow.png', 'pricing-table.png'];
-    setFiles(prev => [...prev, { name: names[prev.length % 4], size: 120000 + Math.random() * 800000, progress: 5 }]);
+    const formData = new FormData();
+    Array.from(list).slice(0, 8).forEach(f => formData.append('files', f));
+    
+    try {
+      const response = await fetch('/api/author/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const uploaded = await response.json();
+      setFiles(prev => [...prev, ...uploaded.map((f: any) => ({ name: f.name, size: f.size, progress: 100 }))].slice(0, 10));
+    } catch (error) {
+      console.error('Upload failed:', error);
+    }
   };
   const addTag = () => {
     const t = tagInput.trim().toLowerCase();
@@ -177,7 +177,7 @@ export function AuthorUploadWizardPage() {
           )}
 
           {step === 2 && (
-            <Section title="Screenshots & gallery" icon={ImageIcon} action={<GradButton icon={Plus} onClick={addMock} variant="outline">Add demo asset</GradButton>}>
+            <Section title="Screenshots & gallery" icon={ImageIcon}>
               <div
                 onDragOver={e => { e.preventDefault(); setDrag(true); }}
                 onDragLeave={() => setDrag(false)}

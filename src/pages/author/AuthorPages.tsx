@@ -8,8 +8,7 @@ import {
   Receipt, BadgeCheck, Heart, Eye, Tag, Zap, Lock, Server, Mail, Image as ImageIcon,
   Code2, Gauge, FileCode, Smartphone, Monitor,
 } from 'lucide-react';
-import { listProducts } from '@/lib/productStore';
-import type { Product } from '@/lib/marketplaceData';
+import { api } from '../lib/api';
 import { useGallery, formatFileSize } from '@/lib/galleryManager';
 import { fetchAuditLogs, type AuditLog } from '@/lib/auditLog';
 import { fetchActivityLogs, type ActivityLog } from '@/lib/activityTimeline';
@@ -235,7 +234,7 @@ function GeoBars({ rows }: { rows: { country: string; flag: string; pct: number;
    ============================================================ */
 
 function useAuthorContext() {
-  const [products, setProducts] = useState<Product[]>(() => listProducts());
+  const [products, setProducts] = useState<any[]>([]);
   const [audit, setAudit] = useState<AuditLog[]>([]);
   const [activity, setActivity] = useState<ActivityLog[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -244,11 +243,15 @@ function useAuthorContext() {
 
   useEffect(() => {
     let alive = true;
-    Promise.all([fetchAuditLogs(), fetchActivityLogs(), fetchNotifications()]).then(([a, ac, n]) => {
+    Promise.all([
+      fetchAuditLogs(),
+      fetchActivityLogs(),
+      fetchNotifications(),
+      api.get('/author/products')
+    ]).then(([a, ac, n, p]) => {
       if (!alive) return;
-      setAudit(a); setActivity(ac); setNotifications(n);
+      setAudit(a); setActivity(ac); setNotifications(n); setProducts(p || []);
     });
-    setProducts(listProducts());
     const id = setInterval(() => setPulse(p => p + 1), 4000);
     return () => { alive = false; clearInterval(id); };
   }, []);
@@ -281,9 +284,9 @@ export function AuthorDashboardPage() {
   const { products, activity, pulse } = useAuthorContext();
 
   const totals = useMemo(() => {
-    const users = products.reduce((s, p) => s + p.users, 0);
-    const revenue = products.reduce((s, p) => s + p.users * (p.subscription.monthly || 5), 0);
-    const avgRating = products.length ? products.reduce((s, p) => s + p.rating, 0) / products.length : 0;
+    const users = products.reduce((s: number, p: any) => s + (p.users || 0), 0);
+    const revenue = products.reduce((s: number, p: any) => s + (p.users || 0) * (p.subscription?.monthly || 5), 0);
+    const avgRating = products.length ? products.reduce((s: number, p: any) => s + (p.rating || 0), 0) / products.length : 0;
     return { users, revenue, avgRating };
   }, [products]);
 
@@ -438,7 +441,7 @@ export function AuthorDashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {products.slice().sort((a,b)=>b.users-a.users).slice(0,7).map((p, i) => (
+                {products.slice().sort((a: any, b: any) => (b.users || 0) - (a.users || 0)).slice(0,7).map((p: any, i: number) => (
                   <tr key={p.id} className="hover:bg-accent/30 transition">
                     <td className="py-2">
                       <div className="flex items-center gap-2 min-w-0">
@@ -449,8 +452,8 @@ export function AuthorDashboardPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="text-right tabular-nums text-foreground">{p.users.toLocaleString()}</td>
-                    <td className="text-right text-amber-300 tabular-nums">⭐ {p.rating.toFixed(1)}</td>
+                    <td className="text-right tabular-nums text-foreground">{(p.users || 0).toLocaleString()}</td>
+                    <td className="text-right text-amber-300 tabular-nums">⭐ {(p.rating || 0).toFixed(1)}</td>
                     <td className="text-right tabular-nums text-foreground">{(3.4 + (i % 5) * 0.4).toFixed(1)}%</td>
                     <td className="text-right">
                       <div className="inline-block w-20 h-6">
@@ -537,7 +540,7 @@ export function AuthorProductsPage() {
   const [tab, setTab] = useState<'all'|'featured'|'new'|'trending'>('all');
   const [q, setQ] = useState('');
 
-  const filtered = useMemo(() => products.filter(p => {
+  const filtered = useMemo(() => products.filter((p: any) => {
     if (tab !== 'all' && p.status !== tab) return false;
     return !q || p.name.toLowerCase().includes(q.toLowerCase());
   }), [products, tab, q]);
@@ -574,7 +577,7 @@ export function AuthorProductsPage() {
       <Section title="Catalog" icon={Package}
         action={<div className="flex items-center gap-2 text-[10px] text-muted-foreground"><button className="px-2 py-1 rounded border border-border hover:bg-accent">Bulk export</button><button className="px-2 py-1 rounded border border-border hover:bg-accent">Bulk archive</button></div>}>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-          {filtered.map(p => (
+          {filtered.map((p: any) => (
             <div key={p.id} className="group rounded-lg border border-border bg-background/40 overflow-hidden hover:border-cyan-500/40 hover:shadow-[0_0_24px_-12px_rgba(34,211,238,0.6)] transition">
               <div className="relative">
                 {p.thumbnail && <img src={p.thumbnail} alt={p.name} className="h-28 w-full object-cover" />}
@@ -587,10 +590,10 @@ export function AuthorProductsPage() {
                   <div className="text-[11px] text-muted-foreground capitalize">{p.category}</div>
                 </div>
                 <div className="grid grid-cols-4 gap-1 text-[10px] text-center">
-                  <div className="rounded bg-background/60 border border-border py-1"><div className="text-foreground tabular-nums">{p.users.toLocaleString()}</div><div className="text-muted-foreground">users</div></div>
-                  <div className="rounded bg-background/60 border border-border py-1"><div className="text-foreground tabular-nums">${(p.subscription.monthly * Math.max(1, Math.round(p.users * 0.08))).toLocaleString()}</div><div className="text-muted-foreground">rev</div></div>
-                  <div className="rounded bg-background/60 border border-border py-1"><div className="text-foreground tabular-nums">{(3.4+(p.users%5)*0.3).toFixed(1)}%</div><div className="text-muted-foreground">conv</div></div>
-                  <div className="rounded bg-background/60 border border-border py-1"><div className="text-amber-300 tabular-nums">{p.rating.toFixed(1)}</div><div className="text-muted-foreground">rating</div></div>
+                  <div className="rounded bg-background/60 border border-border py-1"><div className="text-foreground tabular-nums">{(p.users || 0).toLocaleString()}</div><div className="text-muted-foreground">users</div></div>
+                  <div className="rounded bg-background/60 border border-border py-1"><div className="text-foreground tabular-nums">${((p.subscription?.monthly || 5) * Math.max(1, Math.round((p.users || 0) * 0.08))).toLocaleString()}</div><div className="text-muted-foreground">rev</div></div>
+                  <div className="rounded bg-background/60 border border-border py-1"><div className="text-foreground tabular-nums">{(3.4+((p.users || 0)%5)*0.3).toFixed(1)}%</div><div className="text-muted-foreground">conv</div></div>
+                  <div className="rounded bg-background/60 border border-border py-1"><div className="text-amber-300 tabular-nums">{(p.rating || 0).toFixed(1)}</div><div className="text-muted-foreground">rating</div></div>
                 </div>
                 <div className="flex items-center justify-between text-[10px] pt-1">
                   <span className="inline-flex items-center gap-1 text-emerald-300"><CheckCircle2 className="h-3 w-3"/> healthy</span>
@@ -615,16 +618,42 @@ export function AuthorUploadCenterPage() {
   const [stage, setStage] = useState<'idle'|'uploading'|'validating'|'ready'>('idle');
   const [progress, setProgress] = useState(0);
 
-  useEffect(() => {
-    if (stage !== 'uploading') return;
-    const id = setInterval(() => setProgress(p => {
-      if (p >= 100) { clearInterval(id); setStage('validating'); setTimeout(() => setStage('ready'), 1400); return 100; }
-      return p + 6;
-    }), 140);
-    return () => clearInterval(id);
-  }, [stage]);
-
-  const startMock = () => { setProgress(0); setStage('uploading'); };
+  const handleUpload = async (file: File) => {
+    setStage('uploading');
+    setProgress(0);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api/author/upload', true);
+      
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          setProgress(Math.round((e.loaded / e.total) * 100));
+        }
+      };
+      
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          setStage('validating');
+          setTimeout(() => setStage('ready'), 1400);
+        } else {
+          setStage('idle');
+        }
+      };
+      
+      xhr.onerror = () => {
+        setStage('idle');
+      };
+      
+      xhr.send(formData);
+    } catch (error) {
+      console.error('Upload failed:', error);
+      setStage('idle');
+    }
+  };
 
   const checks = [
     { label: 'Package structure',  ok: true,  detail: 'manifest.json found · valid' },
@@ -644,13 +673,13 @@ export function AuthorUploadCenterPage() {
             onDragEnter={e=>{e.preventDefault();setDrag(true);}}
             onDragLeave={()=>setDrag(false)}
             onDragOver={e=>e.preventDefault()}
-            onDrop={e=>{e.preventDefault();setDrag(false);startMock();}}
+            onDrop={e=>{e.preventDefault();setDrag(false);if(e.dataTransfer.files[0]) handleUpload(e.dataTransfer.files[0]);}}
             className={`rounded-xl border-2 border-dashed p-8 text-center transition ${drag ? 'border-cyan-400 bg-cyan-500/5':'border-border bg-background/40 hover:border-cyan-500/40'}`}
           >
             <div className="mx-auto h-12 w-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-fuchsia-500/20 grid place-items-center mb-3">
               <Upload className="h-6 w-6 text-cyan-300" />
             </div>
-            <p className="text-sm text-foreground">Drop your <strong>.zip</strong> package or <button onClick={startMock} className="text-cyan-300 hover:underline">browse</button></p>
+            <p className="text-sm text-foreground">Drop your <strong>.zip</strong> package or <label className="text-cyan-300 hover:underline cursor-pointer">browse<input type="file" accept=".zip" className="hidden" onChange={e=>e.target.files?.[0] && handleUpload(e.target.files[0])} /></label></p>
             <p className="text-[11px] text-muted-foreground mt-1">Source code · binaries · documentation · screenshots</p>
           </div>
 
@@ -1526,7 +1555,15 @@ export function AuthorMarketingPage() {
    ============================================================ */
 
 export function AuthorAiInsightsPage() {
-  const cards = [
+  const [insights, setInsights] = useState<any[]>([]);
+  
+  useEffect(() => {
+    api.get('/author/analytics').then(data => {
+      setInsights(data || []);
+    });
+  }, []);
+
+  const cards = insights.length ? insights : [
     { icon: Tag,       title: 'Price optimization', value: '+12%', note: 'AI recommends $89 → $94 on top 3 products.', tone: 'emerald' as const },
     { icon: Search,    title: 'SEO opportunities',  value: '24',   note: 'High-volume keywords with weak competitors.',  tone: 'cyan'    as const },
     { icon: Activity,  title: 'Refund prediction',  value: '0.7%', note: 'Next 30 days · model confidence 91%.',         tone: 'amber'   as const },
@@ -1667,10 +1704,10 @@ export function AuthorSeoPage() {
       </div>
       <Section title="Top organic keywords" icon={Search}>
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-          {['hospital management software', 'school erp', 'cloud kitchen pos', 'wholesale b2b marketplace', 'manufacturing erp', 'home healthcare app', 'cleaning service software', 'salon booking'].map(k => (
+          {['hospital management software', 'school erp', 'cloud kitchen pos', 'wholesale b2b marketplace', 'manufacturing erp', 'home healthcare app', 'cleaning service software', 'salon booking'].map((k, i) => (
             <li key={k} className="flex items-center justify-between rounded-md border border-border bg-background/40 px-3 py-2">
               <span className="text-foreground">{k}</span>
-              <span className="text-[11px] text-emerald-300">+{Math.floor(Math.random()*30)}%</span>
+              <span className="text-[11px] text-emerald-300">+{((i + 1) * 3)}%</span>
             </li>
           ))}
         </ul>

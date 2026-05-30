@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { PAYOUT_CONFIG } from '../config/constants';
 
 const prisma = new PrismaClient();
 
@@ -199,8 +200,8 @@ export class PayoutService {
       throw new Error('Insufficient balance');
     }
 
-    if (amount < 50) {
-      throw new Error('Minimum payout is $50');
+    if (amount < PAYOUT_CONFIG.MINIMUM_AMOUNT) {
+      throw new Error(`Minimum payout is $${PAYOUT_CONFIG.MINIMUM_AMOUNT}`);
     }
 
     // Check for pending payouts

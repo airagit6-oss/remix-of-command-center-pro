@@ -1,60 +1,114 @@
 import { CreditCard, Plus, Download } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { api } from '../lib/api';
 
 interface Card { id: string; brand: string; last4: string; exp: string; }
 interface Invoice { id: string; amount: string; date: string; status: 'Paid' | 'Pending'; }
 
-const initialCards: Card[] = [
-  { id: 'c1', brand: 'Visa', last4: '4242', exp: '12/27' },
-];
-
-const invoices: Invoice[] = [
-  { id: 'INV-2024-001', amount: '$29.00', date: 'Mar 15, 2025', status: 'Paid' },
-  { id: 'INV-2024-002', amount: '$29.00', date: 'Feb 15, 2025', status: 'Paid' },
-];
-
 const BillingPage = () => {
   const { t } = useTranslation('common');
-  const [cards, setCards] = useState<Card[]>(initialCards);
+  const [cards, setCards] = useState<Card[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ number: '', exp: '', cvc: '' });
   const [busy, setBusy] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  useEffect(() => {
+    fetchCards();
+    fetchInvoices();
+  }, []);
+
+  const fetchCards = async () => {
+    try {
+      const response = await api.get('/payment/methods');
+      setCards(response);
+    } catch (error) {
+      console.error('Failed to fetch payment methods:', error);
+    }
+  };
+
+  const fetchInvoices = async () => {
+    try {
+      const response = await api.get('/invoices');
+      setInvoices(response.map((inv: any) => ({
+        id: inv.invoiceNumber,
+        amount: `$${Number(inv.total).toFixed(2)}`,
+        date: new Date(inv.createdAt).toLocaleDateString(),
+        status: inv.status as 'Paid' | 'Pending'
+      })));
+    } catch (error) {
+      console.error('Failed to fetch invoices:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const digits = form.number.replace(/\s+/g, '');
     if (!/^\d{13,19}$/.test(digits)) { toast.error(t('card_number_error', { defaultValue: 'Card number must be 13–19 digits' })); return; }
     if (!/^\d{2}\/\d{2}$/.test(form.exp)) { toast.error(t('expiry_error', { defaultValue: 'Expiry must be MM/YY' })); return; }
     if (!/^\d{3,4}$/.test(form.cvc)) { toast.error(t('cvc_error', { defaultValue: 'CVC must be 3 or 4 digits' })); return; }
     setBusy(true);
-    setTimeout(() => {
-      const brand = digits.startsWith('4') ? 'Visa' : digits.startsWith('5') ? 'Mastercard' : digits.startsWith('3') ? 'Amex' : 'Card';
-      setCards(prev => [...prev, { id: `c${Date.now()}`, brand, last4: digits.slice(-4), exp: form.exp }]);
-      toast.success(`${brand} •••• ${digits.slice(-4)} added`);
+    try {
+      await api.post('/payment/methods', {
+        number: digits,
+        exp: form.exp,
+        cvc: form.cvc,
+      });
+      await fetchCards();
+      toast.success(t('payment_method_added', { defaultValue: 'Payment method added' }));
       setForm({ number: '', exp: '', cvc: '' });
-      setOpen(false); setBusy(false);
-    }, 400);
+      setOpen(false);
+    } catch (error) {
+      console.error('Failed to add payment method:', error);
+      toast.error(t('failed_to_add_payment', { defaultValue: 'Failed to add payment method' }));
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const removeCard = (id: string) => {
+  const removeCard = async (id: string) => {
     if (cards.length === 1) { toast.error(t('keep_one_payment', { defaultValue: 'You must keep at least one payment method' })); return; }
     if (!window.confirm(t('confirm_remove_payment', { defaultValue: 'Remove this payment method?' }))) return;
-    setCards(prev => prev.filter(c => c.id !== id));
-    toast.success(t('payment_removed', { defaultValue: 'Payment method removed' }));
+    try {
+      await api.delete(`/payment/methods/${id}`);
+      await fetchCards();
+      toast.success(t('payment_removed', { defaultValue: 'Payment method removed' }));
+    } catch (error) {
+      console.error('Failed to remove payment method:', error);
+      toast.error(t('failed_to_remove_payment', { defaultValue: 'Failed to remove payment method' }));
+    }
   };
 
-  const downloadInvoice = (inv: Invoice) => {
-    const txt = `Invoice ${inv.id}\nDate: ${inv.date}\nAmount: ${inv.amount}\nStatus: ${inv.status}\n`;
-    const blob = new Blob([txt], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `${inv.id}.txt`;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-    toast.success(`${inv.id} downloaded`);
+  const downloadInvoice = async (invoiceId: string) => {
+    try {
+      const response = await api.get(`/invoices/${invoiceId}/download`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `invoice-${invoiceId}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success(`Invoice downloaded`);
+    } catch (error) {
+      console.error('Failed to download invoice:', error);
+      toast.error('Failed to download invoice');
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl">
@@ -63,21 +117,25 @@ const BillingPage = () => {
       <div className="rounded-xl border border-border bg-card p-6 mb-4">
         <h2 className="text-sm font-semibold text-foreground mb-4">{t('payment_methods', { defaultValue: 'Payment methods' })}</h2>
         <div className="space-y-2">
-          {cards.map((c, i) => (
-            <div key={c.id} className="flex items-center justify-between rounded-lg border border-border p-4">
-              <div className="flex items-center gap-3">
-                <CreditCard className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-sm font-medium text-foreground">{c.brand} •••• {c.last4}</p>
-                  <p className="text-xs text-muted-foreground">Expires {c.exp}</p>
+          {cards.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No payment methods added yet</p>
+          ) : (
+            cards.map((c, i) => (
+              <div key={c.id} className="flex items-center justify-between rounded-lg border border-border p-4">
+                <div className="flex items-center gap-3">
+                  <CreditCard className="h-8 w-8 text-primary" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{c.brand} •••• {c.last4}</p>
+                    <p className="text-xs text-muted-foreground">Expires {c.exp}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {i === 0 && <span className="text-xs font-medium px-2 py-1 rounded bg-primary/10 text-primary">Default</span>}
+                  <button onClick={() => removeCard(c.id)} className="text-xs text-destructive hover:underline">Remove</button>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                {i === 0 && <span className="text-xs font-medium px-2 py-1 rounded bg-primary/10 text-primary">Default</span>}
-                <button onClick={() => removeCard(c.id)} className="text-xs text-destructive hover:underline">Remove</button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
         <button onClick={() => setOpen(true)} className="mt-3 flex items-center gap-2 text-sm text-primary font-medium hover:underline">
           <Plus className="h-4 w-4" /> Add payment method
@@ -86,22 +144,26 @@ const BillingPage = () => {
       <div className="rounded-xl border border-border bg-card p-6">
         <h2 className="text-sm font-semibold text-foreground mb-4">Recent invoices</h2>
         <div className="space-y-2">
-          {invoices.map(inv => (
-            <div key={inv.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-              <div>
-                <p className="text-sm font-medium text-foreground">{inv.id}</p>
-                <p className="text-xs text-muted-foreground">{inv.date}</p>
+          {invoices.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No invoices yet</p>
+          ) : (
+            invoices.map(inv => (
+              <div key={inv.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                <div>
+                  <p className="text-sm font-medium text-foreground">{inv.id}</p>
+                  <p className="text-xs text-muted-foreground">{inv.date}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold text-foreground">{inv.amount}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded ${inv.status === 'Paid' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>{inv.status}</span>
+                  <button onClick={() => downloadInvoice(inv.id)} aria-label={`Download ${inv.id}`}
+                    className="p-1 rounded hover:bg-accent">
+                    <Download className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-semibold text-foreground">{inv.amount}</span>
-                <span className="text-xs px-2 py-0.5 rounded bg-green-500/10 text-green-500">{inv.status}</span>
-                <button onClick={() => downloadInvoice(inv)} aria-label={`Download ${inv.id}`}
-                  className="p-1 rounded hover:bg-accent">
-                  <Download className="h-4 w-4 text-muted-foreground" />
-                </button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 

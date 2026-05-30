@@ -362,7 +362,7 @@ const LoginPage = () => {
     const id = setInterval(() => {
       setBlink(true);
       setTimeout(() => setBlink(false), 130);
-    }, 3200 + Math.random() * 1800);
+    }, 3200 + (Date.now() % 1800));
     return () => clearInterval(id);
   }, []);
 
@@ -404,11 +404,11 @@ const LoginPage = () => {
   const particles = useMemo(() =>
     Array.from({ length: 28 }, (_, i) => ({
       id: i,
-      l: Math.random() * 100,
-      t: Math.random() * 100,
-      s: 1 + Math.random() * 2.5,
-      d: 8 + Math.random() * 14,
-      delay: Math.random() * 6,
+      l: (i * 3.5) % 100,
+      t: (i * 2.8) % 100,
+      s: 1 + (i % 3) * 0.8,
+      d: 8 + (i % 7) * 2,
+      delay: (i % 6),
       c: i % 3 === 0 ? NEON.violet : NEON.cyan,
     })), []);
 

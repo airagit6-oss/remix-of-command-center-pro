@@ -26,7 +26,7 @@ async function apiFetch<T>(_url: string, _options?: RequestInit): Promise<T> {
 const STORAGE_KEY = 'saashub_files';
 
 function uid(): string {
-  return 'file_' + Math.random().toString(36).slice(2, 11);
+  return 'file_' + crypto.randomUUID().split('-')[0];
 }
 
 function detectFileType(mimeType: string): FileType {

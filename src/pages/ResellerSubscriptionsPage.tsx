@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Power, PowerOff } from 'lucide-react';
 import { audit } from '@/lib/auditLog';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,13 +16,16 @@ interface Subscription {
   expiryDate: string;
 }
 
-const initialSubs: Subscription[] = [
-  { id: 's1', userName: 'Alex Chen', userEmail: 'alex.chen@example.com', plan: 'Pro', productName: 'EduFlow Pro', status: 'Active', startDate: '2026-01-01', expiryDate: '2026-12-31' },
-  { id: 's2', userName: 'Sarah Kumar', userEmail: 'sarah.k@example.com', plan: 'Basic', productName: 'ShopEngine', status: 'Active', startDate: '2026-02-15', expiryDate: '2026-08-15' },
-  { id: 's3', userName: 'Mike Ross', userEmail: 'mike.ross@example.com', plan: 'Unlimited', productName: 'MediCore 360', status: 'Expired', startDate: '2025-09-01', expiryDate: '2026-03-01' },
-  { id: 's4', userName: 'Priya Patel', userEmail: 'priya.p@example.com', plan: 'Pro', productName: 'HotelNest', status: 'Active', startDate: '2026-03-01', expiryDate: '2027-03-01' },
-  { id: 's5', userName: 'James Wilson', userEmail: 'james.w@example.com', plan: 'Basic', productName: 'EduFlow Pro', status: 'Disabled', startDate: '2026-01-15', expiryDate: '2026-07-15' },
-];
+interface Client {
+  id: string;
+  name: string;
+  email: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+}
 
 const statusStyles: Record<SubStatus, { bg: string; text: string }> = {
   Active: { bg: '#e4f3e8', text: '#008060' },
@@ -31,23 +34,84 @@ const statusStyles: Record<SubStatus, { bg: string; text: string }> = {
 };
 
 const plans = ['Basic', 'Pro', 'Unlimited'];
-const products = ['EduFlow Pro', 'MediCore 360', 'ShopEngine', 'HotelNest', 'AnalyticsHub'];
-const mockUsers = ['Alex Chen', 'Sarah Kumar', 'Mike Ross', 'Priya Patel', 'James Wilson', 'Emily Davis'];
-
-const emptyForm = () => ({
-  userName: '', userEmail: '', plan: 'Basic', productName: products[0],
-  startDate: new Date().toISOString().split('T')[0],
-  expiryDate: new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
-});
 
 const ResellerSubscriptionsPage = () => {
   const { t } = useTranslation('common');
   const { user } = useAuth();
   const resellerId = user?.id ?? 'anonymous';
   const userId = user?.id ?? 'anonymous';
-  const [subs, setSubs] = useState<Subscription[]>(initialSubs);
+  const [subs, setSubs] = useState<Subscription[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState(emptyForm());
+  const [form, setForm] = useState({
+    userName: '', userEmail: '', plan: 'Basic', productName: '',
+    startDate: new Date().toISOString().split('T')[0],
+    expiryDate: new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
+  });
+
+  useEffect(() => {
+    // Fetch subscriptions from API
+    const fetchSubscriptions = async () => {
+      try {
+        const token = localStorage.getItem('saashub_token');
+        if (token) {
+          const response = await fetch('/api/v1/reseller/subscriptions', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setSubs(data.subscriptions || []);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch subscriptions:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Fetch clients from API
+    const fetchClients = async () => {
+      try {
+        const token = localStorage.getItem('saashub_token');
+        if (token) {
+          const response = await fetch('/api/v1/reseller/clients', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setClients(data.clients || []);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch clients:', error);
+      }
+    };
+
+    // Fetch products from API
+    const fetchProducts = async () => {
+      try {
+        const token = localStorage.getItem('saashub_token');
+        if (token) {
+          const response = await fetch('/api/v1/reseller/products', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setProducts(data.products || []);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      }
+    };
+
+    fetchSubscriptions();
+    fetchClients();
+    fetchProducts();
+  }, []);
 
   const toggleStatus = (id: string) => {
     setSubs(prev => prev.map(s => {
@@ -63,7 +127,11 @@ const ResellerSubscriptionsPage = () => {
     const newSub: Subscription = { ...form, id: `s${Date.now()}`, status: 'Active' };
     setSubs(prev => [newSub, ...prev]);
     audit.updateSubscription(resellerId, userId, newSub.id, { action: 'create', product: newSub.productName, plan: newSub.plan });
-    setForm(emptyForm());
+    setForm({
+      userName: '', userEmail: '', plan: 'Basic', productName: products[0]?.name || '',
+      startDate: new Date().toISOString().split('T')[0],
+      expiryDate: new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0],
+    });
     setShowModal(false);
   };
 
@@ -158,7 +226,7 @@ const ResellerSubscriptionsPage = () => {
                   onChange={e => setForm(prev => ({ ...prev, userName: e.target.value }))}
                   className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2" style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}
                 />
-                <datalist id="user-list">{mockUsers.map(u => <option key={u} value={u} />)}</datalist>
+                <datalist id="user-list">{clients.map(c => <option key={c.id} value={c.name} />)}</datalist>
               </div>
               <div>
                 <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('email', { defaultValue: 'Email' })}</label>
@@ -170,7 +238,7 @@ const ResellerSubscriptionsPage = () => {
               <div>
                 <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('app', { defaultValue: 'App' })}</label>
                 <select value={form.productName} onChange={e => setForm(prev => ({ ...prev, productName: e.target.value }))} className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2" style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}>
-                  {products.map(p => <option key={p} value={p}>{p}</option>)}
+                  {products.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
                 </select>
               </div>
               <div>
@@ -196,7 +264,7 @@ const ResellerSubscriptionsPage = () => {
             </div>
             <div className="flex gap-3 mt-5">
               <button onClick={addSubscription} className="flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white" style={{ background: '#008060' }}>{t('create', { defaultValue: 'Create' })}</button>
-              <button onClick={() => { setShowModal(false); setForm(emptyForm()); }} className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium" style={{ borderColor: '#c9cccf', color: '#6d7175' }}>{t('cancel', { defaultValue: 'Cancel' })}</button>
+              <button onClick={() => { setShowModal(false); setForm({ userName: '', userEmail: '', plan: 'Basic', productName: products[0]?.name || '', startDate: new Date().toISOString().split('T')[0], expiryDate: new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0] }); }} className="flex-1 rounded-lg border px-4 py-2 text-sm font-medium" style={{ borderColor: '#c9cccf', color: '#6d7175' }}>{t('cancel', { defaultValue: 'Cancel' })}</button>
             </div>
           </div>
         </div>

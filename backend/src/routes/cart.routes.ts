@@ -14,12 +14,12 @@ export async function getCart(req: FastifyRequest, reply: FastifyReply) {
     if (userId) {
       cart = await prisma.cart.findUnique({
         where: { userId },
-        include: { items: true }
+        include: { items: { include: { product: true } } }
       });
     } else if (sessionId) {
       cart = await prisma.cart.findUnique({
         where: { sessionId },
-        include: { items: true }
+        include: { items: { include: { product: true } } }
       });
     }
 
@@ -30,6 +30,14 @@ export async function getCart(req: FastifyRequest, reply: FastifyReply) {
     const total = cart.items.reduce((sum, item) => {
       return sum + (Number(item.quantity) || 0);
     }, 0);
+
+    // Validate product availability and prices
+    for (const item of cart.items) {
+      if (!item.product || item.product.status !== 'PUBLISHED') {
+        // Remove unavailable items
+        await prisma.cartItem.delete({ where: { id: item.id } });
+      }
+    }
 
     return reply.send({ cart, total });
   } catch (error) {
@@ -98,6 +106,18 @@ export async function addToCart(req: FastifyRequest, reply: FastifyReply) {
       include: { items: { include: { product: true } } }
     });
 
+    // Audit log
+    if (userId) {
+      await prisma.auditLog.create({
+        data: {
+          userId,
+          action: 'ADD_TO_CART',
+          entity: 'CartItem',
+          changes: { productId, quantity }
+        }
+      });
+    }
+
     return reply.send(updatedCart);
   } catch (error) {
     reply.status(500).send({ error: 'Failed to add to cart' });
@@ -109,6 +129,7 @@ export async function updateCartItem(req: FastifyRequest, reply: FastifyReply) {
   try {
     const { itemId } = req.params as any;
     const { quantity } = req.body as any;
+    const userId = (req as any).user?.id;
 
     if (!quantity || quantity < 1) {
       return reply.status(400).send({ error: 'Invalid quantity' });
@@ -118,6 +139,19 @@ export async function updateCartItem(req: FastifyRequest, reply: FastifyReply) {
       where: { id: itemId },
       data: { quantity }
     });
+
+    // Audit log
+    if (userId) {
+      await prisma.auditLog.create({
+        data: {
+          userId,
+          action: 'UPDATE_CART_ITEM',
+          entity: 'CartItem',
+          entityId: itemId,
+          changes: { quantity }
+        }
+      });
+    }
 
     return reply.send(cartItem);
   } catch (error) {
@@ -129,10 +163,23 @@ export async function updateCartItem(req: FastifyRequest, reply: FastifyReply) {
 export async function removeFromCart(req: FastifyRequest, reply: FastifyReply) {
   try {
     const { itemId } = req.params as any;
+    const userId = (req as any).user?.id;
 
     await prisma.cartItem.delete({
       where: { id: itemId }
     });
+
+    // Audit log
+    if (userId) {
+      await prisma.auditLog.create({
+        data: {
+          userId,
+          action: 'REMOVE_FROM_CART',
+          entity: 'CartItem',
+          entityId: itemId
+        }
+      });
+    }
 
     return reply.send({ success: true });
   } catch (error) {
@@ -157,6 +204,17 @@ export async function clearCart(req: FastifyRequest, reply: FastifyReply) {
     if (cart) {
       await prisma.cartItem.deleteMany({
         where: { cartId: cart.id }
+      });
+    }
+
+    // Audit log
+    if (userId) {
+      await prisma.auditLog.create({
+        data: {
+          userId,
+          action: 'CLEAR_CART',
+          entity: 'Cart'
+        }
       });
     }
 

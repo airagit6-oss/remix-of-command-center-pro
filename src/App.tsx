@@ -34,6 +34,10 @@ import FavoritesPage from "./pages/FavoritesPage";
 import RecentPage from "./pages/RecentPage";
 import DashboardSubscriptionPage from "./pages/DashboardSubscriptionPage";
 import AppsPage from "./pages/AppsPage";
+import InvoicesPage from "./pages/InvoicesPage";
+import LicensesPage from "./pages/LicensesPage";
+import SubscriptionsPage from "./pages/SubscriptionsPage";
+import RefundsPage from "./pages/RefundsPage";
 
 // User dashboard sub-pages
 import ProfilePage from "./pages/dashboard/ProfilePage";
@@ -169,6 +173,10 @@ const App = () => (
               <Route path="/subscription" element={<SubscriptionPage />} />
               <Route path="/subscribe-checkout" element={<SubscribeCheckoutPage />} />
               <Route path="/success" element={<SuccessPage />} />
+              <Route path="/invoices" element={<AuthGuard><InvoicesPage /></AuthGuard>} />
+              <Route path="/licenses" element={<AuthGuard><LicensesPage /></AuthGuard>} />
+              <Route path="/subscriptions" element={<AuthGuard><SubscriptionsPage /></AuthGuard>} />
+              <Route path="/refunds" element={<AuthGuard><RefundsPage /></AuthGuard>} />
 
               {/* App access — subscription-gated */}
               <Route
@@ -197,6 +205,10 @@ const App = () => (
                 <Route path="recent" element={<RecentPage />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="billing" element={<BillingPage />} />
+                <Route path="invoices" element={<InvoicesPage />} />
+                <Route path="licenses" element={<LicensesPage />} />
+                <Route path="subscriptions" element={<SubscriptionsPage />} />
+                <Route path="refunds" element={<RefundsPage />} />
                 <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="security" element={<SecurityPage />} />
               </Route>

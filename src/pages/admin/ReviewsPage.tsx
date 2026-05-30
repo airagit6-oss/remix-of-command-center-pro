@@ -65,37 +65,37 @@ const TEXTS = [
   'Refund process was painful and took 3 weeks of back-and-forth emails.',
 ];
 
-const rand = (n: number) => Math.floor(Math.random() * n);
-const pick = <T,>(arr: T[]) => arr[rand(arr.length)];
+const rand = (n: number, seed: number) => Math.floor((seed % n));
+const pick = <T,>(arr: T[], seed: number) => arr[rand(arr.length, seed)];
 
 function mkReview(i: number, offsetMs = 0): Review {
-  const rating = Math.max(1, Math.min(5, Math.round(2 + Math.random() * 3.5)));
+  const rating = Math.max(1, Math.min(5, Math.round(2 + (i % 4))));
   const sentiment: Sentiment = rating >= 4 ? 'positive' : rating <= 2 ? 'negative' : 'neutral';
-  const aiRisk = sentiment === 'negative' ? 30 + rand(60) : rand(40);
+  const aiRisk = sentiment === 'negative' ? 30 + rand(60, i) : rand(40, i);
   return {
     id: `RV-${(10000 + i).toString(36).toUpperCase()}`,
-    user: `${pick(FIRST)} ${pick(LAST)}`,
-    email: `user${i}@${pick(['acme.io', 'corp.com', 'mail.dev', 'box.co'])}`,
-    product: pick(PRODUCTS),
+    user: `${pick(FIRST, i)} ${pick(LAST, i)}`,
+    email: `user${i}@${pick(['acme.io', 'corp.com', 'mail.dev', 'box.co'], i)}`,
+    product: pick(PRODUCTS, i),
     rating,
-    title: pick(TITLES),
-    text: pick(TEXTS),
-    flagged: Math.random() < 0.18,
-    reported: Math.random() < 0.25 ? 1 + rand(5) : 0,
-    status: (['pending', 'approved', 'pending', 'reported', 'approved', 'spam', 'escalated'] as ReviewStatus[])[rand(7)],
-    verified: Math.random() < 0.72,
-    createdAt: Date.now() - offsetMs - rand(1000 * 60 * 60 * 24 * 30),
-    country: pick(COUNTRIES),
-    device: pick(DEVICES),
-    ip: `${rand(255)}.${rand(255)}.${rand(255)}.${rand(255)}`,
+    title: pick(TITLES, i),
+    text: pick(TEXTS, i),
+    flagged: i % 6 === 0,
+    reported: i % 4 === 0 ? 1 + rand(5, i) : 0,
+    status: (['pending', 'approved', 'pending', 'reported', 'approved', 'spam', 'escalated'] as ReviewStatus[])[rand(7, i)],
+    verified: i % 4 !== 0,
+    createdAt: Date.now() - offsetMs - rand(1000 * 60 * 60 * 24 * 30, i),
+    country: pick(COUNTRIES, i),
+    device: pick(DEVICES, i),
+    ip: `${rand(255, i)}.${rand(255, i)}.${rand(255, i)}.${rand(255, i)}`,
     sentiment,
     aiRisk,
-    aiSpam: rand(100),
-    aiFake: rand(100),
-    aiToxicity: sentiment === 'negative' ? rand(70) : rand(25),
-    trustScore: 40 + rand(60),
-    prevReviews: rand(40),
-    orderId: Math.random() < 0.7 ? `ORD-${rand(99999)}` : undefined,
+    aiSpam: rand(100, i),
+    aiFake: rand(100, i),
+    aiToxicity: sentiment === 'negative' ? rand(70, i) : rand(25, i),
+    trustScore: 40 + rand(60, i),
+    prevReviews: rand(40, i),
+    orderId: i % 3 !== 0 ? `ORD-${rand(99999, i)}` : undefined,
     reply: undefined,
     notes: undefined,
   };
@@ -159,19 +159,6 @@ const Sparkline = ({ data, color = 'hsl(var(--primary))' }: { data: number[]; co
 
 // ─────────────────────────── Main Page ───────────────────────────
 const ReviewsPage = () => {
-<<<<<<< HEAD
-  const { t } = useTranslation('common');
-  const [reviews, setReviews] = useState<Review[]>(seed);
-
-  const approve = (id: number) => {
-    setReviews(prev => prev.map(r => r.id === id ? { ...r, status: 'approved', flagged: false } : r));
-    toast.success(t('review_approved', { defaultValue: 'Review approved' }));
-  };
-  const remove = (id: number) => {
-    if (!window.confirm(t('confirm_remove_review', { defaultValue: 'Remove this review?' }))) return;
-    setReviews(prev => prev.filter(r => r.id !== id));
-    toast.success(t('review_removed', { defaultValue: 'Review removed' }));
-=======
   const [reviews, setReviews] = useState<Review[]>(SEED);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [activeQueue, setActiveQueue] = useState<'all' | ReviewStatus>('all');
@@ -196,7 +183,7 @@ const ReviewsPage = () => {
     const tick = setInterval(() => {
       const r = mkReview(Date.now() % 99999);
       setFeed(prev => [{ id: r.id, user: r.user, product: r.product, rating: r.rating, t: Date.now() }, ...prev].slice(0, 14));
-      if (Math.random() < 0.35) {
+      if (Date.now() % 3 === 0) {
         setReviews(prev => [r, ...prev].slice(0, 200));
       }
     }, 2800);
@@ -205,7 +192,6 @@ const ReviewsPage = () => {
 
   const logAction = (action: string, target: string) => {
     setAuditLog(prev => [{ id: `L${Date.now()}`, action, target, at: Date.now(), mod: 'admin@boss' }, ...prev].slice(0, 30));
->>>>>>> 86e358d425792e950fda02e2b832522148538024
   };
 
   // Derived KPIs
@@ -237,7 +223,7 @@ const ReviewsPage = () => {
 
   const trend = useMemo(() => Array.from({ length: 24 }, (_, i) => {
     const start = Date.now() - (24 - i) * 3600_000;
-    return reviews.filter(r => r.createdAt >= start && r.createdAt < start + 3600_000).length + rand(3);
+    return reviews.filter(r => r.createdAt >= start && r.createdAt < start + 3600_000).length + rand(3, i);
   }), [reviews]);
 
   const sentimentMix = useMemo(() => {
@@ -324,33 +310,6 @@ const ReviewsPage = () => {
   ];
 
   return (
-<<<<<<< HEAD
-    <div>
-      <h1 className="text-2xl font-bold text-foreground mb-1">{t('reviews', { defaultValue: 'Reviews' })}</h1>
-      <p className="text-sm text-muted-foreground mb-6">{t('reviews_subtitle', { defaultValue: 'Moderate user reviews and ratings.' })}</p>
-      <div className="space-y-3">
-        {visible.map(r => (
-          <div key={r.id} className="rounded-xl border border-border bg-card p-4">
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <p className="text-sm font-semibold text-foreground">{r.user} <span className="text-muted-foreground font-normal">on</span> {r.product}</p>
-                <div className="flex items-center gap-0.5 mt-1">
-                  {Array.from({ length: 5 }).map((_, idx) => (
-                    <Star key={idx} className={`h-3.5 w-3.5 ${idx < r.rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/30'}`} />
-                  ))}
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {r.status === 'approved' && (
-                  <span className="text-xs px-2 py-1 rounded bg-green-500/10 text-green-500">{t('approved', { defaultValue: 'Approved' })}</span>
-                )}
-                {r.flagged && (
-                  <span className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-destructive/10 text-destructive">
-                    <Flag className="h-3 w-3" /> {t('flagged', { defaultValue: 'Flagged' })}
-                  </span>
-                )}
-              </div>
-=======
     <div className="space-y-4">
       {/* Command bar */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -446,9 +405,9 @@ const ReviewsPage = () => {
             <div><span className="text-rose-500">●</span> NEG {sentimentMix.n.toFixed(0)}%</div>
           </div>
           <div className="mt-2 pt-2 border-t border-border space-y-1 text-[10px] font-mono">
-            <div className="flex justify-between"><span className="text-muted-foreground">Quality Score</span><span className="text-foreground">{(7 + Math.random() * 2).toFixed(1)}/10</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Reputation Index</span><span className="text-emerald-500">+{(82 + Math.random() * 10).toFixed(1)}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">CSAT</span><span className="text-foreground">{(88 + Math.random() * 8).toFixed(1)}%</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Quality Score</span><span className="text-foreground">8.5/10</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Reputation Index</span><span className="text-emerald-500">+87.2</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">CSAT</span><span className="text-foreground">92.4%</span></div>
           </div>
         </div>
       </div>
@@ -586,7 +545,6 @@ const ReviewsPage = () => {
                 Live Feed
               </span>
               <Zap className="h-3 w-3 text-amber-500" />
->>>>>>> 86e358d425792e950fda02e2b832522148538024
             </div>
             <div className="max-h-48 overflow-y-auto divide-y divide-border">
               {feed.length === 0 && <div className="p-3 text-[11px] text-muted-foreground font-mono">Waiting for events…</div>}
@@ -775,8 +733,8 @@ const InvestigationDrawer = ({ review, onClose, onAction, onReply, onNote }: {
                 <div className="space-y-1">
                   {Array.from({ length: 3 }).map((_, i) => (
                     <div key={i} className="flex items-center gap-2 text-[11px]">
-                      <Stars n={3 + rand(3)} size="xs" />
-                      <span className="text-muted-foreground truncate flex-1">on {pick(PRODUCTS)}</span>
+                      <Stars n={3 + rand(3, i)} size="xs" />
+                      <span className="text-muted-foreground truncate flex-1">on {pick(PRODUCTS, i)}</span>
                       <span className="text-muted-foreground">{1 + i * 4}d</span>
                     </div>
                   ))}

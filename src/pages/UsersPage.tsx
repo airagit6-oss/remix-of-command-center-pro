@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { generateUsers, generateSparkline } from "@/lib/mockData";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /* ─────────────────────────────────────────────── */
@@ -101,29 +101,28 @@ const PLANS: EnrichedUser["plan"][] = ["Free", "Pro", "Business", "Enterprise"];
 const ACTIONS = ["viewed dashboard", "opened invoice", "ran export", "called API", "updated profile", "checked metrics", "downloaded report"];
 const AI_TAGS = ["High intent", "Stable", "Power user", "At risk", "Loyal", "VIP candidate", "Anomaly cluster"];
 
-function enrich(raw: ReturnType<typeof generateUsers>): EnrichedUser[] {
+function enrich(raw: any[]): EnrichedUser[] {
   return raw.map((u, i) => {
-    const fraud = Math.floor(Math.random() * 100);
     return {
       ...u,
-      role: ROLES[i % ROLES.length],
-      verified: (["Email", "MFA", "KYC"] as const)[i % 3],
-      plan: PLANS[i % PLANS.length],
-      trust: Math.max(0, Math.min(100, 100 - fraud + Math.floor((Math.random() - 0.5) * 30))),
-      fraud,
-      engagement: Math.floor(40 + Math.random() * 60),
-      vip: Math.floor(Math.random() * 100),
-      churn: Math.floor(Math.random() * 80),
-      revenue: Math.floor(Math.random() * 18000 + 50),
-      sessions: 1 + Math.floor(Math.random() * 5),
-      vpn: Math.random() > 0.82,
-      proxy: Math.random() > 0.92,
-      geoRisk: (["Low", "Low", "Low", "Medium", "High"] as const)[Math.floor(Math.random() * 5)],
-      fingerprint: `fp_${Math.random().toString(36).slice(2, 12)}`,
-      ip: `${Math.floor(Math.random() * 220) + 12}.${Math.floor(Math.random() * 220)}.${Math.floor(Math.random() * 220)}.${Math.floor(Math.random() * 220)}`,
-      lastAction: ACTIONS[Math.floor(Math.random() * ACTIONS.length)],
-      sparkline: generateSparkline(18, 10, 100),
-      ai: AI_TAGS[Math.floor(Math.random() * AI_TAGS.length)],
+      role: u.role || ROLES[i % ROLES.length],
+      verified: u.verified || (["Email", "MFA", "KYC"] as const)[i % 3],
+      plan: u.plan || PLANS[i % PLANS.length],
+      trust: u.trust || 85,
+      fraud: u.fraud || 12,
+      engagement: u.engagement || 70,
+      vip: u.vip || 40,
+      churn: u.churn || 20,
+      revenue: u.revenue || 5000,
+      sessions: u.sessions || 2,
+      vpn: u.vpn || false,
+      proxy: u.proxy || false,
+      geoRisk: u.geoRisk || "Low",
+      fingerprint: u.fingerprint || `fp_${i}`,
+      ip: u.ip || "192.168.1.1",
+      lastAction: u.lastAction || ACTIONS[i % ACTIONS.length],
+      sparkline: u.sparkline || Array.from({ length: 18 }, (_, j) => ({ v: 50 + Math.sin(j * 0.5) * 20 })),
+      ai: u.ai || AI_TAGS[i % AI_TAGS.length],
     };
   });
 }
@@ -136,7 +135,7 @@ const fmt = (n: number) => n.toLocaleString("en-US");
 /* ─────────────────────────────────────────────── */
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<EnrichedUser[]>(() => enrich(generateUsers(30)));
+  const [users, setUsers] = useState<EnrichedUser[]>([]);
   const [filter, setFilter] = useState<"All" | "Live" | "VIP" | "Risk" | "Churn">("All");
   const [role, setRole] = useState<"All" | EnrichedUser["role"]>("All");
   const [query, setQuery] = useState("");
@@ -144,16 +143,14 @@ export default function UsersPage() {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
+    api.get('/users').then(data => {
+      setUsers(enrich(data || []));
+    });
+  }, []);
+
+  useEffect(() => {
     const id = setInterval(() => {
       setTick((t) => t + 1);
-      setUsers((prev) =>
-        prev.map((u) => ({
-          ...u,
-          status: Math.random() > 0.18 ? "live" : "offline",
-          engagement: Math.max(10, Math.min(100, u.engagement + Math.round((Math.random() - 0.5) * 6))),
-          sparkline: [...u.sparkline.slice(1), { v: Math.max(0, Math.min(100, u.sparkline[u.sparkline.length - 1].v + Math.round((Math.random() - 0.5) * 16))) }],
-        }))
-      );
     }, 2800);
     return () => clearInterval(id);
   }, []);
@@ -180,7 +177,7 @@ export default function UsersPage() {
     return { live, vip, risk, churn, revenue, trust, total: users.length };
   }, [users]);
 
-  const trafficSpark = useMemo(() => generateSparkline(28, 30, 100), []);
+  const trafficSpark = useMemo(() => Array.from({ length: 28 }, (_, i) => ({ v: 30 + Math.sin(i * 0.3) * 20 })), []);
 
   return (
     <div

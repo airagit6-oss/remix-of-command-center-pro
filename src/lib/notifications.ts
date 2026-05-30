@@ -27,7 +27,7 @@ const STORAGE_KEY = 'saashub_notifications';
 const MAX_LOCAL_NOTIFICATIONS = 200;
 
 function uid(): string {
-  return 'notif_' + Math.random().toString(36).slice(2, 11);
+  return 'notif_' + crypto.randomUUID().split('-')[0];
 }
 
 function loadLocal(resellerId?: string): Notification[] {

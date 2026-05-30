@@ -90,10 +90,92 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
     l.label.toLowerCase().includes(langQuery.toLowerCase()) || l.code.includes(langQuery.toLowerCase()),
   );
 
-  // Mocked realtime badge counts (UI only)
-  const wishlistCount = Number(localStorage.getItem('saashub_favorites_count') || 0) || 3;
-  const notifCount = 5;
-  const unreadChat = 2;
+  // Fetch real data from API
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [notifCount, setNotifCount] = useState(0);
+  const [unreadChat, setUnreadChat] = useState(0);
+  const [notifications, setNotifications] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Fetch wishlist count from API
+    const fetchWishlistCount = async () => {
+      try {
+        const token = localStorage.getItem('saashub_token');
+        if (token) {
+          const response = await fetch('/api/v1/wishlist/count', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setWishlistCount(data.count || 0);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch wishlist count:', error);
+      }
+    };
+
+    // Fetch notification count from API
+    const fetchNotifCount = async () => {
+      try {
+        const token = localStorage.getItem('saashub_token');
+        if (token) {
+          const response = await fetch('/api/v1/notifications/unread-count', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setNotifCount(data.count || 0);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch notification count:', error);
+      }
+    };
+
+    // Fetch notifications from API
+    const fetchNotifications = async () => {
+      try {
+        const token = localStorage.getItem('saashub_token');
+        if (token) {
+          const response = await fetch('/api/v1/notifications?limit=5', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setNotifications(data.notifications || []);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch notifications:', error);
+      }
+    };
+
+    // Fetch unread chat count from API
+    const fetchUnreadChat = async () => {
+      try {
+        const token = localStorage.getItem('saashub_token');
+        if (token) {
+          const response = await fetch('/api/v1/chat/unread-count', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setUnreadChat(data.count || 0);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch chat count:', error);
+      }
+    };
+
+    if (isLoggedIn) {
+      fetchWishlistCount();
+      fetchNotifCount();
+      fetchNotifications();
+      fetchUnreadChat();
+    }
+  }, [isLoggedIn]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -300,21 +382,22 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
                     <span className="rounded-full bg-cyan-400/10 px-2 py-0.5 text-[10px] font-medium text-cyan-300">{notifCount} new</span>
                   </div>
                   <div className="max-h-80 divide-y divide-white/5 overflow-y-auto">
-                    {[
-                      { t: 'New AI tool matches your interest', d: 'Atlas AI · Education', time: '2m' },
-                      { t: 'Your subscription renews tomorrow', d: 'Dashboard Pro', time: '1h' },
-                      { t: 'Price drop on a wishlist item', d: 'Saved 25%', time: '3h' },
-                      { t: 'Reseller payout processed', d: '$1,240.00', time: '1d' },
-                    ].map((n, i) => (
-                      <div key={i} className="flex gap-3 px-3 py-2.5 transition-colors hover:bg-white/5">
-                        <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-gradient-to-br from-cyan-400 to-fuchsia-500 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs font-medium text-foreground">{n.t}</p>
-                          <p className="truncate text-[10px] text-muted-foreground">{n.d}</p>
+                    {notifications.length > 0 ? (
+                      notifications.map((n) => (
+                        <div key={n.id} className="flex gap-3 px-3 py-2.5 transition-colors hover:bg-white/5">
+                          <div className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-gradient-to-br from-cyan-400 to-fuchsia-500 shadow-[0_0_8px_rgba(34,211,238,0.6)]" />
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-xs font-medium text-foreground">{n.title}</p>
+                            <p className="truncate text-[10px] text-muted-foreground">{n.message}</p>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground">{n.time}</span>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <p className="px-3 py-4 text-center text-xs text-muted-foreground">No notifications</p>
+                    )}
                   </div>
                 </div>
               )}

@@ -107,7 +107,7 @@ const STORAGE_KEY = 'saashub_gallery';
 const SETTINGS_KEY = 'saashub_gallery_settings';
 
 function uid(): string {
-  return 'gm_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  return 'gm_' + Date.now().toString(36) + crypto.randomUUID().slice(2, 7);
 }
 
 // ========== PERSISTENCE ==========

@@ -11,7 +11,7 @@ import {
   PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer, Tooltip,
   XAxis, YAxis,
 } from "recharts";
-import { generateTimeSeries } from "@/lib/mockData";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /* ───────────────── helpers ───────────────── */
@@ -119,7 +119,7 @@ const toneRing: Record<Kpi["tone"], string> = {
 function KpiCell({ k }: { k: Kpi }) {
   const v = useCounter(k.value);
   const up = k.delta >= 0;
-  const spark = useMemo(() => generateTimeSeries(20, 30, 80), [k.label]);
+  const spark = useMemo(() => Array.from({ length: 20 }, (_, i) => ({ name: i, value: 30 + Math.sin(i * 0.3) * 25 })), [k.label]);
   const Icon = k.icon;
   return (
     <GlassPanel glow={k.tone} className="group p-3 transition-transform hover:-translate-y-0.5">
@@ -242,7 +242,7 @@ function LiveFeed() {
     let id = 0;
     const push = () => {
       if (pausedRef.current) return;
-      const seed = feedSeed[Math.floor(Math.random() * feedSeed.length)];
+      const seed = feedSeed[Date.now() % feedSeed.length];
       setItems((prev) =>
         [{ ...seed, id: id++, t: new Date().toLocaleTimeString("en-US", { hour12: false }) }, ...prev].slice(0, 80),
       );
@@ -618,7 +618,7 @@ function AlertRulesConsole() {
     }));
 
   const saveDraft = () => {
-    const id = `rule-${Math.random().toString(36).slice(2, 7)}`;
+    const id = `rule-${crypto.randomUUID().split('-')[0]}`;
     setRules((rs) => [{ ...draft, id }, ...rs]);
     setSelectedId(id);
     setCreating(false);
@@ -1018,7 +1018,7 @@ export default function RevenuePage() {
   const tick = useTick(2200);
 
   const forecast = useMemo(() => {
-    const base = generateTimeSeries(36, 80000, 145000);
+    const base = Array.from({ length: 36 }, (_, i) => ({ name: i, value: 80000 + Math.sin(i * 0.2) * 30000 }));
     return base.map((d, i) => ({
       ...d,
       actual: i < 26 ? d.value : null,
@@ -1030,7 +1030,7 @@ export default function RevenuePage() {
   const cohort = useMemo(
     () => Array.from({ length: 12 }, (_, i) => ({
       m: `M${i}`,
-      retention: Math.max(38, Math.round(100 - i * 5.4 - Math.random() * 4)),
+      retention: Math.max(38, Math.round(100 - i * 5.4 - (i % 4))),
     })),
     [tick],
   );
@@ -1054,7 +1054,7 @@ export default function RevenuePage() {
   ];
   const deviceColors = ["#22d3ee", "#a78bfa", "#34d399", "#f59e0b"];
 
-  const txStream = useMemo(() => generateTimeSeries(48, 200, 1400), [tick]);
+  const txStream = useMemo(() => Array.from({ length: 48 }, (_, i) => ({ name: i, value: 200 + Math.sin(i * 0.3) * 600 })), [tick]);
 
   const kpis: Kpi[] = [
     { label: "Total Revenue",        value: 4_812_440 + (tick % 50) * 130, prefix: "$", delta:  8.4, icon: DollarSign, tone: "emerald", ai: "Tracking +18% MoM · forecast green" },

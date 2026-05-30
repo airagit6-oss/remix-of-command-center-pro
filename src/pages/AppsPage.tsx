@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { generateApps, generateSparkline } from "@/lib/mockData";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -103,8 +103,10 @@ function Bar({ label, value, color }: { label: string; value: number; color: str
 /*  Domain                                                                    */
 /* ────────────────────────────────────────────────────────────────────────── */
 
-type Service = ReturnType<typeof generateApps>[number] & {
+type Service = {
   id: string;
+  name: string;
+  status: string;
   tier: "Edge" | "Core" | "Data" | "AI" | "Payments";
   region: string;
   version: string;
@@ -125,41 +127,38 @@ type Service = ReturnType<typeof generateApps>[number] & {
   lastDeploy: string;
   anomalies: string[];
   dependencies: string[];
+  sparkline: { t: number; v: number }[];
 };
 
 const TIERS: Service["tier"][] = ["Edge", "Core", "Data", "AI", "Payments"];
 const REGIONS = ["us-east-1", "us-west-2", "eu-west-1", "eu-central-1", "ap-south-1", "ap-northeast-1"];
 
-const enrich = (raw: ReturnType<typeof generateApps>): Service[] =>
+const enrich = (raw: any[]): Service[] =>
   raw.map((a, i) => {
-    const down = a.status === "Down";
     return {
       ...a,
-      id: `svc-${i + 1}`,
-      tier: TIERS[i % TIERS.length],
-      region: REGIONS[i % REGIONS.length],
-      version: `v${4 + (i % 3)}.${i + 1}.${Math.floor(Math.random() * 9)}`,
-      uptime: down ? 92 + Math.random() * 4 : 99.4 + Math.random() * 0.59,
-      responseMs: Math.floor(40 + Math.random() * (down ? 600 : 220)),
-      cpu: Math.floor(20 + Math.random() * (down ? 70 : 55)),
-      ram: Math.floor(30 + Math.random() * (down ? 60 : 50)),
-      queue: Math.floor(Math.random() * (down ? 4200 : 600)),
-      cacheHit: Math.floor(72 + Math.random() * 26),
-      dbLatency: Math.floor(8 + Math.random() * (down ? 180 : 60)),
-      wsStability: Math.floor(80 + Math.random() * 19),
-      aiHealth: down ? Math.floor(35 + Math.random() * 25) : Math.floor(78 + Math.random() * 21),
-      riskScore: down ? Math.floor(60 + Math.random() * 35) : Math.floor(5 + Math.random() * 35),
-      securityScore: Math.floor(70 + Math.random() * 28),
-      recoveryScore: Math.floor(60 + Math.random() * 38),
-      costPerHour: +(0.4 + Math.random() * 9.6).toFixed(2),
-      revenueImpact: Math.floor(800 + Math.random() * 24000),
-      lastDeploy: `${Math.floor(Math.random() * 11) + 1}h ago`,
-      anomalies: down
-        ? ["Latency spike", "Memory drift", "Error burst"].slice(0, 1 + Math.floor(Math.random() * 3))
-        : Math.random() > 0.55
-          ? ["Cache cold-start"]
-          : [],
-      dependencies: ["postgres-primary", "redis-cluster", "kafka-events", "auth-service"].slice(0, 2 + (i % 3)),
+      id: a.id || `svc-${i + 1}`,
+      tier: a.tier || TIERS[i % TIERS.length],
+      region: a.region || REGIONS[i % REGIONS.length],
+      version: a.version || `v${4 + (i % 3)}.${i + 1}.0`,
+      uptime: a.uptime || 99.5,
+      responseMs: a.responseMs || 50,
+      cpu: a.cpu || 35,
+      ram: a.ram || 45,
+      queue: a.queue || 10,
+      cacheHit: a.cacheHit || 85,
+      dbLatency: a.dbLatency || 15,
+      wsStability: a.wsStability || 90,
+      aiHealth: a.aiHealth || 88,
+      riskScore: a.riskScore || 12,
+      securityScore: a.securityScore || 92,
+      recoveryScore: a.recoveryScore || 78,
+      costPerHour: a.costPerHour || 2.5,
+      revenueImpact: a.revenueImpact || 5000,
+      lastDeploy: a.lastDeploy || '2h ago',
+      anomalies: a.anomalies || [],
+      dependencies: a.dependencies || ["postgres-primary", "redis-cluster"],
+      sparkline: a.sparkline || Array.from({ length: 20 }, (_, j) => ({ t: j, v: 50 + Math.sin(j * 0.5) * 20 })),
     };
   });
 
@@ -171,26 +170,22 @@ const fmt = (n: number) => n.toLocaleString("en-US");
 
 export default function AppsPage() {
   const navigate = useNavigate();
-  const [services, setServices] = useState<Service[]>(() => enrich(generateApps()));
+  const [services, setServices] = useState<Service[]>([]);
   const [filter, setFilter] = useState<"All" | "Healthy" | "Degraded" | "Down" | "AI Risk">("All");
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [pulse, setPulse] = useState(0);
 
+  useEffect(() => {
+    api.get('/apps').then(data => {
+      setServices(data || []);
+    });
+  }, []);
+
   // realtime telemetry tick (UI only)
   useEffect(() => {
     const id = setInterval(() => {
       setPulse((p) => p + 1);
-      setServices((prev) =>
-        prev.map((s) => ({
-          ...s,
-          cpu: Math.max(8, Math.min(98, s.cpu + Math.round((Math.random() - 0.5) * 6))),
-          ram: Math.max(10, Math.min(96, s.ram + Math.round((Math.random() - 0.5) * 4))),
-          responseMs: Math.max(20, s.responseMs + Math.round((Math.random() - 0.5) * 18)),
-          queue: Math.max(0, s.queue + Math.round((Math.random() - 0.5) * 60)),
-          sparkline: [...s.sparkline.slice(1), { t: s.sparkline.length, v: Math.max(0, Math.min(100, s.sparkline[s.sparkline.length - 1].v + Math.round((Math.random() - 0.5) * 18))) }],
-        }))
-      );
     }, 2400);
     return () => clearInterval(id);
   }, []);
@@ -218,9 +213,9 @@ export default function AppsPage() {
     return { total, down, healthy, avgUptime, totalRpm, totalRevenue, totalCost, avgAi };
   }, [services]);
 
-  const trafficSpark = useMemo(() => generateSparkline(28, 30, 100), []);
-  const latencySpark = useMemo(() => generateSparkline(28, 20, 90), []);
-  const errSpark = useMemo(() => generateSparkline(28, 5, 60), []);
+  const trafficSpark = useMemo(() => Array.from({ length: 28 }, (_, i) => ({ t: i, v: 30 + Math.sin(i * 0.3) * 20 })), []);
+  const latencySpark = useMemo(() => Array.from({ length: 28 }, (_, i) => ({ t: i, v: 20 + Math.sin(i * 0.4) * 15 })), []);
+  const errSpark = useMemo(() => Array.from({ length: 28 }, (_, i) => ({ t: i, v: 5 + Math.sin(i * 0.5) * 10 })), []);
 
   return (
     <div

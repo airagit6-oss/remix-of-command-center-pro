@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { requireOwnership } from '../middleware/auth.middleware';
+import { PAYOUT_CONFIG } from '../config/constants';
 
 const prisma = new PrismaClient();
 
@@ -366,8 +367,8 @@ export async function requestPayout(req: FastifyRequest, reply: FastifyReply) {
       return reply.status(400).send({ error: 'Insufficient balance' });
     }
 
-    if (amount < 50) {
-      return reply.status(400).send({ error: 'Minimum payout is $50' });
+    if (amount < PAYOUT_CONFIG.MINIMUM_AMOUNT) {
+      return reply.status(400).send({ error: `Minimum payout is $${PAYOUT_CONFIG.MINIMUM_AMOUNT}` });
     }
 
     // Create payout

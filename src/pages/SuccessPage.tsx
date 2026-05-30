@@ -1,21 +1,57 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircle, Download, Home, FileText } from 'lucide-react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { CheckCircle, Download, Home, FileText, Package } from 'lucide-react';
+import { api } from '../lib/api';
+
+interface Order {
+  id: string;
+  totalAmount: number;
+  status: string;
+  createdAt: string;
+  orderItems: Array<{
+    product: {
+      name: string;
+    };
+  }>;
+}
 
 export default function SuccessPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [orderId, setOrderId] = useState<string | null>(null);
+  const { id } = useParams();
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (location.state?.orderId) {
-      setOrderId(location.state.orderId);
+    const orderId = location.state?.orderId || id;
+    if (orderId) {
+      fetchOrder(orderId);
     } else {
       navigate('/');
     }
-  }, [location, navigate]);
+  }, [location, id, navigate]);
 
-  if (!orderId) {
+  const fetchOrder = async (orderId: string) => {
+    try {
+      const response = await api.get<Order>(`/payment/orders/${orderId}`);
+      setOrder(response);
+    } catch (error) {
+      console.error('Failed to fetch order:', error);
+      navigate('/');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  if (!order) {
     return null;
   }
 
@@ -34,16 +70,31 @@ export default function SuccessPage() {
 
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <p className="text-sm text-gray-600">Order ID</p>
-            <p className="font-mono font-semibold text-gray-900">{orderId}</p>
+            <p className="font-mono font-semibold text-gray-900">{order.id}</p>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <p className="text-sm text-gray-600 mb-2">Items Purchased</p>
+            {order.orderItems.map((item, index) => (
+              <p key={index} className="text-sm font-medium text-gray-900">
+                {item.product.name}
+              </p>
+            ))}
           </div>
 
           <div className="space-y-3">
-            <button className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold flex items-center justify-center gap-2">
-              <Download className="w-5 h-5" />
-              Download Your Products
+            <button
+              onClick={() => navigate('/licenses')}
+              className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold flex items-center justify-center gap-2"
+            >
+              <Package className="w-5 h-5" />
+              View License Keys
             </button>
 
-            <button className="w-full py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold flex items-center justify-center gap-2">
+            <button
+              onClick={() => navigate('/invoices')}
+              className="w-full py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-semibold flex items-center justify-center gap-2"
+            >
               <FileText className="w-5 h-5" />
               View Invoice
             </button>
@@ -69,8 +120,8 @@ export default function SuccessPage() {
           <h3 className="font-semibold text-blue-900 mb-2">What's Next?</h3>
           <ul className="text-sm text-blue-800 space-y-1">
             <li>• Check your email for order confirmation</li>
-            <li>• Download your products from the order page</li>
             <li>• Your license keys are available in your account</li>
+            <li>• Download your products from the order page</li>
             <li>• Contact support if you have any questions</li>
           </ul>
         </div>

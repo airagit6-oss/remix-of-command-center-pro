@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { COMMISSION_CONFIG, PAYOUT_CONFIG } from '../config/constants';
 
 const prisma = new PrismaClient();
 
@@ -18,7 +19,7 @@ export class CommissionService {
       where: { type: 'REFERRAL', isActive: true }
     });
 
-    const rate = rule ? Number(rule.rate) : 0.05; // Default 5%
+    const rate = rule ? Number(rule.rate) : COMMISSION_CONFIG.DEFAULT_REFERRAL_RATE;
     const amount = orderAmount * rate;
 
     // Check for duplicate commission

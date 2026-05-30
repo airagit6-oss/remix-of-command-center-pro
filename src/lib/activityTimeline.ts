@@ -22,7 +22,7 @@ const STORAGE_KEY = 'saashub_activity_logs';
 const MAX_LOCAL_ACTIVITY_LOGS = 1000;
 
 function uid(): string {
-  return 'act_' + Math.random().toString(36).slice(2, 11);
+  return 'act_' + crypto.randomUUID().slice(2, 11);
 }
 
 function loadLocal(resellerId?: string, userId?: string): ActivityLog[] {

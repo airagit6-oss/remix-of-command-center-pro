@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { requireOwnership } from '../middleware/auth.middleware';
+import { PAYOUT_CONFIG, COMMISSION_CONFIG } from '../config/constants';
 
 const prisma = new PrismaClient();
 
@@ -307,7 +308,7 @@ export async function convertLead(req: FastifyRequest, reply: FastifyReply) {
       where: { type: 'LEAD_CONVERSION', isActive: true }
     });
 
-    const rate = commissionRule ? Number(commissionRule.rate) : 0.10;
+    const rate = commissionRule ? Number(commissionRule.rate) : COMMISSION_CONFIG.DEFAULT_LEAD_CONVERSION_RATE;
     const amount = lead.value ? Number(lead.value) * rate : 0;
 
     if (amount > 0) {
@@ -461,8 +462,8 @@ export async function requestResellerPayout(req: FastifyRequest, reply: FastifyR
       return reply.status(400).send({ error: 'Insufficient balance' });
     }
 
-    if (amount < 50) {
-      return reply.status(400).send({ error: 'Minimum payout is $50' });
+    if (amount < PAYOUT_CONFIG.MINIMUM_AMOUNT) {
+      return reply.status(400).send({ error: `Minimum payout is $${PAYOUT_CONFIG.MINIMUM_AMOUNT}` });
     }
 
     const payout = await prisma.payout.create({
@@ -591,7 +592,7 @@ export async function generateReferralCode(req: FastifyRequest, reply: FastifyRe
       return reply.status(404).send({ error: 'Reseller profile not found' });
     }
 
-    const newCode = `REF${Date.now().toString(36).toUpperCase()}${Math.floor(Math.random() * 1000)}`;
+    const newCode = `REF${Date.now().toString(36).toUpperCase()}${crypto.randomUUID().split('-')[0].substring(0, 3).toUpperCase()}`;
 
     const updated = await prisma.resellerProfile.update({
       where: { id: reseller.id },

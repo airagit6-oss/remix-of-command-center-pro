@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Package, UserCheck, UserX, Star, BarChart3, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -13,29 +13,70 @@ interface Product {
   installs: number;
 }
 
-const availableProducts: Product[] = [
-  { id: 'prod1', name: 'EduFlow Pro', category: 'Education', description: 'Complete LMS for online education', plans: ['Basic', 'Pro', 'Unlimited'], assignedUsers: ['Alex Chen', 'Emily Davis'], rating: 4.8, installs: 45 },
-  { id: 'prod2', name: 'MediCore 360', category: 'Healthcare', description: 'Patient management & clinic software', plans: ['Pro', 'Enterprise'], assignedUsers: ['Sarah Kumar'], rating: 4.9, installs: 22 },
-  { id: 'prod3', name: 'ShopEngine', category: 'E-Commerce', description: 'Full-stack ecommerce platform', plans: ['Basic', 'Pro', 'Unlimited'], assignedUsers: ['Mike Ross', 'Priya Patel', 'Omar Hassan'], rating: 4.6, installs: 38 },
-  { id: 'prod4', name: 'HotelNest', category: 'Hospitality', description: 'Property management system', plans: ['Pro', 'Unlimited'], assignedUsers: [], rating: 4.3, installs: 15 },
-  { id: 'prod5', name: 'AnalyticsHub', category: 'Analytics', description: 'Business intelligence dashboard', plans: ['Basic', 'Pro'], assignedUsers: ['James Wilson'], rating: 4.7, installs: 31 },
-];
-
-const mockUserList = ['Alex Chen', 'Sarah Kumar', 'Mike Ross', 'Priya Patel', 'James Wilson', 'Emily Davis', 'Omar Hassan', 'Anya Singh'];
-
-const categoryColors: Record<string, string> = {
-  Education: '#0070f3',
-  Healthcare: '#d32f2f',
-  'E-Commerce': '#008060',
-  Hospitality: '#b98900',
-  Analytics: '#7c3aed',
-};
+interface Client {
+  id: string;
+  name: string;
+  email: string;
+}
 
 const ResellerProductsPage = () => {
-  const [products, setProducts] = useState<Product[]>(availableProducts);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [assignModal, setAssignModal] = useState<{ productId: string; productName: string } | null>(null);
   const [selectedUser, setSelectedUser] = useState('');
+
+  useEffect(() => {
+    // Fetch products from API
+    const fetchProducts = async () => {
+      try {
+        const token = localStorage.getItem('saashub_token');
+        if (token) {
+          const response = await fetch('/api/v1/reseller/products', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setProducts(data.products || []);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Fetch clients from API
+    const fetchClients = async () => {
+      try {
+        const token = localStorage.getItem('saashub_token');
+        if (token) {
+          const response = await fetch('/api/v1/reseller/clients', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setClients(data.clients || []);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch clients:', error);
+      }
+    };
+
+    fetchProducts();
+    fetchClients();
+  }, []);
+
+  const categoryColors: Record<string, string> = {
+    Education: '#0070f3',
+    Healthcare: '#d32f2f',
+    'E-Commerce': '#008060',
+    Hospitality: '#b98900',
+    Analytics: '#7c3aed',
+  };
 
   const assignUser = () => {
     if (!selectedUser || !assignModal) return;
@@ -162,7 +203,7 @@ const ResellerProductsPage = () => {
               style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}
             >
               <option value="">— choose client —</option>
-              {mockUserList.map(u => <option key={u} value={u}>{u}</option>)}
+              {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
             <div className="flex gap-3 mt-5">
               <button onClick={assignUser} disabled={!selectedUser} className="flex-1 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-50" style={{ background: '#008060' }}>Assign</button>

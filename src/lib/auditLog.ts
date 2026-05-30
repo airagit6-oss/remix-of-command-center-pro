@@ -24,7 +24,7 @@ async function apiFetch<T>(_url: string, _options?: RequestInit): Promise<T> {
 }
 
 function uid(): string {
-  return 'al_' + Math.random().toString(36).slice(2, 11);
+  return 'al_' + crypto.randomUUID().slice(2, 11);
 }
 
 const STORAGE_KEY = 'saashub_audit_logs';

@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { generateServers } from "@/lib/mockData";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 
 export default function InfrastructurePage() {
   const { t } = useTranslation("common");
-  const [servers] = useState(generateServers());
+  const [servers, setServers] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.get('/infrastructure/servers').then(data => {
+      setServers(data || []);
+    });
+  }, []);
 
   return (
     <div className="space-y-3">

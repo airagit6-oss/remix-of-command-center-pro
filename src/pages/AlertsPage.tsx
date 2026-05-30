@@ -1,12 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { generateAlerts } from "@/lib/mockData";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { AlertTriangle, CheckCircle, XCircle, Clock } from "lucide-react";
 
 export default function AlertsPage() {
   const { t } = useTranslation("common");
-  const [alerts] = useState(generateAlerts());
+  const [alerts, setAlerts] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.get('/alerts').then(data => {
+      setAlerts(data || []);
+    });
+  }, []);
 
   const severityIcon = (s: string) => {
     if (s === 'Critical') return <XCircle className="w-4 h-4 text-dd-error" />;

@@ -351,7 +351,7 @@ const CouponsPage = () => {
     setCoupons((prev) =>
       prev.map((c) =>
         c.active && (c.limit === 0 || c.used < c.limit)
-          ? { ...c, used: c.used + (Math.random() < 0.4 ? 1 : 0), revenue: c.revenue + Math.floor(Math.random() * 60) }
+          ? { ...c, used: c.used + (Date.now() % 3 === 0 ? 1 : 0), revenue: c.revenue + (Date.now() % 2 === 0 ? 30 : 0) }
           : c,
       ),
     );

@@ -1,7 +1,6 @@
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { cn } from "@/lib/utils";
-import { generateSparkline } from "@/lib/mockData";
 
 interface Props {
   title: string;
@@ -10,6 +9,7 @@ interface Props {
   color: "blue" | "green" | "red" | "yellow" | "purple";
   prefix?: string;
   suffix?: string;
+  sparklineData?: Array<{ v: number }>;
 }
 
 const colorMap = {
@@ -20,8 +20,23 @@ const colorMap = {
   purple: { stroke: "hsl(270,70%,60%)", fill: "hsl(270,70%,60%)" },
 };
 
-export function KpiCard({ title, value, change, color, prefix = "", suffix = "" }: Props) {
-  const sparkData = generateSparkline(12, 30, 80);
+// Generate deterministic sparkline data from value (no random)
+const generateDeterministicSparkline = (baseValue: number, points: number = 12): Array<{ v: number }> => {
+  const data: Array<{ v: number }> = [];
+  let current = baseValue * 0.7; // Start at 70% of base
+  
+  for (let i = 0; i < points; i++) {
+    // Use sine wave with offset to create smooth deterministic pattern
+    const variance = Math.sin(i * 0.5) * (baseValue * 0.15);
+    const trend = (i / points) * (baseValue * 0.3);
+    data.push({ v: Math.round(current + variance + trend) });
+  }
+  
+  return data;
+};
+
+export function KpiCard({ title, value, change, color, prefix = "", suffix = "", sparklineData }: Props) {
+  const sparkData = sparklineData || generateDeterministicSparkline(typeof value === 'number' ? value : 0);
   const isPositive = change >= 0;
   const c = colorMap[color];
 

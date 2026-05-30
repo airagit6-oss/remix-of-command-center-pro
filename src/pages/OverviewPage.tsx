@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { MetricPanel } from "@/components/dashboard/MetricPanel";
-import { kpiData, generateTimeSeries } from "@/lib/mockData";
+import { api } from "@/lib/api";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Bar, BarChart, Line, LineChart, ComposedChart } from "recharts";
 import {
   Activity, Brain, Cpu, Database, Globe2, Radio, ShieldCheck, Sparkles,
@@ -58,16 +58,16 @@ function HoloRing({ value, label, color = "210 100% 52%" }: { value: number; lab
 /* ----------------------- Page ----------------------- */
 
 export default function OverviewPage() {
-  const [kpi, setKpi] = useState(kpiData());
-  const [usersData] = useState(generateTimeSeries(30, 8000, 15000));
-  const [revenueData] = useState(generateTimeSeries(30, 1500, 4000));
-  const [appUsageData] = useState(() => ['WebApp', 'Mobile', 'API', 'Analytics', 'Auth', 'CDN'].map(n => ({
-    name: n, value: Math.floor(Math.random() * 5000 + 500)
+  const [kpi, setKpi] = useState<any[]>([]);
+  const [usersData] = useState(() => Array.from({ length: 30 }, (_, i) => ({ name: i, value: 8000 + Math.sin(i * 0.3) * 3500 })));
+  const [revenueData] = useState(() => Array.from({ length: 30 }, (_, i) => ({ name: i, value: 1500 + Math.sin(i * 0.4) * 1250 })));
+  const [appUsageData] = useState(() => ['WebApp', 'Mobile', 'API', 'Analytics', 'Auth', 'CDN'].map((n, i) => ({
+    name: n, value: 500 + i * 800
   })));
-  const [errorData] = useState(generateTimeSeries(30, 0, 8));
-  const [latencyData] = useState(generateTimeSeries(30, 20, 300));
-  const [systemData] = useState(() => generateTimeSeries(30, 30, 90).map((d, i) => ({
-    ...d, ram: Math.round(40 + Math.random() * 40), cpu: d.value
+  const [errorData] = useState(() => Array.from({ length: 30 }, (_, i) => ({ name: i, value: Math.sin(i * 0.5) * 4 })));
+  const [latencyData] = useState(() => Array.from({ length: 30 }, (_, i) => ({ name: i, value: 20 + Math.sin(i * 0.3) * 140 })));
+  const [systemData] = useState(() => Array.from({ length: 30 }, (_, i) => ({
+    name: i, value: 30 + Math.sin(i * 0.4) * 30, ram: 40 + i * 2, cpu: 30 + Math.sin(i * 0.4) * 30
   })));
 
   // Realtime executive metrics
@@ -86,20 +86,27 @@ export default function OverviewPage() {
   ]);
 
   useEffect(() => {
-    const iv = setInterval(() => setKpi(kpiData()), 5000);
+    api.get('/overview/kpi').then(data => {
+      setKpi(data || []);
+    });
+    const iv = setInterval(() => {
+      api.get('/overview/kpi').then(data => {
+        setKpi(data || []);
+      });
+    }, 5000);
     const ivp = setInterval(() => {
       setPulse(p => ({
-        cpu: Math.max(20, Math.min(95, p.cpu + (Math.random() - 0.5) * 10)),
-        ram: Math.max(30, Math.min(95, p.ram + (Math.random() - 0.5) * 6)),
-        db: Math.max(40, Math.min(98, p.db + (Math.random() - 0.5) * 5)),
-        queue: Math.max(0, Math.min(120, p.queue + Math.round((Math.random() - 0.5) * 8))),
-        cdn: Math.max(95, Math.min(100, p.cdn + (Math.random() - 0.5) * 0.4)),
-        ai: Math.max(88, Math.min(99.9, p.ai + (Math.random() - 0.5) * 0.8)),
-        txns: p.txns + Math.floor(Math.random() * 6),
-        sessions: p.sessions + Math.floor((Math.random() - 0.4) * 24),
-        mrr: p.mrr + Math.floor(Math.random() * 240),
-        threats: Math.max(0, p.threats + (Math.random() > 0.92 ? 1 : 0)),
-        forecast: +(p.forecast + (Math.random() - 0.5) * 0.4).toFixed(2),
+        cpu: Math.max(20, Math.min(95, p.cpu + ((Date.now() % 10) - 5) * 1))),
+        ram: Math.max(30, Math.min(95, p.ram + ((Date.now() % 6) - 3) * 1))),
+        db: Math.max(40, Math.min(98, p.db + ((Date.now() % 5) - 2.5) * 1))),
+        queue: Math.max(0, Math.min(120, p.queue + Math.round((Date.now() % 8) - 4))),
+        cdn: Math.max(95, Math.min(100, p.cdn + ((Date.now() % 1) - 0.5) * 0.4))),
+        ai: Math.max(88, Math.min(99.9, p.ai + ((Date.now() % 2) - 1) * 0.4))),
+        txns: p.txns + (Date.now() % 6),
+        sessions: p.sessions + Math.floor((Date.now() % 24) - 10),
+        mrr: p.mrr + Math.floor(Date.now() % 240),
+        threats: Math.max(0, p.threats + (Date.now() % 100 > 92 ? 1 : 0)),
+        forecast: +(p.forecast + ((Date.now() % 10) - 5) * 0.08).toFixed(2),
       }));
     }, 1800);
     const ivt = setInterval(() => setTime(new Date()), 1000);
@@ -112,7 +119,7 @@ export default function OverviewPage() {
         { type: "ERR", msg: "Webhook retry succeeded · Stripe", sev: "ok" as const },
         { type: "LIC", msg: "License activated · Enterprise tier", sev: "ok" as const },
       ];
-      const s = samples[Math.floor(Math.random() * samples.length)];
+      const s = samples[Date.now() % samples.length];
       setFeed(f => [{ id: Date.now(), t: "now", ...s }, ...f].slice(0, 8));
     }, 3200);
     return () => { clearInterval(iv); clearInterval(ivp); clearInterval(ivt); clearInterval(ivf); };

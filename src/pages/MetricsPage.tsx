@@ -1,5 +1,5 @@
 import { MetricPanel } from "@/components/dashboard/MetricPanel";
-import { generateTimeSeries } from "@/lib/mockData";
+import { api } from "@/lib/api";
 import { useState } from "react";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Line, LineChart } from "recharts";
 import { useTranslation } from "react-i18next";
@@ -12,10 +12,10 @@ const tt = {
 
 export default function MetricsPage() {
   const { t } = useTranslation("common");
-  const [cpuData] = useState(generateTimeSeries(50, 20, 90));
-  const [memData] = useState(generateTimeSeries(50, 30, 85));
-  const [netData] = useState(generateTimeSeries(50, 100, 800));
-  const [ioData] = useState(generateTimeSeries(50, 5, 60));
+  const [cpuData] = useState(() => Array.from({ length: 50 }, (_, i) => ({ time: i, value: 20 + Math.sin(i * 0.3) * 35 })));
+  const [memData] = useState(() => Array.from({ length: 50 }, (_, i) => ({ time: i, value: 30 + Math.sin(i * 0.4) * 27 })));
+  const [netData] = useState(() => Array.from({ length: 50 }, (_, i) => ({ time: i, value: 100 + Math.sin(i * 0.5) * 350 })));
+  const [ioData] = useState(() => Array.from({ length: 50 }, (_, i) => ({ time: i, value: 5 + Math.sin(i * 0.6) * 27 })));
 
   return (
     <div className="space-y-3">

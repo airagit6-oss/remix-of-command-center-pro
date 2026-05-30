@@ -17,8 +17,8 @@ export function TopNavbar({ onToggleSidebar }: { onToggleSidebar: () => void }) 
     const i = setInterval(() => {
       setNow(new Date());
       if (isLive) {
-        setRevenue((r) => r + Math.floor(Math.random() * 40));
-        setUsers((u) => Math.max(900, u + Math.floor(Math.random() * 11) - 5));
+        setRevenue((r) => r + (Date.now() % 40));
+        setUsers((u) => Math.max(900, u + (Date.now() % 11) - 5));
       }
     }, 1500);
     return () => clearInterval(i);

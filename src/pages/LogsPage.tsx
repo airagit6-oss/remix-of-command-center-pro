@@ -1,19 +1,24 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { generateLogs, generateLog } from "@/lib/mockData";
+import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { Search, Filter } from "lucide-react";
 
 export default function LogsPage() {
   const { t } = useTranslation('common');
-  const [logs, setLogs] = useState(generateLogs(80));
+  const [logs, setLogs] = useState<any[]>([]);
   const [filter, setFilter] = useState("");
   const [eventFilter, setEventFilter] = useState("all");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    api.get('/logs').then(data => {
+      setLogs(data || []);
+    });
     const iv = setInterval(() => {
-      setLogs(prev => [...prev.slice(-200), generateLog(prev.length)]);
+      api.get('/logs').then(data => {
+        setLogs(data || []);
+      });
     }, 2000);
     return () => clearInterval(iv);
   }, []);

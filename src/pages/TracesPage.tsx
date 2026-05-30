@@ -68,29 +68,31 @@ type Trace = {
   queue: number; errors: number; ts: number; pinned?: boolean;
 };
 
-const rand = (a: number, b: number) => Math.floor(a + Math.random() * (b - a));
-const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
-const hex = (n: number) => Math.random().toString(16).slice(2, 2 + n);
+let traceCounter = 0;
+const rand = (a: number, b: number, seed: number) => Math.floor(a + (seed % (b - a)));
+const pick = <T,>(arr: T[], seed: number) => arr[Math.floor((seed % arr.length))];
+const hex = (n: number, seed: number) => (seed % 1000000).toString(16).slice(2, 2 + n);
 
 function makeTrace(): Trace {
-  const status = pick(STATUSES);
+  traceCounter++;
+  const status = pick(STATUSES, traceCounter);
   return {
-    id: hex(10),
-    reqId: `req_${hex(8)}`,
-    service: pick(SERVICES),
-    op: pick(OPS),
-    endpoint: `/api${pick(OPS).split(" ")[1] ?? "/v1"}`,
-    user: `u_${hex(6)}`,
-    device: pick(DEVICES),
-    country: pick(COUNTRIES),
-    region: pick(REGIONS),
+    id: hex(10, traceCounter),
+    reqId: `req_${hex(8, traceCounter)}`,
+    service: pick(SERVICES, traceCounter),
+    op: pick(OPS, traceCounter),
+    endpoint: `/api${pick(OPS, traceCounter).split(" ")[1] ?? "/v1"}`,
+    user: `u_${hex(6, traceCounter)}`,
+    device: pick(DEVICES, traceCounter),
+    country: pick(COUNTRIES, traceCounter),
+    region: pick(REGIONS, traceCounter),
     status,
-    duration: rand(8, status >= 500 ? 4200 : 1200),
-    mem: rand(8, 512),
-    queries: rand(0, 24),
-    queue: rand(0, 9),
-    errors: status >= 400 ? rand(1, 4) : 0,
-    ts: Date.now() - rand(0, 60_000),
+    duration: rand(8, status >= 500 ? 4200 : 1200, traceCounter),
+    mem: rand(8, 512, traceCounter),
+    queries: rand(0, 24, traceCounter),
+    queue: rand(0, 9, traceCounter),
+    errors: status >= 400 ? rand(1, 4, traceCounter) : 0,
+    ts: Date.now() - rand(0, 60_000, traceCounter),
   };
 }
 
@@ -329,7 +331,7 @@ function ThroughputChart() {
 }
 
 function Heatmap() {
-  const cells = Array.from({ length: 7 * 24 }, () => Math.random());
+  const cells = Array.from({ length: 7 * 24 }, (_, i) => (i % 7) / 7);
   return (
     <Panel className="p-3" glow="emerald">
       <div className="flex items-center justify-between">

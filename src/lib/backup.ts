@@ -34,7 +34,7 @@ export async function triggerBackup(): Promise<BackupMeta> {
     // Offline simulation: snapshot localStorage data as a backup record
     const snapshot = _captureLocalSnapshot();
     const meta: BackupMeta = {
-      id: 'bkp_' + Math.random().toString(36).slice(2, 11),
+      id: 'bkp_' + crypto.randomUUID().split('-')[0],
       created_at: new Date().toISOString(),
       size_bytes: new Blob([JSON.stringify(snapshot)]).size,
       tables: Object.keys(snapshot),

@@ -37,11 +37,43 @@ export default function CheckoutPage() {
         paymentMethod
       });
 
-      clearCart();
-      navigate('/success', { state: { orderId: response.order.id } });
-    } catch (error) {
+      // If Stripe client secret is returned, use Stripe Elements
+      if (response.clientSecret) {
+        // Use Stripe Elements to confirm payment
+        const stripe = (window as any).Stripe(response.publishableKey);
+        const { error, paymentIntent } = await stripe.confirmCardPayment(response.clientSecret, {
+          payment_method: {
+            card: (window as any).elements.getElement('card'),
+            billing_details: {
+              name: formData.name,
+              email: formData.email,
+              address: {
+                line1: formData.address,
+                city: formData.city,
+                country: formData.country,
+                postal_code: formData.zipCode,
+              },
+            },
+          },
+        });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        clearCart();
+        navigate('/success', { state: { orderId: response.order.id } });
+      } else {
+        clearCart();
+        navigate('/success', { state: { orderId: response.order.id } });
+      }
+    } catch (error: any) {
       console.error('Checkout failed:', error);
-      alert('Payment failed. Please try again.');
+      if (error.response?.data?.error) {
+        alert(error.response.data.error);
+      } else {
+        alert('Payment failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
