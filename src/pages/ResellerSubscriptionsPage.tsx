@@ -222,7 +222,7 @@ const ResellerSubscriptionsPage = () => {
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('client_name', { defaultValue: 'Client Name' })}</label>
-                <input type="text" placeholder={t('client_name_placeholder', { defaultValue: 'Client name' })}, list="user-list" value={form.userName}
+                <input type="text" placeholder={t('client_name_placeholder', { defaultValue: 'Client name' })} list="user-list" value={form.userName}
                   onChange={e => setForm(prev => ({ ...prev, userName: e.target.value }))}
                   className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2" style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}
                 />
@@ -230,7 +230,7 @@ const ResellerSubscriptionsPage = () => {
               </div>
               <div>
                 <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('email', { defaultValue: 'Email' })}</label>
-                <input type="email" placeholder={t('email_placeholder', { defaultValue: 'client@example.com' })}, value={form.userEmail}
+                <input type="email" placeholder={t('email_placeholder', { defaultValue: 'client@example.com' })} value={form.userEmail}
                   onChange={e => setForm(prev => ({ ...prev, userEmail: e.target.value }))}
                   className="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2" style={{ borderColor: '#c9cccf', color: '#1a1a1a' }}
                 />

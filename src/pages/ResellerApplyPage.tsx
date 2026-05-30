@@ -79,12 +79,12 @@ const ResellerApplyPage = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">{t('full_name', { defaultValue: 'Full Name' })}</label>
-                <input type="text" required placeholder={t('your_name_placeholder', { defaultValue: 'Your name' })}, className={inputClass}
+                <input type="text" required placeholder={t('your_name_placeholder', { defaultValue: 'Your name' })} className={inputClass}
                   value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">{t('email', { defaultValue: 'Email' })}</label>
-                <input type="email" required placeholder={t('email_placeholder', { defaultValue: 'email@domain.com' })}, className={inputClass}
+                <input type="email" required placeholder={t('email_placeholder', { defaultValue: 'email@domain.com' })} className={inputClass}
                   value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
               </div>
               <div>
@@ -94,12 +94,12 @@ const ResellerApplyPage = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">{t('website_optional', { defaultValue: 'Website / Social (optional)' })}</label>
-                <input type="url" placeholder={t('website_placeholder', { defaultValue: 'https://yoursite.com' })}, className={inputClass}
+                <input type="url" placeholder={t('website_placeholder', { defaultValue: 'https://yoursite.com' })} className={inputClass}
                   value={form.website} onChange={e => setForm(f => ({ ...f, website: e.target.value }))} />
               </div>
               <div>
                 <label className="block text-sm font-medium text-foreground mb-1.5">{t('why_join', { defaultValue: 'Why do you want to join?' })}</label>
-                <textarea rows={3} placeholder={t('about_yourself_placeholder', { defaultValue: 'Tell us about yourself...' })}, className={`${inputClass} resize-none`}
+                <textarea rows={3} placeholder={t('about_yourself_placeholder', { defaultValue: 'Tell us about yourself...' })} className={`${inputClass} resize-none`}
                   value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
               </div>
               <button type="submit"
