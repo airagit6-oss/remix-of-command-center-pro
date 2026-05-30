@@ -96,12 +96,12 @@ export default function OverviewPage() {
     }, 5000);
     const ivp = setInterval(() => {
       setPulse(p => ({
-        cpu: Math.max(20, Math.min(95, p.cpu + ((Date.now() % 10) - 5) * 1))),
-        ram: Math.max(30, Math.min(95, p.ram + ((Date.now() % 6) - 3) * 1))),
-        db: Math.max(40, Math.min(98, p.db + ((Date.now() % 5) - 2.5) * 1))),
+        cpu: Math.max(20, Math.min(95, p.cpu + ((Date.now() % 10) - 5) * 1)),
+        ram: Math.max(30, Math.min(95, p.ram + ((Date.now() % 6) - 3) * 1)),
+        db: Math.max(40, Math.min(98, p.db + ((Date.now() % 5) - 2.5) * 1)),
         queue: Math.max(0, Math.min(120, p.queue + Math.round((Date.now() % 8) - 4))),
-        cdn: Math.max(95, Math.min(100, p.cdn + ((Date.now() % 1) - 0.5) * 0.4))),
-        ai: Math.max(88, Math.min(99.9, p.ai + ((Date.now() % 2) - 1) * 0.4))),
+        cdn: Math.max(95, Math.min(100, p.cdn + ((Date.now() % 1) - 0.5) * 0.4)),
+        ai: Math.max(88, Math.min(99.9, p.ai + ((Date.now() % 2) - 1) * 0.4)),
         txns: p.txns + (Date.now() % 6),
         sessions: p.sessions + Math.floor((Date.now() % 24) - 10),
         mrr: p.mrr + Math.floor(Date.now() % 240),
