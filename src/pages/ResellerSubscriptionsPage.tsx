@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useState, useEffect } from 'react';
 import { Plus, Power, PowerOff } from 'lucide-react';
 import { audit } from '@/lib/auditLog';

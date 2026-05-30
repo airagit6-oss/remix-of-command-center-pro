@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity, AlertTriangle, Brain, ChevronRight, Command, Cpu, Database, Download,

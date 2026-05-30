@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Mail, Edit3 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';

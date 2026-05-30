@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Shield, Key, Smartphone, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';

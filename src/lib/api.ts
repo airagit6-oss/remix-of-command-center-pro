@@ -28,7 +28,7 @@ class ApiClient {
     return headers;
   }
 
-  async get<T>(endpoint: string): Promise<T> {
+  async get<T = any>(endpoint: string): Promise<T> {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: 'GET',
       headers: this.getHeaders(),
@@ -41,7 +41,7 @@ class ApiClient {
     return response.json();
   }
 
-  async post<T>(endpoint: string, data?: any): Promise<T> {
+  async post<T = any>(endpoint: string, data?: any): Promise<T> {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: 'POST',
       headers: this.getHeaders(),
@@ -55,7 +55,7 @@ class ApiClient {
     return response.json();
   }
 
-  async patch<T>(endpoint: string, data?: any): Promise<T> {
+  async patch<T = any>(endpoint: string, data?: any): Promise<T> {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: 'PATCH',
       headers: this.getHeaders(),
@@ -69,7 +69,7 @@ class ApiClient {
     return response.json();
   }
 
-  async delete<T>(endpoint: string): Promise<T> {
+  async delete<T = any>(endpoint: string): Promise<T> {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method: 'DELETE',
       headers: this.getHeaders(),

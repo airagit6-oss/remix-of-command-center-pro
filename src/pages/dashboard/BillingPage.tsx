@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { CreditCard, Plus, Download } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';

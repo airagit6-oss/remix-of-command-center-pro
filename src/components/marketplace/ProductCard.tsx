@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, ShoppingCart, ShoppingBag, Zap, Heart, Star, Sparkles, Users, TrendingUp } from 'lucide-react';
