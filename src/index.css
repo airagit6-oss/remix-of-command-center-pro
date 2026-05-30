@@ -29,20 +29,21 @@
     --destructive: 0 80% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 25% 18%;
-    --input: 240 25% 16%;
-    --ring: 265 85% 65%;
+    --border: 250 40% 22%;
+    --input: 240 30% 14%;
+    --ring: 265 90% 70%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 240 35% 6%;
-    --sidebar-foreground: 220 20% 88%;
-    --sidebar-primary: 265 85% 65%;
+    /* Sidebar: deep indigo with neon cyan/purple active state (matches refs) */
+    --sidebar-background: 245 45% 5%;
+    --sidebar-foreground: 230 25% 78%;
+    --sidebar-primary: 265 90% 68%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 30% 12%;
-    --sidebar-accent-foreground: 190 95% 65%;
-    --sidebar-border: 240 30% 14%;
-    --sidebar-ring: 265 85% 65%;
+    --sidebar-accent: 250 40% 14%;
+    --sidebar-accent-foreground: 190 100% 70%;
+    --sidebar-border: 250 40% 16%;
+    --sidebar-ring: 265 90% 70%;
 
     --mp-success: 145 70% 50%;
     --mp-warning: 38 95% 60%;
@@ -90,5 +91,24 @@
       radial-gradient(ellipse at top left, hsl(265 85% 25% / 0.15), transparent 50%),
       radial-gradient(ellipse at bottom right, hsl(190 95% 30% / 0.12), transparent 55%);
     background-attachment: fixed;
+  }
+
+  /* Premium card glow + crisp dividers using token colors only */
+  .bg-card,
+  [class*="bg-card"] {
+    box-shadow:
+      0 0 0 1px hsl(var(--border) / 0.6),
+      0 8px 28px -12px hsl(265 90% 30% / 0.45),
+      0 0 40px -20px hsl(190 100% 50% / 0.25);
+  }
+  hr, [role="separator"] {
+    background: linear-gradient(90deg,
+      transparent,
+      hsl(var(--border)) 20%,
+      hsl(265 90% 60% / 0.4) 50%,
+      hsl(var(--border)) 80%,
+      transparent);
+    border: 0;
+    height: 1px;
   }
 }
