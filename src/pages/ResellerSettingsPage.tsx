@@ -65,7 +65,7 @@ const ResellerSettingsPage = () => {
           <div>
             <label className="block text-xs font-medium mb-1" style={{ color: '#6d7175' }}>{t('bio', { defaultValue: 'Bio' })}</label>
             <textarea
-              placeholder={t('bio_placeholder', { defaultValue: 'Tell us about your business...' })},
+              placeholder={t('bio_placeholder', { defaultValue: 'Tell us about your business...' })}
               value={profile.bio}
               onChange={e => setProfile(p => ({ ...p, bio: e.target.value }))}
               rows={3}
