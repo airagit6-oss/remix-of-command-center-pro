@@ -55,11 +55,11 @@ export default function InfrastructurePage() {
                 <AreaChart data={s.sparkline}>
                   <defs>
                     <linearGradient id={`srv-${s.name}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(210,100%,56%)" stopOpacity={0.2} />
-                      <stop offset="100%" stopColor="hsl(210,100%,56%)" stopOpacity={0} />
+                      <stop offset="0%" stopColor="hsl(var(--accent))" stopOpacity={0.2} />
+                      <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <Area type="monotone" dataKey="v" stroke="hsl(210,100%,56%)" fill={`url(#srv-${s.name})`} strokeWidth={1} dot={false} isAnimationActive={false} />
+                  <Area type="monotone" dataKey="v" stroke="hsl(var(--accent))" fill={`url(#srv-${s.name})`} strokeWidth={1} dot={false} isAnimationActive={false} />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
