@@ -1042,17 +1042,17 @@ export default function RevenuePage() {
   ];
 
   const funnel = [
-    { stage: "Visits",   v: 184000, c: "#22d3ee" },
+    { stage: "Visits",   v: 184000, c: "hsl(var(--accent))" },
     { stage: "Trials",   v:  42000, c: "#38bdf8" },
     { stage: "Activated",v:  18400, c: "#818cf8" },
-    { stage: "Paid",     v:   8200, c: "#a78bfa" },
-    { stage: "Ent.",     v:   1240, c: "#f472b6" },
+    { stage: "Paid",     v:   8200, c: "hsl(var(--primary))" },
+    { stage: "Ent.",     v:   1240, c: "hsl(var(--primary))" },
   ];
 
   const device = [
     { name: "Desktop", v: 58 }, { name: "Mobile", v: 31 }, { name: "Tablet", v: 8 }, { name: "API", v: 3 },
   ];
-  const deviceColors = ["#22d3ee", "#a78bfa", "#34d399", "#f59e0b"];
+  const deviceColors = ["hsl(var(--accent))", "hsl(var(--primary))", "hsl(var(--mp-success))", "#f59e0b"];
 
   const txStream = useMemo(() => Array.from({ length: 48 }, (_, i) => ({ name: i, value: 200 + Math.sin(i * 0.3) * 600 })), [tick]);
 
@@ -1118,20 +1118,20 @@ export default function RevenuePage() {
                 <ComposedChart data={forecast}>
                   <defs>
                     <linearGradient id="rev-actual" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.55} />
-                      <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
+                      <stop offset="0%" stopColor="hsl(var(--accent))" stopOpacity={0.55} />
+                      <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="rev-forecast" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.55} />
-                      <stop offset="100%" stopColor="#a78bfa" stopOpacity={0} />
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.55} />
+                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="rgba(148,163,184,0.08)" strokeDasharray="3 3" />
-                  <XAxis dataKey="time" tick={{ fontSize: 10, fill: "#64748b" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: "#64748b" }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
                   <Tooltip {...tt} />
-                  <Area type="monotone" dataKey="actual"   stroke="#22d3ee" strokeWidth={2} fill="url(#rev-actual)"   dot={false} />
-                  <Area type="monotone" dataKey="forecast" stroke="#a78bfa" strokeWidth={2} strokeDasharray="4 3" fill="url(#rev-forecast)" dot={false} />
+                  <Area type="monotone" dataKey="actual"   stroke="hsl(var(--accent))" strokeWidth={2} fill="url(#rev-actual)"   dot={false} />
+                  <Area type="monotone" dataKey="forecast" stroke="hsl(var(--primary))" strokeWidth={2} strokeDasharray="4 3" fill="url(#rev-forecast)" dot={false} />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
@@ -1155,8 +1155,8 @@ export default function RevenuePage() {
               <ResponsiveContainer width="100%" height={260}>
                 <RadarChart data={radar}>
                   <PolarGrid stroke="rgba(148,163,184,0.15)" />
-                  <PolarAngleAxis dataKey="axis" tick={{ fontSize: 10, fill: "#94a3b8" }} />
-                  <Radar dataKey="v" stroke="#34d399" fill="#34d399" fillOpacity={0.25} strokeWidth={2} />
+                  <PolarAngleAxis dataKey="axis" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <Radar dataKey="v" stroke="hsl(var(--mp-success))" fill="hsl(var(--mp-success))" fillOpacity={0.25} strokeWidth={2} />
                   <Tooltip {...tt} />
                 </RadarChart>
               </ResponsiveContainer>
@@ -1175,13 +1175,13 @@ export default function RevenuePage() {
                 <BarChart data={cohort}>
                   <defs>
                     <linearGradient id="cohort-grad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.95} />
-                      <stop offset="100%" stopColor="#22d3ee" stopOpacity={0.4} />
+                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.95} />
+                      <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity={0.4} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid stroke="rgba(148,163,184,0.08)" strokeDasharray="3 3" />
-                  <XAxis dataKey="m" tick={{ fontSize: 10, fill: "#64748b" }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: "#64748b" }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey="m" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
                   <Tooltip {...tt} />
                   <Bar dataKey="retention" fill="url(#cohort-grad)" radius={[3, 3, 0, 0]} />
                 </BarChart>
@@ -1266,15 +1266,15 @@ export default function RevenuePage() {
               <BarChart data={txStream}>
                 <defs>
                   <linearGradient id="tx-grad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#34d399" stopOpacity={1} />
-                    <stop offset="100%" stopColor="#22d3ee" stopOpacity={0.3} />
+                    <stop offset="0%" stopColor="hsl(var(--mp-success))" stopOpacity={1} />
+                    <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="time" tick={{ fontSize: 9, fill: "#64748b" }} axisLine={false} tickLine={false} interval={5} />
+                <XAxis dataKey="time" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} interval={5} />
                 <Tooltip {...tt} />
                 <Bar dataKey="value" fill="url(#tx-grad)" radius={[2, 2, 0, 0]}>
                   {txStream.map((_, i) => (
-                    <Cell key={i} fill={i === txStream.length - 1 ? "#f472b6" : "url(#tx-grad)"} />
+                    <Cell key={i} fill={i === txStream.length - 1 ? "hsl(var(--primary))" : "url(#tx-grad)"} />
                   ))}
                 </Bar>
               </BarChart>

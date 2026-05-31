@@ -129,7 +129,7 @@ function PulseDot({ color = "bg-emerald-400" }: { color?: string }) {
   );
 }
 
-function MiniSpark({ data, stroke = "#22d3ee" }: { data: number[]; stroke?: string }) {
+function MiniSpark({ data, stroke = "hsl(var(--accent))" }: { data: number[]; stroke?: string }) {
   const d = data.map((v, i) => ({ i, v }));
   return (
     <div className="h-10 w-full">
@@ -210,7 +210,7 @@ const SPARK = (n = 24) => Array.from({ length: n }, () => rand(20, 95));
 function KpiCell({ k }: { k: Kpi }) {
   const v = useCounter(k.value);
   const colorMap = {
-    cyan: "#22d3ee", violet: "#a78bfa", emerald: "#34d399", rose: "#fb7185", amber: "#fbbf24",
+    cyan: "hsl(var(--accent))", violet: "hsl(var(--primary))", emerald: "hsl(var(--mp-success))", rose: "hsl(var(--destructive))", amber: "hsl(var(--mp-warning))",
   };
   return (
     <Panel className="p-3" glow={k.color}>
@@ -292,9 +292,9 @@ function LatencyChart() {
             <XAxis dataKey="t" tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }} stroke="rgba(255,255,255,0.1)" />
             <YAxis tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }} stroke="rgba(255,255,255,0.1)" />
             <RTooltip contentStyle={chartTooltipStyle()} />
-            <Line dataKey="p50" stroke="#34d399" strokeWidth={1.5} dot={false} isAnimationActive={false} />
-            <Line dataKey="p95" stroke="#fbbf24" strokeWidth={1.5} dot={false} isAnimationActive={false} />
-            <Line dataKey="p99" stroke="#fb7185" strokeWidth={1.5} dot={false} isAnimationActive={false} />
+            <Line dataKey="p50" stroke="hsl(var(--mp-success))" strokeWidth={1.5} dot={false} isAnimationActive={false} />
+            <Line dataKey="p95" stroke="hsl(var(--mp-warning))" strokeWidth={1.5} dot={false} isAnimationActive={false} />
+            <Line dataKey="p99" stroke="hsl(var(--destructive))" strokeWidth={1.5} dot={false} isAnimationActive={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
@@ -322,8 +322,8 @@ function ThroughputChart() {
             <XAxis dataKey="t" tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }} stroke="rgba(255,255,255,0.1)" />
             <YAxis tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 10 }} stroke="rgba(255,255,255,0.1)" />
             <RTooltip contentStyle={chartTooltipStyle()} />
-            <Bar dataKey="ok" stackId="a" fill="#22d3ee" />
-            <Bar dataKey="err" stackId="a" fill="#fb7185" />
+            <Bar dataKey="ok" stackId="a" fill="hsl(var(--accent))" />
+            <Bar dataKey="err" stackId="a" fill="hsl(var(--destructive))" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -363,14 +363,14 @@ function Heatmap() {
 
 function InfraMap() {
   const nodes = [
-    { id: "gw",  x: 50,  y: 60, label: "Gateway",  c: "#22d3ee" },
-    { id: "au",  x: 160, y: 30, label: "Auth",     c: "#a78bfa" },
-    { id: "or",  x: 160, y: 100,label: "Orders",   c: "#a78bfa" },
-    { id: "pm",  x: 280, y: 40, label: "Payments", c: "#fbbf24" },
-    { id: "db",  x: 400, y: 30, label: "Postgres", c: "#34d399" },
-    { id: "rd",  x: 400, y: 100,label: "Redis",    c: "#fb7185" },
-    { id: "kf",  x: 280, y: 130,label: "Kafka",    c: "#22d3ee" },
-    { id: "cdn", x: 50,  y: 130,label: "CDN",      c: "#34d399" },
+    { id: "gw",  x: 50,  y: 60, label: "Gateway",  c: "hsl(var(--accent))" },
+    { id: "au",  x: 160, y: 30, label: "Auth",     c: "hsl(var(--primary))" },
+    { id: "or",  x: 160, y: 100,label: "Orders",   c: "hsl(var(--primary))" },
+    { id: "pm",  x: 280, y: 40, label: "Payments", c: "hsl(var(--mp-warning))" },
+    { id: "db",  x: 400, y: 30, label: "Postgres", c: "hsl(var(--mp-success))" },
+    { id: "rd",  x: 400, y: 100,label: "Redis",    c: "hsl(var(--destructive))" },
+    { id: "kf",  x: 280, y: 130,label: "Kafka",    c: "hsl(var(--accent))" },
+    { id: "cdn", x: 50,  y: 130,label: "CDN",      c: "hsl(var(--mp-success))" },
   ];
   const links = [
     ["gw","au"],["gw","or"],["au","pm"],["or","pm"],["pm","db"],
@@ -399,7 +399,7 @@ function InfraMap() {
             return (
               <g key={i}>
                 <line x1={A.x} y1={A.y} x2={B.x} y2={B.y} stroke="rgba(255,255,255,0.12)" strokeWidth={1} />
-                <circle r="2" fill="#22d3ee">
+                <circle r="2" fill="hsl(var(--accent))">
                   <animateMotion dur={`${2 + (i % 3)}s`} repeatCount="indefinite"
                     path={`M ${A.x} ${A.y} L ${B.x} ${B.y}`} />
                 </circle>
@@ -491,13 +491,13 @@ function DurationBar({ ms }: { ms: number }) {
 
 function TraceDrawer({ trace, onClose }: { trace: Trace; onClose: () => void }) {
   const spans = useMemo(() => [
-    { svc: "api-gateway", op: "GET /v2/orders", start: 0, dur: 12, c: "#22d3ee" },
-    { svc: "auth-svc",    op: "verifyJWT",      start: 12, dur: 6,  c: "#a78bfa" },
-    { svc: "orders-svc",  op: "load order",     start: 22, dur: 48, c: "#34d399" },
-    { svc: "postgres",    op: "SELECT orders",  start: 30, dur: 22, c: "#fbbf24" },
-    { svc: "redis",       op: "GET cache",      start: 70, dur: 4,  c: "#fb7185" },
-    { svc: "payments",    op: "POST stripe",    start: 80, dur: 140,c: "#a78bfa" },
-    { svc: "kafka",       op: "publish event",  start: 222, dur: 8, c: "#22d3ee" },
+    { svc: "api-gateway", op: "GET /v2/orders", start: 0, dur: 12, c: "hsl(var(--accent))" },
+    { svc: "auth-svc",    op: "verifyJWT",      start: 12, dur: 6,  c: "hsl(var(--primary))" },
+    { svc: "orders-svc",  op: "load order",     start: 22, dur: 48, c: "hsl(var(--mp-success))" },
+    { svc: "postgres",    op: "SELECT orders",  start: 30, dur: 22, c: "hsl(var(--mp-warning))" },
+    { svc: "redis",       op: "GET cache",      start: 70, dur: 4,  c: "hsl(var(--destructive))" },
+    { svc: "payments",    op: "POST stripe",    start: 80, dur: 140,c: "hsl(var(--primary))" },
+    { svc: "kafka",       op: "publish event",  start: 222, dur: 8, c: "hsl(var(--accent))" },
   ], []);
   const total = 240;
   return (
@@ -778,7 +778,7 @@ function ErrorCenter() {
               </div>
               <span className="rounded-md border border-rose-400/30 bg-rose-500/10 px-1.5 py-0.5 font-mono text-[10px] text-rose-300">×{e.count}</span>
             </div>
-            <MiniSpark data={SPARK(20)} stroke="#fb7185" />
+            <MiniSpark data={SPARK(20)} stroke="hsl(var(--destructive))" />
           </div>
         ))}
       </div>
@@ -788,11 +788,11 @@ function ErrorCenter() {
 
 function GeoTraffic() {
   const regions = [
-    { r: "us-east-1", v: 38, c: "#22d3ee" },
-    { r: "eu-west-1", v: 27, c: "#a78bfa" },
-    { r: "ap-south-1", v: 18, c: "#34d399" },
-    { r: "sa-east-1", v: 9,  c: "#fbbf24" },
-    { r: "us-west-2", v: 8,  c: "#fb7185" },
+    { r: "us-east-1", v: 38, c: "hsl(var(--accent))" },
+    { r: "eu-west-1", v: 27, c: "hsl(var(--primary))" },
+    { r: "ap-south-1", v: 18, c: "hsl(var(--mp-success))" },
+    { r: "sa-east-1", v: 9,  c: "hsl(var(--mp-warning))" },
+    { r: "us-west-2", v: 8,  c: "hsl(var(--destructive))" },
   ];
   return (
     <Panel className="p-3" glow="emerald">
