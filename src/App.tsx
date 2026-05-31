@@ -86,6 +86,7 @@ import ReviewsPage from "./pages/admin/ReviewsPage";
 import CouponsPage from "./pages/admin/CouponsPage";
 import ReportsPage from "./pages/admin/ReportsPage";
 import EmailTemplatesPage from "./pages/admin/EmailTemplatesPage";
+import ChartsQAPage from "./pages/admin/ChartsQAPage";
 import { products } from "@/lib/marketplaceData";
 
 // Author Studio
@@ -268,6 +269,7 @@ const App = () => (
                 <Route path="reports" element={<ReportsPage />} />
                 <Route path="email-templates" element={<EmailTemplatesPage />} />
                 <Route path="settings" element={<SettingsPage />} />
+                <Route path="qa/charts" element={<ChartsQAPage />} />
               </Route>
 
               {/* Author Studio — auth-gated */}

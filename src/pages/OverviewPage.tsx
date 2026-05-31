@@ -43,7 +43,7 @@ function HoloRing({ value, label, color = "210 100% 52%" }: { value: number; lab
   return (
     <div className="flex items-center gap-3">
       <svg width="64" height="64" className="-rotate-90 drop-shadow-[0_0_8px_hsl(210_100%_52%/0.4)]">
-        <circle cx="32" cy="32" r={r} stroke="hsl(220 15% 14%)" strokeWidth="5" fill="none" />
+        <circle cx="32" cy="32" r={r} stroke="hsl(var(--border))" strokeWidth="5" fill="none" />
         <circle cx="32" cy="32" r={r} stroke={`hsl(${color})`} strokeWidth="5" fill="none"
           strokeDasharray={c} strokeDashoffset={c - (value / 100) * c} strokeLinecap="round"
           style={{ transition: "stroke-dashoffset 1s ease-out" }} />
