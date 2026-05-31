@@ -13,11 +13,11 @@ interface Props {
 }
 
 const colorMap = {
-  blue: { stroke: "hsl(210,100%,56%)", fill: "hsl(210,100%,56%)" },
-  green: { stroke: "hsl(142,71%,45%)", fill: "hsl(142,71%,45%)" },
-  red: { stroke: "hsl(0,72%,51%)", fill: "hsl(0,72%,51%)" },
-  yellow: { stroke: "hsl(38,92%,50%)", fill: "hsl(38,92%,50%)" },
-  purple: { stroke: "hsl(270,70%,60%)", fill: "hsl(270,70%,60%)" },
+  blue: { stroke: "hsl(var(--accent))", fill: "hsl(var(--accent))" },
+  green: { stroke: "hsl(var(--mp-success))", fill: "hsl(var(--mp-success))" },
+  red: { stroke: "hsl(var(--destructive))", fill: "hsl(var(--destructive))" },
+  yellow: { stroke: "hsl(var(--mp-warning))", fill: "hsl(var(--mp-warning))" },
+  purple: { stroke: "hsl(var(--primary))", fill: "hsl(var(--primary))" },
 };
 
 // Generate deterministic sparkline data from value (no random)

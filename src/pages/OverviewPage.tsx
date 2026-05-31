@@ -12,15 +12,15 @@ import {
 
 const chartTooltipStyle = {
   contentStyle: {
-    background: "hsl(220,22%,6%)",
+    background: "hsl(var(--popover))",
     border: "1px solid hsl(210,100%,52% / 0.25)",
     borderRadius: 8,
     fontSize: 12,
     boxShadow: "0 8px 40px hsl(210 100% 52% / 0.15)",
     backdropFilter: "blur(12px)",
   },
-  labelStyle: { color: "hsl(210,20%,88%)" },
-  itemStyle: { color: "hsl(210,20%,75%)" },
+  labelStyle: { color: "hsl(var(--foreground))" },
+  itemStyle: { color: "hsl(var(--muted-foreground))" },
 };
 
 /* ----------------------- Premium primitives ----------------------- */
@@ -332,17 +332,17 @@ export default function OverviewPage() {
           <MetricPanel title="Users Activity">
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={usersData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215,18%,14%)" />
-                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(215,15%,50%)" }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(215,15%,50%)" }} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
                 <Tooltip {...chartTooltipStyle} />
                 <defs>
                   <linearGradient id="userGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(186,90%,55%)" stopOpacity={0.5} />
-                    <stop offset="100%" stopColor="hsl(210,100%,56%)" stopOpacity={0} />
+                    <stop offset="0%" stopColor="hsl(var(--accent))" stopOpacity={0.5} />
+                    <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <Area type="monotone" dataKey="value" stroke="hsl(186,90%,55%)" strokeWidth={2} fill="url(#userGrad)" dot={false} />
+                <Area type="monotone" dataKey="value" stroke="hsl(var(--accent))" strokeWidth={2} fill="url(#userGrad)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </MetricPanel>
@@ -352,17 +352,17 @@ export default function OverviewPage() {
           <MetricPanel title="Revenue Stream">
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215,18%,14%)" />
-                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(215,15%,50%)" }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(215,15%,50%)" }} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
                 <Tooltip {...chartTooltipStyle} />
                 <defs>
                   <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(142,71%,45%)" stopOpacity={0.5} />
-                    <stop offset="100%" stopColor="hsl(142,71%,45%)" stopOpacity={0} />
+                    <stop offset="0%" stopColor="hsl(var(--mp-success))" stopOpacity={0.5} />
+                    <stop offset="100%" stopColor="hsl(var(--mp-success))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <Area type="monotone" dataKey="value" stroke="hsl(142,71%,55%)" strokeWidth={2} fill="url(#revGrad)" dot={false} />
+                <Area type="monotone" dataKey="value" stroke="hsl(var(--mp-success))" strokeWidth={2} fill="url(#revGrad)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           </MetricPanel>
@@ -372,14 +372,14 @@ export default function OverviewPage() {
           <MetricPanel title="App Usage">
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={appUsageData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215,18%,14%)" />
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(215,15%,50%)" }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(215,15%,50%)" }} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
                 <Tooltip {...chartTooltipStyle} />
                 <defs>
                   <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(280,80%,65%)" />
-                    <stop offset="100%" stopColor="hsl(210,100%,52%)" />
+                    <stop offset="0%" stopColor="hsl(var(--primary))" />
+                    <stop offset="100%" stopColor="hsl(var(--accent))" />
                   </linearGradient>
                 </defs>
                 <Bar dataKey="value" fill="url(#barGrad)" radius={[4, 4, 0, 0]} />
@@ -394,11 +394,11 @@ export default function OverviewPage() {
           <MetricPanel title="Error Rate">
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={errorData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215,18%,14%)" />
-                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(215,15%,50%)" }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(215,15%,50%)" }} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
                 <Tooltip {...chartTooltipStyle} />
-                <Line type="monotone" dataKey="value" stroke="hsl(0,72%,55%)" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="value" stroke="hsl(var(--destructive))" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </MetricPanel>
@@ -408,11 +408,11 @@ export default function OverviewPage() {
           <MetricPanel title="API Latency (ms)">
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={latencyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215,18%,14%)" />
-                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(215,15%,50%)" }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(215,15%,50%)" }} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
                 <Tooltip {...chartTooltipStyle} />
-                <Line type="monotone" dataKey="value" stroke="hsl(38,92%,55%)" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="value" stroke="hsl(var(--mp-warning))" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </MetricPanel>
@@ -422,12 +422,12 @@ export default function OverviewPage() {
           <MetricPanel title="CPU / RAM">
             <ResponsiveContainer width="100%" height={200}>
               <ComposedChart data={systemData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215,18%,14%)" />
-                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(215,15%,50%)" }} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: "hsl(215,15%,50%)" }} tickLine={false} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
                 <Tooltip {...chartTooltipStyle} />
-                <Area type="monotone" dataKey="cpu" stroke="hsl(210,100%,56%)" fill="hsl(210,100%,56%)" fillOpacity={0.18} strokeWidth={1.5} dot={false} name="CPU %" />
-                <Line type="monotone" dataKey="ram" stroke="hsl(186,90%,55%)" strokeWidth={1.5} dot={false} name="RAM %" />
+                <Area type="monotone" dataKey="cpu" stroke="hsl(var(--accent))" fill="hsl(var(--accent))" fillOpacity={0.18} strokeWidth={1.5} dot={false} name="CPU %" />
+                <Line type="monotone" dataKey="ram" stroke="hsl(var(--accent))" strokeWidth={1.5} dot={false} name="RAM %" />
               </ComposedChart>
             </ResponsiveContainer>
           </MetricPanel>
