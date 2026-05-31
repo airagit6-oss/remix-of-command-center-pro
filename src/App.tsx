@@ -269,6 +269,7 @@ const App = () => (
                 <Route path="reports" element={<ReportsPage />} />
                 <Route path="email-templates" element={<EmailTemplatesPage />} />
                 <Route path="settings" element={<SettingsPage />} />
+                <Route path="qa/charts" element={<ChartsQAPage />} />
               </Route>
 
               {/* Author Studio — auth-gated */}
