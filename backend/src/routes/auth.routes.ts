@@ -1,204 +1,166 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import { FastifyInstance } from 'fastify';
+import { AppError, throwError } from '../middleware/errorHandler';
+import { validate, schemas, sanitizeInput } from '../middleware/validation';
+import { strictRateLimiter } from '../middleware/rateLimiter';
+import { prisma } from '../db';
+import { hashPassword, verifyPassword, generateToken } from '../utils/auth';
+import { logger } from '../utils/logger';
 
-const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+/**
+ * AUTHENTICATION ROUTES - PRODUCTION HARDENED
+ */
 
-// POST /auth/register
-export async function register(req: FastifyRequest, reply: FastifyReply) {
-  try {
-    const { email, password, name, referralCode, role } = req.body as any;
-    
-    // Check if user exists
-    const existing = await prisma.user.findUnique({
-      where: { email }
-    });
+export async function authRoutes(fastify: FastifyInstance) {
+  /**
+   * POST /auth/register
+   * Register new user with validation and rate limiting
+   */
+  fastify.post(
+    '/auth/register',
+    { preHandler: [strictRateLimiter] },
+    async (request, fastify) => {
+      try {
+        // Validate input
+        const validated = schemas.register.parse(request.body);
+        const { email, password, name } = sanitizeInput(validated);
 
-    if (existing) {
-      return reply.status(400).send({ error: 'User already exists' });
-    }
+        // Check if user exists
+        const existingUser = await prisma.user.findUnique({
+          where: { email },
+        });
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name,
-        role: role || 'CUSTOMER'
-      }
-    });
-
-    // Handle referral
-    if (referralCode) {
-      const reseller = await prisma.resellerProfile.findUnique({
-        where: { referralCode }
-      });
-
-      if (reseller) {
-        // Validate referral (no self-referral, no duplicate)
-        if (reseller.userId !== user.id) {
-          const existingReferral = await prisma.referral.findFirst({
-            where: {
-              referrerId: reseller.userId,
-              referredUserId: user.id
-            }
-          });
-
-          if (!existingReferral) {
-            await prisma.referral.create({
-              data: {
-                referrerId: reseller.userId,
-                referredUserId: user.id,
-                code: referralCode,
-                status: 'PENDING'
-              }
-            });
-
-            // Update reseller stats
-            await prisma.resellerProfile.update({
-              where: { id: reseller.id },
-              data: { totalReferrals: { increment: 1 } }
-            });
-          }
+        if (existingUser) {
+          throw new AppError(409, 'Email already registered');
         }
-      }
-    }
 
-    // Create profile based on role
-    if (role === 'AUTHOR') {
-      await prisma.authorProfile.create({
-        data: {
-          userId: user.id
-        }
-      });
-    } else if (role === 'RESELLER') {
-      const referralCodeNew = `REF${Date.now().toString(36).toUpperCase()}${Math.floor(Date.now() % 10000)}`;
-      await prisma.resellerProfile.create({
-        data: {
+        // Hash password
+        const hashedPassword = await hashPassword(password);
+
+        // Create user
+        const user = await prisma.user.create({
+          data: {
+            email,
+            name,
+            password: hashedPassword,
+            role: 'user',
+          },
+        });
+
+        // Generate token
+        const token = generateToken(user.id);
+
+        logger.info({
+          type: 'user_registered',
           userId: user.id,
-          referralCode: referralCodeNew,
-          referralLink: `${process.env.APP_URL || 'http://localhost:3000'}/signup?ref=${referralCodeNew}`
+          email: user.email,
+        });
+
+        return {
+          success: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          },
+          token,
+        };
+      } catch (error) {
+        if (error instanceof AppError) throw error;
+        
+        logger.error({
+          type: 'register_error',
+          error: error.message,
+        });
+        throw new AppError(500, 'Registration failed');
+      }
+    }
+  );
+
+  /**
+   * POST /auth/login
+   * Login with email and password
+   */
+  fastify.post(
+    '/auth/login',
+    { preHandler: [strictRateLimiter] },
+    async (request, fastify) => {
+      try {
+        const validated = schemas.login.parse(request.body);
+        const { email, password } = sanitizeInput(validated);
+
+        // Find user
+        const user = await prisma.user.findUnique({
+          where: { email },
+        });
+
+        if (!user) {
+          // Don't reveal if email exists (security best practice)
+          throw new AppError(401, 'Invalid email or password');
         }
+
+        // Verify password
+        const isValid = await verifyPassword(password, user.password);
+
+        if (!isValid) {
+          logger.warn({
+            type: 'failed_login',
+            email,
+            reason: 'invalid_password',
+          });
+          throw new AppError(401, 'Invalid email or password');
+        }
+
+        // Generate token
+        const token = generateToken(user.id);
+
+        logger.info({
+          type: 'user_login',
+          userId: user.id,
+          email: user.email,
+        });
+
+        return {
+          success: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          },
+          token,
+        };
+      } catch (error) {
+        if (error instanceof AppError) throw error;
+        throw new AppError(500, 'Login failed');
+      }
+    }
+  );
+
+  /**
+   * GET /auth/me
+   * Get current user info (requires auth)
+   */
+  fastify.get(
+    '/auth/me',
+    { onRequest: [fastify.authenticate] },
+    async (request, fastify) => {
+      const user = await prisma.user.findUnique({
+        where: { id: request.user.id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+        },
       });
-    }
 
-    // Generate token
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    // Audit log
-    await prisma.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'REGISTER',
-        entity: 'User',
-        entityId: user.id,
-        changes: { email, role: user.role, referralCode }
+      if (!user) {
+        throw new AppError(404, 'User not found');
       }
-    });
 
-    reply.status(201).send({
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role
-      },
-      token
-    });
-  } catch (error) {
-    reply.status(500).send({ error: 'Failed to register' });
-  }
-}
-
-// POST /auth/login
-export async function login(req: FastifyRequest, reply: FastifyReply) {
-  try {
-    const { email, password } = req.body as any;
-    
-    const user = await prisma.user.findUnique({
-      where: { email }
-    });
-
-    if (!user) {
-      return reply.status(401).send({ error: 'Invalid credentials' });
+      return { success: true, user };
     }
-
-    const validPassword = await bcrypt.compare(password, user.password);
-
-    if (!validPassword) {
-      return reply.status(401).send({ error: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    // Audit log
-    await prisma.auditLog.create({
-      data: {
-        userId: user.id,
-        action: 'LOGIN',
-        entity: 'User',
-        entityId: user.id
-      }
-    });
-
-    reply.send({
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role
-      },
-      token
-    });
-  } catch (error) {
-    reply.status(500).send({ error: 'Failed to login' });
-  }
-}
-
-// GET /auth/me
-export async function getMe(req: FastifyRequest, reply: FastifyReply) {
-  try {
-    const userId = (req as any).user.id;
-    
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        isVerified: true,
-        createdAt: true,
-        authorProfile: true,
-        resellerProfile: true
-      }
-    });
-
-    if (!user) {
-      return reply.status(404).send({ error: 'User not found' });
-    }
-
-    reply.send(user);
-  } catch (error) {
-    reply.status(500).send({ error: 'Failed to fetch user' });
-  }
-}
-
-export function authRoutes(fastify: FastifyInstance) {
-  fastify.post('/auth/register', register);
-  fastify.post('/auth/login', login);
-  fastify.get('/auth/me', { preHandler: [fastify.authenticate] }, getMe);
+  );
 }
