@@ -25,7 +25,7 @@
       "instances": 1,
       "env": {
         "NODE_ENV": "production",
-        "PORT": 8080
+        "PORT": 4173
       },
       "error_file": "/root/apps/remix-of-command-center-pro/logs/frontend-error.log",
       "out_file": "/root/apps/remix-of-command-center-pro/logs/frontend-out.log",

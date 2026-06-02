@@ -9,8 +9,10 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "start": "node server.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "seed:locales": "node scripts/seed-locale-placeholders.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
