@@ -222,7 +222,7 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
                 <span className="text-sm font-bold text-primary-foreground">S</span>
                 <span className="absolute -right-0.5 -top-0.5 h-2 w-2 animate-pulse rounded-full bg-emerald-400 ring-2 ring-background" />
               </div>
-              <span className="font-display text-xl font-bold text-foreground hidden sm:inline tracking-tight">SaaSHub</span>
+              <span className="font-display text-xl font-bold text-foreground hidden sm:inline tracking-tight">Software Vala</span>
             </Link>
           </div>
 

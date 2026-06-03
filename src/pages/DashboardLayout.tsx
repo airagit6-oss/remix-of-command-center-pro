@@ -51,7 +51,7 @@ const UserSidebar = () => {
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg mp-gradient-bg">
             <span className="text-xs font-bold text-primary-foreground">S</span>
           </div>
-          {!collapsed && <span className="font-display text-base font-bold text-foreground">SaaSHub</span>}
+          {!collapsed && <span className="font-display text-base font-bold text-foreground">Software Vala</span>}
         </NavLink>
       </SidebarHeader>
 

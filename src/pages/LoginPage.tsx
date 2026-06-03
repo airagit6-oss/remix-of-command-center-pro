@@ -468,7 +468,7 @@ const LoginPage = () => {
             background: `linear-gradient(135deg, ${NEON.cyan}, ${NEON.violet})`,
             boxShadow: accentGlow,
           }} />
-          <span style={{ fontWeight: 700, letterSpacing: 0.4 }}>SaaSHub <span style={{ color: NEON.mute, fontWeight: 500 }}>· Command Center</span></span>
+          <span style={{ fontWeight: 700, letterSpacing: 0.4 }}>Software Vala <span style={{ color: NEON.mute, fontWeight: 500 }}>· Command Center</span></span>
         </div>
         <div style={{ display: 'flex', gap: 8, fontSize: 12, color: NEON.mute }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>

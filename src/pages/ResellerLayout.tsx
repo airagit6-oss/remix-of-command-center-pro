@@ -81,7 +81,7 @@ const ResellerSidebar = () => {
             </div>
             {!collapsed && (
               <div>
-                <span className="text-[13px] font-semibold text-white block leading-tight">SaaSHub</span>
+                <span className="text-[13px] font-semibold text-white block leading-tight">Software Vala</span>
                 <span className="text-[10px] text-white/50 leading-tight">Partner Program</span>
               </div>
             )}

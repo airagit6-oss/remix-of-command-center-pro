@@ -67,7 +67,7 @@ const HomePage = () => {
               </div>
             </div>
             <div className="mt-8 border-t border-border pt-6 text-center">
-              <p className="text-xs text-muted-foreground">© 2026 SaaSHub. All rights reserved. Ultra Premium Software Marketplace.</p>
+              <p className="text-xs text-muted-foreground">© 2026 Software Vala. All rights reserved. Ultra Premium Software Marketplace.</p>
             </div>
           </div>
         </footer>

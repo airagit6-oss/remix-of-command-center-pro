@@ -128,7 +128,7 @@ const RouteMeta = () => {
     const product = pathname.startsWith('/product/')
       ? products.find(p => p.id === pathname.split('/').pop())
       : undefined;
-    const title = product ? `${product.name} | SaaSHub` : pathname.startsWith('/admin') ? 'Boss Panel | SaaSHub' : pathname.startsWith('/reseller') ? 'Partner Panel | SaaSHub' : pathname.startsWith('/dashboard') ? 'User Dashboard | SaaSHub' : 'SaaSHub Marketplace';
+    const title = product ? `${product.name} | Software Vala` : pathname.startsWith('/admin') ? 'Boss Panel | Software Vala' : pathname.startsWith('/reseller') ? 'Partner Panel | Software Vala' : pathname.startsWith('/dashboard') ? 'User Dashboard | Software Vala' : 'Software Vala Marketplace';
     const description = product ? product.shortDescription : 'Premium SaaS marketplace with user, reseller, and boss dashboards for apps, orders, reports, and monitoring.';
     document.title = title;
     setMeta('meta[name="description"]', description);

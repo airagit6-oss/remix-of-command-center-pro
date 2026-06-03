@@ -52,7 +52,7 @@ const SignupPage = () => {
             </p>
           )}
           <p style={{ fontSize: '13px', color: '#666', textAlign: 'center', marginBottom: '24px' }}>
-            Join SaaSHub to access premium apps
+            Join Software Vala to access premium apps
           </p>
 
           <form onSubmit={handleSignup}>

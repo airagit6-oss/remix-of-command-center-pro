@@ -47,7 +47,7 @@ const ResellerApplyPage = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card px-6 py-4 flex items-center justify-between">
-        <Link to="/" className="font-display text-xl font-bold text-foreground">SaaSHub</Link>
+        <Link to="/" className="font-display text-xl font-bold text-foreground">Software Vala</Link>
         <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
           {t('sign_in', { defaultValue: 'Sign in' })}
         </Link>
@@ -57,7 +57,7 @@ const ResellerApplyPage = () => {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-foreground mb-3">{t('become_a_reseller', { defaultValue: 'Become a Reseller' })}</h1>
           <p className="text-lg text-muted-foreground">
-            {t('reseller_intro', { defaultValue: 'Join our partner network and earn recurring commissions by referring customers to SaaSHub.' })}
+            {t('reseller_intro', { defaultValue: 'Join our partner network and earn recurring commissions by referring customers to Software Vala.' })}
           </p>
         </div>
 
