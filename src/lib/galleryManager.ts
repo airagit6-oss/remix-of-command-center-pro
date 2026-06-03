@@ -83,7 +83,7 @@ const DEFAULT_SETTINGS: GallerySettings = {
   compressionQuality: 0.85,
   autoWebp: true,
   watermarkEnabled: false,
-  watermarkText: '© SaaSHub',
+  watermarkText: '© Software Vala',
   watermarkOpacity: 0.3,
   requireApproval: false,
   autoGenerateThumbnails: true,

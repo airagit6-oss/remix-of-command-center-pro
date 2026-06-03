@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { Logo } from '@/components/brand/Logo';
 
 type Lang = { code: string; label: string; flag: string };
 const LANGS: Lang[] = [
@@ -218,11 +219,8 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
               <Menu className="h-5 w-5" />
             </button>
             <Link to="/" className="flex items-center gap-2">
-              <div className="relative flex h-9 w-9 items-center justify-center rounded-lg mp-gradient-bg shadow-[0_0_24px_-6px_rgba(34,211,238,0.6)]">
-                <span className="text-sm font-bold text-primary-foreground">S</span>
-                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 animate-pulse rounded-full bg-emerald-400 ring-2 ring-background" />
-              </div>
-              <span className="font-display text-xl font-bold text-foreground hidden sm:inline tracking-tight">SaaSHub</span>
+              <Logo variant="horizontal" height={36} className="hidden sm:block" />
+              <Logo variant="round" height={36} className="sm:hidden" />
             </Link>
           </div>
 

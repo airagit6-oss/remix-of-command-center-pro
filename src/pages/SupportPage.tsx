@@ -21,7 +21,7 @@ const SupportPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card px-6 py-4 flex items-center justify-between">
-        <Link to="/" className="font-display text-xl font-bold text-foreground">SaaSHub</Link>
+        <Link to="/" className="font-display text-xl font-bold text-foreground">Software Vala</Link>
         <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">← Back to Home</Link>
       </header>
 

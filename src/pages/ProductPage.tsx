@@ -114,8 +114,8 @@ const ProductPage = () => {
   ];
 
   const comments = [
-    { id: 1, user: 'David Kim', avatar: 'DK', date: '3 days ago', text: 'Does this support multi-language?', replies: [{ user: 'SaaSHub Team', avatar: 'ST', date: '2 days ago', text: 'Yes! We support 20+ languages out of the box.' }] },
-    { id: 2, user: 'Anna Lopez', avatar: 'AL', date: '1 week ago', text: 'Can I integrate this with Stripe for payments?', replies: [{ user: 'SaaSHub Team', avatar: 'ST', date: '6 days ago', text: 'Absolutely, Stripe integration is included in all plans.' }] },
+    { id: 1, user: 'David Kim', avatar: 'DK', date: '3 days ago', text: 'Does this support multi-language?', replies: [{ user: 'Software Vala Team', avatar: 'ST', date: '2 days ago', text: 'Yes! We support 20+ languages out of the box.' }] },
+    { id: 2, user: 'Anna Lopez', avatar: 'AL', date: '1 week ago', text: 'Can I integrate this with Stripe for payments?', replies: [{ user: 'Software Vala Team', avatar: 'ST', date: '6 days ago', text: 'Absolutely, Stripe integration is included in all plans.' }] },
     { id: 3, user: 'Raj Mehta', avatar: 'RM', date: '2 weeks ago', text: 'Great product! Working perfectly for our team.', replies: [] },
   ];
 
@@ -568,7 +568,7 @@ const ProductPage = () => {
                   <div className="flex items-center gap-3">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">SH</div>
                     <div>
-                      <p className="text-sm font-semibold text-foreground">SaaSHub Team</p>
+                      <p className="text-sm font-semibold text-foreground">Software Vala Team</p>
                       <p className="text-xs text-muted-foreground">Elite Author • Power Elite</p>
                     </div>
                   </div>

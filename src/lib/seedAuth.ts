@@ -23,7 +23,7 @@ export interface SeedUser {
   hash: string; // SHA-256(SEED_SALT:email:password)
 }
 
-const SEED_SALT = 'SaaSHub::v1::auth-seed';
+const SEED_SALT = 'Software Vala::v1::auth-seed';
 const SEED_FLAG_KEY = 'saashub_seed_v1';
 const ROLES_KEY = 'saashub_roles_v1';
 

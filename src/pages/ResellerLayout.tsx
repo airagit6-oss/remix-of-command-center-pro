@@ -14,6 +14,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
   SidebarHeader, SidebarFooter, useSidebar,
 } from '@/components/ui/sidebar';
+import { Logo } from '@/components/brand/Logo';
 
 const getGroups = (t: any) => [
   {
@@ -76,13 +77,15 @@ const ResellerSidebar = () => {
       <div className="flex flex-col h-full" style={{ background: '#1a1a1a' }}>
         <SidebarHeader className="px-4 py-4">
           <NavLink to="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: '#008060' }}>
-              <span className="text-sm font-bold text-white">S</span>
-            </div>
-            {!collapsed && (
-              <div>
-                <span className="text-[13px] font-semibold text-white block leading-tight">SaaSHub</span>
-                <span className="text-[10px] text-white/50 leading-tight">Partner Program</span>
+            {collapsed ? (
+              <Logo variant="round" height={32} />
+            ) : (
+              <div className="flex items-center gap-2.5">
+                <Logo variant="round" height={32} />
+                <div>
+                  <span className="text-[13px] font-semibold text-white block leading-tight">Software Vala</span>
+                  <span className="text-[10px] text-white/60 leading-tight tracking-wider uppercase">The Name of Trust</span>
+                </div>
               </div>
             )}
           </NavLink>

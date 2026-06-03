@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 interface Template { name: string; desc: string; updated: string; subject: string; body: string; }
 
 const seed: Template[] = [
-  { name: 'Welcome email', desc: 'Sent on user signup', updated: '2 days ago', subject: 'Welcome to SaaSHub 👋', body: 'Hi {{name}},\n\nThanks for signing up.' },
+  { name: 'Welcome email', desc: 'Sent on user signup', updated: '2 days ago', subject: 'Welcome to Software Vala 👋', body: 'Hi {{name}},\n\nThanks for signing up.' },
   { name: 'Order confirmation', desc: 'Sent after successful purchase', updated: '1 week ago', subject: 'Your order is confirmed', body: 'Hi {{name}}, your order #{{id}} is confirmed.' },
   { name: 'Password reset', desc: 'Sent when user requests password reset', updated: '3 weeks ago', subject: 'Reset your password', body: 'Click here to reset: {{link}}' },
   { name: 'Subscription renewal', desc: 'Sent before billing date', updated: '1 month ago', subject: 'Your subscription renews soon', body: 'Heads up — your plan renews on {{date}}.' },
