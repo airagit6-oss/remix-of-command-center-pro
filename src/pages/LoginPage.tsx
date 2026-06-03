@@ -490,46 +490,14 @@ const LoginPage = () => {
         </div>
 
         <section style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', animation: 'lvSlideUp .5s ease' }}>
-          <div ref={robotRef} style={{ position: 'relative', width: 132, height: 132, marginBottom: -34, animation: 'lvFloat 5s ease-in-out infinite' }}>
-            <span style={{ position: 'absolute', inset: -10, borderRadius: '50%', border: `1px solid ${accent}55`, animation: 'lvRing 2.4s ease-out infinite' }} />
-            <span style={{ position: 'absolute', inset: -10, borderRadius: '50%', border: `1px solid ${accent}33`, animation: 'lvRing 2.4s 1.2s ease-out infinite' }} />
-            <svg viewBox="0 0 132 132" width="132" height="132">
-              <defs>
-                <radialGradient id="lvHead" cx="50%" cy="40%" r="60%">
-                  <stop offset="0%" stopColor="#1a2547" />
-                  <stop offset="100%" stopColor="#070b1a" />
-                </radialGradient>
-                <linearGradient id="lvVisor" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor={accent} stopOpacity="0.9" />
-                  <stop offset="100%" stopColor={NEON.violet} stopOpacity="0.7" />
-                </linearGradient>
-                <filter id="lvGlow"><feGaussianBlur stdDeviation="2.4" /></filter>
-              </defs>
-              <rect x="58" y="100" width="16" height="14" rx="3" fill="#0e1530" stroke={accent} strokeOpacity="0.3" />
-              <path d="M30 56 Q30 26 66 26 Q102 26 102 56 L102 88 Q102 104 86 104 L46 104 Q30 104 30 88 Z"
-                fill="url(#lvHead)" stroke={accent} strokeOpacity="0.55" />
-              <line x1="66" y1="26" x2="66" y2="14" stroke={accent} strokeWidth="1.5" />
-              <circle cx="66" cy="12" r="3" fill={accent} filter="url(#lvGlow)" />
-              <rect x="40" y="50" width="52" height="26" rx="13" fill="url(#lvVisor)" opacity="0.18" />
-              <rect x="40" y="50" width="52" height="26" rx="13" fill="none" stroke={accent} strokeOpacity="0.6" />
-              <rect x="42" y="58" width="48" height="1.2" fill={accent} opacity="0.7">
-                <animate attributeName="y" values="52;74;52" dur="3.2s" repeatCount="indefinite" />
-                <animate attributeName="opacity" values="0.2;0.9;0.2" dur="3.2s" repeatCount="indefinite" />
-              </rect>
-              <g transform={`translate(${pupil.x}, ${pupil.y})`}>
-                <ellipse cx="54" cy="63" rx="5" ry={blink ? 0.6 : 5} fill={accent} filter="url(#lvGlow)" />
-                <ellipse cx="78" cy="63" rx="5" ry={blink ? 0.6 : 5} fill={accent} filter="url(#lvGlow)" />
-                <circle cx="54" cy="63" r={blink ? 0 : 1.6} fill="#fff" />
-                <circle cx="78" cy="63" r={blink ? 0 : 1.6} fill="#fff" />
-              </g>
-              <g stroke={accent} strokeOpacity="0.5">
-                <line x1="54" y1="86" x2="78" y2="86" />
-                <line x1="58" y1="90" x2="74" y2="90" />
-                <line x1="62" y1="94" x2="70" y2="94" />
-              </g>
-              <path d="M30 64 L22 70 L22 82 L30 88" fill="none" stroke={accent} strokeOpacity="0.45" />
-              <path d="M102 64 L110 70 L110 82 L102 88" fill="none" stroke={accent} strokeOpacity="0.45" />
-            </svg>
+          <div ref={robotRef} style={{ position: 'relative', marginBottom: -28, animation: 'lvFloat 5s ease-in-out infinite', display: 'grid', placeItems: 'center' }}>
+            <span style={{ position: 'absolute', inset: -14, borderRadius: '50%', border: `1px solid #2D8CFF55`, animation: 'lvRing 2.4s ease-out infinite' }} />
+            <span style={{ position: 'absolute', inset: -14, borderRadius: '50%', border: `1px solid #2D8CFF33`, animation: 'lvRing 2.4s 1.2s ease-out infinite' }} />
+            <Logo variant="round" height={116} withGlow />
+          </div>
+          <div style={{ textAlign: 'center', marginTop: 18, marginBottom: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 4, color: '#2D8CFF', textTransform: 'uppercase' }}>The Name of Trust</div>
+            <div style={{ fontSize: 13, color: NEON.mute, marginTop: 4 }}>Global Enterprise Operating System</div>
           </div>
 
           <div style={{
