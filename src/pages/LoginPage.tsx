@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { Logo } from '@/components/brand/Logo';
 
 type Role = 'user' | 'reseller' | 'admin';
 type Mode = 'login' | 'forgot' | 'otp' | '2fa' | 'biometric';
@@ -462,13 +463,11 @@ const LoginPage = () => {
         position: 'relative', zIndex: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '20px 28px',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 30, height: 30, borderRadius: 8,
-            background: `linear-gradient(135deg, ${NEON.cyan}, ${NEON.violet})`,
-            boxShadow: accentGlow,
-          }} />
-          <span style={{ fontWeight: 700, letterSpacing: 0.4 }}>Software Vala <span style={{ color: NEON.mute, fontWeight: 500 }}>· Command Center</span></span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Logo variant="horizontal" height={34} withGlow />
+          <span style={{ fontSize: 11, color: NEON.mute, fontWeight: 600, letterSpacing: 1.4, textTransform: 'uppercase', borderLeft: `1px solid ${NEON.border}`, paddingLeft: 12 }}>
+            Command Center
+          </span>
         </div>
         <div style={{ display: 'flex', gap: 8, fontSize: 12, color: NEON.mute }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
