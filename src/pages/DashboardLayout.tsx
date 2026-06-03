@@ -9,6 +9,7 @@ import {
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
   SidebarHeader, SidebarFooter, useSidebar,
 } from '@/components/ui/sidebar';
+import { Logo } from '@/components/brand/Logo';
 
 const groups = [
   {

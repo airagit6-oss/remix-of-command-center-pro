@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { Logo } from '@/components/brand/Logo';
 
 type Lang = { code: string; label: string; flag: string };
 const LANGS: Lang[] = [
