@@ -367,11 +367,19 @@ const LoginPage = () => {
     return () => clearInterval(id);
   }, []);
 
-  const doLogin = useCallback((r: Role, em = 'demo@platform.io') => {
+  const doLogin = useCallback(async (r: Role, em = 'demo@platform.io') => {
+    setAuthError('');
     setSuccess(true);
+
+    const res = await login(em, 'x');
+    if (!res.ok) {
+      setSuccess(false);
+      setAuthError(res.error);
+      return;
+    }
+
     setTimeout(() => {
-      login(em, 'x', r);
-      navigate(r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/');
+      navigate(res.redirect);
     }, 850);
   }, [login, navigate]);
 
@@ -591,9 +599,9 @@ const LoginPage = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-              <QuickBtn color={NEON.cyan} label="Member" onClick={() => { login('user@test.com', 'test', 'user'); navigate('/'); }} />
-              <QuickBtn color={NEON.violet} label="Reseller" onClick={() => { login('reseller@test.com', 'test', 'reseller'); navigate('/reseller/dashboard'); }} />
-              <QuickBtn color="#f5b042" label="Boss" onClick={() => { login('boss@test.com', 'test', 'admin'); navigate('/admin'); }} />
+              <QuickBtn color={NEON.cyan} label="Member" onClick={() => void doLogin('user', 'user@test.com')} />
+              <QuickBtn color={NEON.violet} label="Reseller" onClick={() => void doLogin('reseller', 'reseller@test.com')} />
+              <QuickBtn color="#f5b042" label="Boss" onClick={() => void doLogin('admin', 'boss@test.com')} />
             </div>
 
             <p style={{ marginTop: 18, textAlign: 'center', fontSize: 12, color: NEON.mute }}>

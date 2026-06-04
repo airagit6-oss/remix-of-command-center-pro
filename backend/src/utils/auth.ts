@@ -24,10 +24,11 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 /**
  * Generate JWT token
  */
-export function generateToken(userId: string, expiresIn: string = '7d'): string {
+export function generateToken(userId: string, role: string, expiresIn: string = '7d'): string {
   return jwt.sign(
     {
       id: userId,
+      role,
       iat: Math.floor(Date.now() / 1000),
     },
     JWT_SECRET,

@@ -46,8 +46,10 @@ export async function authRoutes(fastify: FastifyInstance) {
           },
         });
 
+        const role = user.role === 'CUSTOMER' ? 'user' : user.role.toLowerCase();
+
         // Generate token
-        const token = generateToken(user.id);
+        const token = generateToken(user.id, role);
 
         logger.info({
           type: 'user_registered',
@@ -111,8 +113,10 @@ export async function authRoutes(fastify: FastifyInstance) {
           throw new AppError(401, 'Invalid email or password');
         }
 
+        const role = user.role === 'CUSTOMER' ? 'user' : user.role.toLowerCase();
+
         // Generate token
-        const token = generateToken(user.id);
+        const token = generateToken(user.id, role);
 
         logger.info({
           type: 'user_login',

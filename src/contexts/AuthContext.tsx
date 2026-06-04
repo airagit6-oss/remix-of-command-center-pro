@@ -6,7 +6,7 @@ interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role: 'user' | 'admin' | 'reseller';
+  role: 'user' | 'admin' | 'reseller' | 'author';
 }
 
 interface AuthContextType {
@@ -16,7 +16,8 @@ interface AuthContextType {
   isAdmin: boolean;
   isReseller: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ ok: true; redirect: string } | { ok: false; error: string }>;
+  login: (email: string, password: string, role?: string) => Promise<{ ok: true; redirect: string } | { ok: false; error: string }>;
+  loginWithCredentials: (email: string, password: string) => Promise<{ ok: true; redirect: string } | { ok: false; error: string }>;
   register: (email: string, password: string, name: string) => Promise<{ ok: true; redirect: string } | { ok: false; error: string }>;
   updateProfile: (profile: Pick<AuthUser, 'name' | 'email'>) => void;
   logout: () => void;
@@ -79,7 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     verifyToken();
   }, [token]);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string, _role?: string) => {
     setIsLoading(true);
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
@@ -117,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Determine redirect based on role
       const roleRedirect: Record<string, string> = {
-        admin: '/admin/dashboard',
+        admin: '/admin',
         reseller: '/reseller/dashboard',
         author: '/author/dashboard',
         user: '/dashboard',
@@ -210,6 +211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isReseller: user?.role === 'reseller' || user?.role === 'admin',
         isLoading,
         login,
+        loginWithCredentials: login,
         register,
         updateProfile,
         logout,

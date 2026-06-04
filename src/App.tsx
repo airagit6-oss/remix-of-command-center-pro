@@ -250,6 +250,7 @@ const App = () => (
                 }
               >
                 <Route index element={<OverviewPage />} />
+                <Route path="dashboard" element={<OverviewPage />} />
                 <Route path="products" element={<AdminProductsPage />} />
                 <Route path="categories" element={<CategoriesPage />} />
                 <Route path="gallery" element={<AdminGalleryPage />} />
