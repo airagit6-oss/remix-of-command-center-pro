@@ -42,7 +42,7 @@ export async function authRoutes(fastify: FastifyInstance) {
             email,
             name,
             password: hashedPassword,
-            role: 'user',
+            role: 'CUSTOMER',
           },
         });
 
@@ -61,7 +61,7 @@ export async function authRoutes(fastify: FastifyInstance) {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role,
+            role: user.role === 'CUSTOMER' ? 'user' : user.role.toLowerCase(),
           },
           token,
         };
@@ -126,7 +126,7 @@ export async function authRoutes(fastify: FastifyInstance) {
             id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role,
+            role: user.role === 'CUSTOMER' ? 'user' : user.role.toLowerCase(),
           },
           token,
         };
@@ -160,7 +160,13 @@ export async function authRoutes(fastify: FastifyInstance) {
         throw new AppError(404, 'User not found');
       }
 
-      return { success: true, user };
+      return {
+        success: true,
+        user: {
+          ...user,
+          role: user.role === 'CUSTOMER' ? 'user' : user.role.toLowerCase(),
+        },
+      };
     }
   );
 }
