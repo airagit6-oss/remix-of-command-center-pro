@@ -57,7 +57,10 @@ const ApprovalsPage = () => {
   const [query, setQuery] = useState('');
   const [edit, setEdit] = useState<EditState>({ open: false });
 
-  useEffect(() => approvalsStore.subscribe(() => force(n => n + 1)), []);
+  useEffect(() => {
+    const unsub = approvalsStore.subscribe(() => force(n => n + 1));
+    return () => { unsub(); };
+  }, []);
 
   const stats = approvalStats();
 
