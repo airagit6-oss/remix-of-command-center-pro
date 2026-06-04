@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate, Link } from 'react-router-dom';
 import {
   BarChart2, Users, ShoppingBag, CreditCard, FileText, AlertCircle, Activity, Settings,
   LogOut, LayoutDashboard, Server, GitBranch, LayoutGrid, Image, Store, FolderTree,
-  Star, Ticket, FileBarChart, Mail,
+  Star, Ticket, FileBarChart, Mail, ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -42,6 +42,7 @@ const groups = [
     items: [
       { to: '/admin/users', label: 'Users', icon: Users },
       { to: '/admin/vendors', label: 'Vendors', icon: Store },
+      { to: '/admin/approvals', label: 'Approvals', icon: ShieldCheck },
     ],
   },
   {

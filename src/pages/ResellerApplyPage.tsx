@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Users, TrendingUp, Shield, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { approvalsStore } from '@/lib/approvalsStore';
 
 const benefits = (t: any) => [
   { icon: TrendingUp, title: t('commission_30', { defaultValue: '30% Commission' }), desc: t('commission_desc', { defaultValue: 'Earn on every sale through your referral link' }) },
@@ -20,6 +21,15 @@ const ResellerApplyPage = () => {
     if (form.name.trim().length < 2) return;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) return;
     if (form.message.trim().length < 5) return;
+    approvalsStore.add({
+      kind: 'reseller',
+      name: form.name.trim(),
+      email: form.email.trim().toLowerCase(),
+      phone: form.phone.trim() || undefined,
+      website: form.website.trim() || undefined,
+      message: form.message.trim(),
+      rate: 30,
+    });
     setSubmitted(true);
     setTimeout(() => navigate('/'), 3000);
   };
