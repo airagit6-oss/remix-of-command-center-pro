@@ -1,10 +1,7 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { audit } from '@/lib/auditLog';
-import { bootstrapSeed, verifySeededCredentials, ROLE_HOME, type SeedRole } from '@/lib/seedAuth';
 
-// Run the role/seed bootstrap exactly once at module load.
-bootstrapSeed();
-
+// Encryption key types
 interface AuthUser {
   id: string;
   name: string;
@@ -18,22 +15,29 @@ interface AuthContextType {
   hasSubscription: boolean;
   isAdmin: boolean;
   isReseller: boolean;
-  login: (email: string, password: string, role?: 'user' | 'admin' | 'reseller') => void;
-  loginWithCredentials: (email: string, password: string) => Promise<{ ok: true; redirect: string; tier: SeedRole } | { ok: false; error: string }>;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<{ ok: true; redirect: string } | { ok: false; error: string }>;
+  register: (email: string, password: string, name: string) => Promise<{ ok: true; redirect: string } | { ok: false; error: string }>;
   updateProfile: (profile: Pick<AuthUser, 'name' | 'email'>) => void;
   logout: () => void;
   activateSubscription: () => void;
 }
 
 const AUTH_KEY = 'saashub_auth';
+const TOKEN_KEY = 'saashub_token';
 const SUB_KEY = 'saashub_sub';
+const API_BASE = '/api/v1';
 
-function loadAuth(): AuthUser | null {
+function loadAuth(): { user: AuthUser | null; token: string | null } {
   try {
-    const raw = localStorage.getItem(AUTH_KEY);
-    return raw ? (JSON.parse(raw) as AuthUser) : null;
+    const user = localStorage.getItem(AUTH_KEY);
+    const token = localStorage.getItem(TOKEN_KEY);
+    return {
+      user: user ? JSON.parse(user) : null,
+      token: token || null,
+    };
   } catch {
-    return null;
+    return { user: null, token: null };
   }
 }
 
@@ -44,37 +48,125 @@ function loadSub(): boolean {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(loadAuth);
+  const { user: initialUser, token: initialToken } = loadAuth();
+  const [user, setUser] = useState<AuthUser | null>(initialUser);
+  const [token, setToken] = useState<string | null>(initialToken);
   const [hasSubscription, setHasSubscription] = useState<boolean>(loadSub);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const login = useCallback((email: string, _password: string, role: 'user' | 'admin' | 'reseller' = 'user') => {
-    const safeEmail = email.trim().toLowerCase();
-    const newUser: AuthUser = {
-      id: 'u_' + crypto.randomUUID().replace(/-/g, '').slice(0, 9),
-      name: safeEmail.split('@')[0] || 'User',
-      email: safeEmail,
-      role,
+  // Verify token on mount
+  useEffect(() => {
+    const verifyToken = async () => {
+      if (!token) return;
+      
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        if (!res.ok) {
+          // Token invalid, clear auth
+          localStorage.removeItem(TOKEN_KEY);
+          localStorage.removeItem(AUTH_KEY);
+          setToken(null);
+          setUser(null);
+        }
+      } catch {
+        // Network error, keep current auth
+      }
     };
-    setUser(newUser);
-    localStorage.setItem(AUTH_KEY, JSON.stringify(newUser));
-    audit.login(newUser.id, { email: safeEmail, role });
+
+    verifyToken();
+  }, [token]);
+
+  const login = useCallback(async (email: string, password: string) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { ok: false as const, error: data.error || 'Login failed' };
+      }
+
+      const authUser = {
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role || 'user',
+      };
+
+      // Store auth data
+      localStorage.setItem(AUTH_KEY, JSON.stringify(authUser));
+      localStorage.setItem(TOKEN_KEY, data.token);
+      
+      setUser(authUser);
+      setToken(data.token);
+      
+      // Audit log
+      try {
+        audit.login(authUser.id, { email, role: authUser.role });
+      } catch {
+        // Ignore audit log errors
+      }
+
+      // Determine redirect based on role
+      const roleRedirect: Record<string, string> = {
+        admin: '/admin/dashboard',
+        reseller: '/reseller/dashboard',
+        author: '/author/dashboard',
+        user: '/dashboard',
+      };
+
+      const redirect = roleRedirect[authUser.role] || '/dashboard';
+      return { ok: true as const, redirect };
+    } catch (error) {
+      return { ok: false as const, error: error instanceof Error ? error.message : 'Login failed' };
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  // Verifies against the seeded credential table (hashed). Returns
-  // a redirect target derived from the seeded tier on success.
-  const loginWithCredentials = useCallback(async (email: string, password: string) => {
-    const seed = await verifySeededCredentials(email, password);
-    if (!seed) return { ok: false as const, error: 'Invalid email or password' };
-    const newUser: AuthUser = {
-      id: 'u_' + crypto.randomUUID().replace(/-/g, '').slice(0, 9),
-      name: seed.email.split('@')[0],
-      email: seed.email,
-      role: seed.role,
-    };
-    setUser(newUser);
-    localStorage.setItem(AUTH_KEY, JSON.stringify(newUser));
-    audit.login(newUser.id, { email: seed.email, role: seed.role, tier: seed.tier });
-    return { ok: true as const, redirect: ROLE_HOME[seed.tier], tier: seed.tier };
+  const register = useCallback(async (email: string, password: string, name: string) => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return { ok: false as const, error: data.error || 'Registration failed' };
+      }
+
+      const authUser = {
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role || 'user',
+      };
+
+      // Store auth data
+      localStorage.setItem(AUTH_KEY, JSON.stringify(authUser));
+      localStorage.setItem(TOKEN_KEY, data.token);
+      
+      setUser(authUser);
+      setToken(data.token);
+
+      return { ok: true as const, redirect: '/dashboard' };
+    } catch (error) {
+      return { ok: false as const, error: error instanceof Error ? error.message : 'Registration failed' };
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const updateProfile = useCallback((profile: Pick<AuthUser, 'name' | 'email'>) => {
@@ -87,13 +179,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(() => {
-    const current = loadAuth();
-    if (current) audit.logout(current.id);
+    const current = user;
+    if (current) {
+      try {
+        audit.logout(current.id);
+      } catch {
+        // Ignore audit log errors
+      }
+    }
     setUser(null);
+    setToken(null);
     setHasSubscription(false);
     localStorage.removeItem(AUTH_KEY);
+    localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(SUB_KEY);
-  }, []);
+  }, [user]);
 
   const activateSubscription = useCallback(() => {
     setHasSubscription(true);
@@ -104,12 +204,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <AuthContext.Provider
       value={{
         user,
-        isLoggedIn: !!user,
+        isLoggedIn: !!user && !!token,
         hasSubscription,
         isAdmin: user?.role === 'admin',
         isReseller: user?.role === 'reseller' || user?.role === 'admin',
+        isLoading,
         login,
-        loginWithCredentials,
+        register,
         updateProfile,
         logout,
         activateSubscription,

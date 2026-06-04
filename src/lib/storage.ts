@@ -18,9 +18,40 @@ export interface StoredFile {
   created_at: string;
 }
 
-async function apiFetch<T>(_url: string, _options?: RequestInit): Promise<T> {
-  // Backend not wired in this build — force fallback path in callers.
-  throw new Error('backend_disabled');
+async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
+  // Get JWT token from localStorage (set by AuthContext)
+  const TOKEN_KEY = 'saashub_token';
+  const AUTH_KEY = 'saashub_auth';
+  
+  const token = localStorage.getItem(TOKEN_KEY);
+  const rawAuth = localStorage.getItem(AUTH_KEY);
+  const auth = rawAuth ? JSON.parse(rawAuth) : null;
+  
+  const headers: HeadersInit = {
+    ...options?.headers,
+  };
+
+  // Add Authorization header if token exists
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Add user info headers as fallback
+  if (auth?.id) {
+    headers['X-User-Id'] = auth.id;
+    headers['X-User-Role'] = auth.role || 'user';
+  }
+
+  const response = await fetch(url, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status} ${response.statusText}`);
+  }
+
+  return response.json() as Promise<T>;
 }
 
 const STORAGE_KEY = 'saashub_files';
