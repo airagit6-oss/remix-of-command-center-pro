@@ -87,6 +87,7 @@ import CouponsPage from "./pages/admin/CouponsPage";
 import ReportsPage from "./pages/admin/ReportsPage";
 import EmailTemplatesPage from "./pages/admin/EmailTemplatesPage";
 import ChartsQAPage from "./pages/admin/ChartsQAPage";
+import ApprovalsPage from "./pages/admin/ApprovalsPage";
 import { products } from "@/lib/marketplaceData";
 
 // Author Studio
@@ -256,6 +257,7 @@ const App = () => (
                 <Route path="coupons" element={<CouponsPage />} />
                 <Route path="users" element={<UsersPage />} />
                 <Route path="vendors" element={<VendorsPage />} />
+                <Route path="approvals" element={<ApprovalsPage />} />
                 <Route path="orders" element={<AdminOrdersPage />} />
                 <Route path="subscriptions" element={<AdminSubscriptionsPage />} />
                 <Route path="revenue" element={<RevenuePage />} />
