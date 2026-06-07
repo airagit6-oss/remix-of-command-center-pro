@@ -16,7 +16,8 @@ interface AuthContextType {
   isAdmin: boolean;
   isReseller: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ ok: true; redirect: string } | { ok: false; error: string }>;
+  login: (email: string, password: string, role?: AuthUser['role']) => Promise<{ ok: true; redirect: string } | { ok: false; error: string }>;
+  loginWithCredentials: (email: string, password: string) => Promise<{ ok: true; redirect: string } | { ok: false; error: string }>;
   register: (email: string, password: string, name: string) => Promise<{ ok: true; redirect: string } | { ok: false; error: string }>;
   updateProfile: (profile: Pick<AuthUser, 'name' | 'email'>) => void;
   logout: () => void;
@@ -79,9 +80,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     verifyToken();
   }, [token]);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string, roleOverride?: AuthUser['role']) => {
     setIsLoading(true);
     try {
+      // Demo / quick-access shortcut: when a role override is provided we
+      // skip the (often-unavailable) auth backend and seed a local session.
+      if (roleOverride) {
+        const authUser: AuthUser = {
+          id: `local_${roleOverride}_${Date.now()}`,
+          name: email.split('@')[0] || roleOverride,
+          email,
+          role: roleOverride,
+        };
+        const fakeToken = `demo.${authUser.id}`;
+        localStorage.setItem(AUTH_KEY, JSON.stringify(authUser));
+        localStorage.setItem(TOKEN_KEY, fakeToken);
+        setUser(authUser);
+        setToken(fakeToken);
+        const roleRedirect: Record<string, string> = {
+          admin: '/admin', reseller: '/reseller/dashboard', user: '/dashboard',
+        };
+        return { ok: true as const, redirect: roleRedirect[roleOverride] || '/dashboard' };
+      }
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -210,6 +230,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isReseller: user?.role === 'reseller' || user?.role === 'admin',
         isLoading,
         login,
+        loginWithCredentials: login,
         register,
         updateProfile,
         logout,
