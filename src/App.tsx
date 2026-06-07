@@ -90,6 +90,12 @@ import ChartsQAPage from "./pages/admin/ChartsQAPage";
 import ApprovalsPage from "./pages/admin/ApprovalsPage";
 import { products } from "@/lib/marketplaceData";
 
+// Gamification (AMS) — Phase 1
+import {
+  AMSCommandCenterPage, AMSLibraryPage, AMSXPPage,
+  AMSLevelsPage, AMSRanksPage, AMSLeaderboardPage,
+} from "./pages/admin/gamification/AMSPages";
+
 // Author Studio
 import AuthorLayout from "./pages/AuthorLayout";
 import {
@@ -272,6 +278,12 @@ const App = () => (
                 <Route path="email-templates" element={<EmailTemplatesPage />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="qa/charts" element={<ChartsQAPage />} />
+                <Route path="gamification"             element={<AMSCommandCenterPage />} />
+                <Route path="gamification/library"     element={<AMSLibraryPage />} />
+                <Route path="gamification/xp"          element={<AMSXPPage />} />
+                <Route path="gamification/levels"      element={<AMSLevelsPage />} />
+                <Route path="gamification/ranks"       element={<AMSRanksPage />} />
+                <Route path="gamification/leaderboard" element={<AMSLeaderboardPage />} />
               </Route>
 
               {/* Author Studio — auth-gated */}
