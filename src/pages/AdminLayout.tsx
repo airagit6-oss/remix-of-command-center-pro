@@ -3,6 +3,7 @@ import {
   BarChart2, Users, ShoppingBag, CreditCard, FileText, AlertCircle, Activity, Settings,
   LogOut, LayoutDashboard, Server, GitBranch, LayoutGrid, Image, Store, FolderTree,
   Star, Ticket, FileBarChart, Mail, ShieldCheck,
+  Trophy, Zap, Crown, Award, TrendingUp, Globe,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -62,6 +63,17 @@ const groups = [
     items: [
       { to: '/admin/reports', label: 'Reports', icon: FileBarChart },
       { to: '/admin/email-templates', label: 'Email templates', icon: Mail },
+    ],
+  },
+  {
+    label: 'Gamification',
+    items: [
+      { to: '/admin/gamification',             label: 'Command Center', icon: Trophy, end: true },
+      { to: '/admin/gamification/library',     label: 'Achievements',   icon: Award },
+      { to: '/admin/gamification/xp',          label: 'XP',             icon: Zap },
+      { to: '/admin/gamification/levels',      label: 'Levels',         icon: TrendingUp },
+      { to: '/admin/gamification/ranks',       label: 'Ranks',          icon: Crown },
+      { to: '/admin/gamification/leaderboard', label: 'Leaderboard',    icon: Globe },
     ],
   },
   {

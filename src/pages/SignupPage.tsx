@@ -15,8 +15,7 @@ const SignupPage = () => {
     if (name.trim().length < 2) return;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return;
     if (password.length < 8) return;
-    login(email, password, 'user');
-    navigate('/');
+    login(email, password, 'user').then(() => navigate('/'));
   };
 
   const fieldStyle = (field: string) => ({
