@@ -14,6 +14,561 @@ export type Database = {
   }
   public: {
     Tables: {
+      ams_achievements: {
+        Row: {
+          active: boolean
+          category: string
+          code: string
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          role: string
+          title: string
+          updated_at: string
+          xp: number
+        }
+        Insert: {
+          active?: boolean
+          category?: string
+          code: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          role?: string
+          title: string
+          updated_at?: string
+          xp?: number
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          code?: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          role?: string
+          title?: string
+          updated_at?: string
+          xp?: number
+        }
+        Relationships: []
+      }
+      ams_audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          meta: Json | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          meta?: Json | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          meta?: Json | null
+        }
+        Relationships: []
+      }
+      ams_badges: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          rarity: string
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          rarity?: string
+          title: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          rarity?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      ams_claims: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          reward_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reward_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reward_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ams_claims_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "ams_rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ams_levels: {
+        Row: {
+          level: number
+          reward: string | null
+          title: string
+          xp_required: number
+        }
+        Insert: {
+          level: number
+          reward?: string | null
+          title: string
+          xp_required: number
+        }
+        Update: {
+          level?: number
+          reward?: string | null
+          title?: string
+          xp_required?: number
+        }
+        Relationships: []
+      }
+      ams_milestones: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          metric: string
+          target_value: number
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metric?: string
+          target_value?: number
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metric?: string
+          target_value?: number
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
+      ams_notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          read?: boolean
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ams_ranks: {
+        Row: {
+          color: string
+          id: string
+          min_level: number
+          name: string
+          perks: string | null
+        }
+        Insert: {
+          color?: string
+          id: string
+          min_level: number
+          name: string
+          perks?: string | null
+        }
+        Update: {
+          color?: string
+          id?: string
+          min_level?: number
+          name?: string
+          perks?: string | null
+        }
+        Relationships: []
+      }
+      ams_rewards: {
+        Row: {
+          active: boolean
+          code: string
+          cost_xp: number
+          created_at: string
+          description: string | null
+          id: string
+          stock: number
+          title: string
+          type: string
+          value: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          cost_xp?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          stock?: number
+          title: string
+          type?: string
+          value?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          cost_xp?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          stock?: number
+          title?: string
+          type?: string
+          value?: number
+        }
+        Relationships: []
+      }
+      ams_streaks: {
+        Row: {
+          activity_count: number
+          date: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_count?: number
+          date: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_count?: number
+          date?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ams_trophies: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          tier: string
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          tier?: string
+          title: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          tier?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      ams_user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ams_user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "ams_achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ams_user_badges: {
+        Row: {
+          awarded_at: string
+          badge_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          badge_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string
+          badge_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ams_user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "ams_badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ams_user_milestones: {
+        Row: {
+          completed: boolean
+          completed_at: string | null
+          id: string
+          milestone_id: string
+          progress: number
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          milestone_id: string
+          progress?: number
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          milestone_id?: string
+          progress?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ams_user_milestones_milestone_id_fkey"
+            columns: ["milestone_id"]
+            isOneToOne: false
+            referencedRelation: "ams_milestones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ams_user_progress: {
+        Row: {
+          achievements_unlocked: number
+          created_at: string
+          current_streak: number
+          display_name: string | null
+          last_activity_at: string | null
+          level: number
+          longest_streak: number
+          rank: string
+          role: string
+          territory: string | null
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          achievements_unlocked?: number
+          created_at?: string
+          current_streak?: number
+          display_name?: string | null
+          last_activity_at?: string | null
+          level?: number
+          longest_streak?: number
+          rank?: string
+          role?: string
+          territory?: string | null
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          achievements_unlocked?: number
+          created_at?: string
+          current_streak?: number
+          display_name?: string | null
+          last_activity_at?: string | null
+          level?: number
+          longest_streak?: number
+          rank?: string
+          role?: string
+          territory?: string | null
+          total_xp?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ams_user_trophies: {
+        Row: {
+          awarded_at: string
+          id: string
+          trophy_id: string
+          user_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          id?: string
+          trophy_id: string
+          user_id: string
+        }
+        Update: {
+          awarded_at?: string
+          id?: string
+          trophy_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ams_user_trophies_trophy_id_fkey"
+            columns: ["trophy_id"]
+            isOneToOne: false
+            referencedRelation: "ams_trophies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ams_xp_transactions: {
+        Row: {
+          achievement_id: string | null
+          amount: number
+          category: string
+          created_at: string
+          id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id?: string | null
+          amount: number
+          category?: string
+          created_at?: string
+          id?: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string | null
+          amount?: number
+          category?: string
+          created_at?: string
+          id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ams_xp_transactions_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "ams_achievements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reseller_achievements: {
         Row: {
           code: string
@@ -515,15 +1070,53 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      ams_award_xp: {
+        Args: {
+          _achievement_id?: string
+          _amount: number
+          _category: string
+          _reason: string
+          _user_id: string
+        }
+        Returns: string
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "boss" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -650,6 +1243,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "boss", "moderator", "user"],
+    },
   },
 } as const
