@@ -25,6 +25,7 @@ import SearchPage from "./pages/SearchPage";
 import SupportPage from "./pages/SupportPage";
 import ResellerApplyPage from "./pages/ResellerApplyPage";
 import NotFound from "./pages/NotFound";
+import RewardsPage from "./pages/RewardsPage";
 
 // User dashboard
 import DashboardLayout from "./pages/DashboardLayout";
@@ -95,6 +96,10 @@ import {
   AMSCommandCenterPage, AMSLibraryPage, AMSXPPage,
   AMSLevelsPage, AMSRanksPage, AMSLeaderboardPage,
 } from "./pages/admin/gamification/AMSPages";
+import {
+  AMSBadgesPage, AMSTrophiesPage, AMSRewardsPage, AMSClaimsPage,
+  AMSMilestonesPage, AMSNotificationsPage, AMSAuditPage, AMSAnalyticsPage,
+} from "./pages/admin/gamification/AMSPagesExtra";
 
 // Author Studio
 import AuthorLayout from "./pages/AuthorLayout";
@@ -166,6 +171,7 @@ const App = () => (
               <Route path="/search" element={<SearchPage />} />
               <Route path="/support" element={<SupportPage />} />
               <Route path="/reseller-apply" element={<ResellerApplyPage />} />
+              <Route path="/rewards" element={<RewardsPage />} />
 
               {/* Category hierarchy (macro, macro/sub, macro/sub/micro) */}
               <Route path="/category/:macro" element={<HomePage />} />
@@ -284,6 +290,14 @@ const App = () => (
                 <Route path="gamification/levels"      element={<AMSLevelsPage />} />
                 <Route path="gamification/ranks"       element={<AMSRanksPage />} />
                 <Route path="gamification/leaderboard" element={<AMSLeaderboardPage />} />
+                <Route path="gamification/badges"      element={<AMSBadgesPage />} />
+                <Route path="gamification/trophies"    element={<AMSTrophiesPage />} />
+                <Route path="gamification/rewards"     element={<AMSRewardsPage />} />
+                <Route path="gamification/claims"      element={<AMSClaimsPage />} />
+                <Route path="gamification/milestones"  element={<AMSMilestonesPage />} />
+                <Route path="gamification/notifications" element={<AMSNotificationsPage />} />
+                <Route path="gamification/audit"       element={<AMSAuditPage />} />
+                <Route path="gamification/analytics"   element={<AMSAnalyticsPage />} />
               </Route>
 
               {/* Author Studio — auth-gated */}
