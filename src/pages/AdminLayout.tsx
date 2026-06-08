@@ -4,6 +4,7 @@ import {
   LogOut, LayoutDashboard, Server, GitBranch, LayoutGrid, Image, Store, FolderTree,
   Star, Ticket, FileBarChart, Mail, ShieldCheck,
   Trophy, Zap, Crown, Award, TrendingUp, Globe,
+  Medal, Gift, Package, Target, Bell, ScrollText, Flame,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -70,10 +71,18 @@ const groups = [
     items: [
       { to: '/admin/gamification',             label: 'Command Center', icon: Trophy, end: true },
       { to: '/admin/gamification/library',     label: 'Achievements',   icon: Award },
+      { to: '/admin/gamification/badges',      label: 'Badges',         icon: Medal },
+      { to: '/admin/gamification/trophies',    label: 'Trophies',       icon: Trophy },
+      { to: '/admin/gamification/rewards',     label: 'Rewards',        icon: Gift },
+      { to: '/admin/gamification/claims',      label: 'Claims',         icon: Package },
+      { to: '/admin/gamification/milestones',  label: 'Milestones',     icon: Target },
       { to: '/admin/gamification/xp',          label: 'XP',             icon: Zap },
       { to: '/admin/gamification/levels',      label: 'Levels',         icon: TrendingUp },
       { to: '/admin/gamification/ranks',       label: 'Ranks',          icon: Crown },
       { to: '/admin/gamification/leaderboard', label: 'Leaderboard',    icon: Globe },
+      { to: '/admin/gamification/notifications', label: 'Notifications', icon: Bell },
+      { to: '/admin/gamification/analytics',   label: 'Analytics',      icon: Flame },
+      { to: '/admin/gamification/audit',       label: 'Audit Logs',     icon: ScrollText },
     ],
   },
   {
