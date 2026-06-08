@@ -25,6 +25,7 @@ import SearchPage from "./pages/SearchPage";
 import SupportPage from "./pages/SupportPage";
 import ResellerApplyPage from "./pages/ResellerApplyPage";
 import NotFound from "./pages/NotFound";
+import RewardsPage from "./pages/RewardsPage";
 
 // User dashboard
 import DashboardLayout from "./pages/DashboardLayout";
@@ -170,6 +171,7 @@ const App = () => (
               <Route path="/search" element={<SearchPage />} />
               <Route path="/support" element={<SupportPage />} />
               <Route path="/reseller-apply" element={<ResellerApplyPage />} />
+              <Route path="/rewards" element={<RewardsPage />} />
 
               {/* Category hierarchy (macro, macro/sub, macro/sub/micro) */}
               <Route path="/category/:macro" element={<HomePage />} />
