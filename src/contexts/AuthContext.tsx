@@ -59,6 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const verifyToken = async () => {
       if (!token) return;
+      if (token.startsWith('demo.')) return;
       
       try {
         const res = await fetch(`${API_BASE}/auth/me`, {

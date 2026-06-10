@@ -9,7 +9,7 @@ import {
   Receipt, BadgeCheck, Heart, Eye, Tag, Zap, Lock, Server, Mail, Image as ImageIcon,
   Code2, Gauge, FileCode, Smartphone, Monitor,
 } from 'lucide-react';
-import { api } from '../lib/api';
+import { api } from '@/lib/api';
 import { useGallery, formatFileSize } from '@/lib/galleryManager';
 import { fetchAuditLogs, type AuditLog } from '@/lib/auditLog';
 import { fetchActivityLogs, type ActivityLog } from '@/lib/activityTimeline';

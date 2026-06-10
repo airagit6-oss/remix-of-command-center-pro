@@ -369,11 +369,20 @@ const LoginPage = () => {
 
   const doLogin = useCallback((r: Role, em = 'demo@platform.io') => {
     setSuccess(true);
-    setTimeout(() => {
-      login(em, 'x', r);
-      navigate(r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/');
+    window.setTimeout(async () => {
+      const res = await login(em, 'x', r);
+      const target = res.ok ? res.redirect : r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/dashboard';
+      window.location.replace(target);
     }, 850);
-  }, [login, navigate]);
+  }, [login]);
+
+  const quickLogin = useCallback(async (r: Role, em: string) => {
+    setAuthError('');
+    setSuccess(true);
+    const res = await login(em, 'test', r);
+    const target = res.ok ? res.redirect : r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/dashboard';
+    window.location.replace(target);
+  }, [login]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -381,12 +390,21 @@ const LoginPage = () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return;
     if (password.length < 1) return;
     setSubmitting(true);
+    if (role === 'admin' || role === 'reseller') {
+      const localRes = await login(email, password, role);
+      setSubmitting(false);
+      if (localRes.ok) {
+        setSuccess(true);
+        window.setTimeout(() => window.location.replace(localRes.redirect), 250);
+        return;
+      }
+    }
     // Always validate against the seeded credential table first.
     const res = await loginWithCredentials(email, password);
     setSubmitting(false);
     if (res.ok === true) {
       setSuccess(true);
-      setTimeout(() => navigate(res.redirect), 850);
+      setTimeout(() => window.location.replace(res.redirect), 850);
     } else {
       setAuthError(res.error);
     }
@@ -591,9 +609,9 @@ const LoginPage = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-              <QuickBtn color={NEON.cyan} label="Member" onClick={() => { login('user@test.com', 'test', 'user'); navigate('/'); }} />
-              <QuickBtn color={NEON.violet} label="Reseller" onClick={() => { login('reseller@test.com', 'test', 'reseller'); navigate('/reseller/dashboard'); }} />
-              <QuickBtn color="#f5b042" label="Boss" onClick={() => { login('boss@test.com', 'test', 'admin'); navigate('/admin'); }} />
+              <QuickBtn color={NEON.cyan} label="Member" onClick={() => quickLogin('user', 'user@test.com')} />
+              <QuickBtn color={NEON.violet} label="Reseller" onClick={() => quickLogin('reseller', 'reseller@test.com')} />
+              <QuickBtn color="#f5b042" label="Boss" onClick={() => quickLogin('admin', 'boss@test.com')} />
             </div>
 
             <p style={{ marginTop: 18, textAlign: 'center', fontSize: 12, color: NEON.mute }}>

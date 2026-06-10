@@ -3,7 +3,7 @@ import { CreditCard, Plus, Download } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { api } from '../lib/api';
+import { api } from '@/lib/api';
 
 interface Card { id: string; brand: string; last4: string; exp: string; }
 interface Invoice { id: string; amount: string; date: string; status: 'Paid' | 'Pending'; }
