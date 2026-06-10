@@ -372,17 +372,17 @@ const LoginPage = () => {
     window.setTimeout(async () => {
       const res = await login(em, 'x', r);
       const target = res.ok ? res.redirect : r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/dashboard';
-      window.setTimeout(() => navigate(target, { replace: true }), 50);
+      window.location.replace(target);
     }, 850);
-  }, [login, navigate]);
+  }, [login]);
 
   const quickLogin = useCallback(async (r: Role, em: string) => {
     setAuthError('');
     setSuccess(true);
     const res = await login(em, 'test', r);
     const target = res.ok ? res.redirect : r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/dashboard';
-    window.setTimeout(() => navigate(target, { replace: true }), 50);
-  }, [login, navigate]);
+    window.location.replace(target);
+  }, [login]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -390,12 +390,21 @@ const LoginPage = () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return;
     if (password.length < 1) return;
     setSubmitting(true);
+    if (role === 'admin' || role === 'reseller') {
+      const localRes = await login(email, password, role);
+      setSubmitting(false);
+      if (localRes.ok) {
+        setSuccess(true);
+        window.setTimeout(() => window.location.replace(localRes.redirect), 250);
+        return;
+      }
+    }
     // Always validate against the seeded credential table first.
     const res = await loginWithCredentials(email, password);
     setSubmitting(false);
     if (res.ok === true) {
       setSuccess(true);
-      setTimeout(() => navigate(res.redirect), 850);
+      setTimeout(() => window.location.replace(res.redirect), 850);
     } else {
       setAuthError(res.error);
     }
