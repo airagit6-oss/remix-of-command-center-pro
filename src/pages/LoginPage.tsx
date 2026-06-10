@@ -369,10 +369,17 @@ const LoginPage = () => {
 
   const doLogin = useCallback((r: Role, em = 'demo@platform.io') => {
     setSuccess(true);
-    setTimeout(() => {
-      login(em, 'x', r);
-      navigate(r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/');
+    window.setTimeout(async () => {
+      const res = await login(em, 'x', r);
+      navigate(res.ok ? res.redirect : r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/dashboard', { replace: true });
     }, 850);
+  }, [login, navigate]);
+
+  const quickLogin = useCallback(async (r: Role, em: string) => {
+    setAuthError('');
+    setSuccess(true);
+    const res = await login(em, 'test', r);
+    navigate(res.ok ? res.redirect : r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/dashboard', { replace: true });
   }, [login, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -591,9 +598,9 @@ const LoginPage = () => {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-              <QuickBtn color={NEON.cyan} label="Member" onClick={() => { login('user@test.com', 'test', 'user'); navigate('/'); }} />
-              <QuickBtn color={NEON.violet} label="Reseller" onClick={() => { login('reseller@test.com', 'test', 'reseller'); navigate('/reseller/dashboard'); }} />
-              <QuickBtn color="#f5b042" label="Boss" onClick={() => { login('boss@test.com', 'test', 'admin'); navigate('/admin'); }} />
+              <QuickBtn color={NEON.cyan} label="Member" onClick={() => quickLogin('user', 'user@test.com')} />
+              <QuickBtn color={NEON.violet} label="Reseller" onClick={() => quickLogin('reseller', 'reseller@test.com')} />
+              <QuickBtn color="#f5b042" label="Boss" onClick={() => quickLogin('admin', 'boss@test.com')} />
             </div>
 
             <p style={{ marginTop: 18, textAlign: 'center', fontSize: 12, color: NEON.mute }}>
