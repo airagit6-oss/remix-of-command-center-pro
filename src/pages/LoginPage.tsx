@@ -371,7 +371,8 @@ const LoginPage = () => {
     setSuccess(true);
     window.setTimeout(async () => {
       const res = await login(em, 'x', r);
-      navigate(res.ok ? res.redirect : r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/dashboard', { replace: true });
+      const target = res.ok ? res.redirect : r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/dashboard';
+      window.setTimeout(() => navigate(target, { replace: true }), 50);
     }, 850);
   }, [login, navigate]);
 
@@ -379,7 +380,8 @@ const LoginPage = () => {
     setAuthError('');
     setSuccess(true);
     const res = await login(em, 'test', r);
-    navigate(res.ok ? res.redirect : r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/dashboard', { replace: true });
+    const target = res.ok ? res.redirect : r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/dashboard';
+    window.setTimeout(() => navigate(target, { replace: true }), 50);
   }, [login, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
