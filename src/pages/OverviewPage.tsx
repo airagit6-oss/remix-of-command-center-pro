@@ -58,8 +58,16 @@ function HoloRing({ value, label, color = "210 100% 52%" }: { value: number; lab
 
 /* ----------------------- Page ----------------------- */
 
+const KPI_DEFAULT = {
+  activeUsers: { value: 0, change: 0 },
+  requestsPerSec: { value: 0, change: 0 },
+  errorRate: { value: 0, change: 0 },
+  revenuePerMin: { value: 0, change: 0 },
+  activeSubs: { value: 0, change: 0 },
+};
+
 export default function OverviewPage() {
-  const [kpi, setKpi] = useState<any[]>([]);
+  const [kpi, setKpi] = useState<any>(KPI_DEFAULT);
   const [usersData] = useState(() => Array.from({ length: 30 }, (_, i) => ({ name: i, value: 8000 + Math.sin(i * 0.3) * 3500 })));
   const [revenueData] = useState(() => Array.from({ length: 30 }, (_, i) => ({ name: i, value: 1500 + Math.sin(i * 0.4) * 1250 })));
   const [appUsageData] = useState(() => ['WebApp', 'Mobile', 'API', 'Analytics', 'Auth', 'CDN'].map((n, i) => ({
@@ -87,13 +95,13 @@ export default function OverviewPage() {
   ]);
 
   useEffect(() => {
-    api.get('/overview/kpi').then(data => {
-      setKpi(data || []);
-    });
+    api.get('/overview/kpi')
+      .then(data => setKpi({ ...KPI_DEFAULT, ...(data || {}) }))
+      .catch(() => {});
     const iv = setInterval(() => {
-      api.get('/overview/kpi').then(data => {
-        setKpi(data || []);
-      });
+      api.get('/overview/kpi')
+        .then(data => setKpi({ ...KPI_DEFAULT, ...(data || {}) }))
+        .catch(() => {});
     }, 5000);
     const ivp = setInterval(() => {
       setPulse(p => ({
