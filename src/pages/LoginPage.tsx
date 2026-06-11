@@ -377,13 +377,10 @@ const LoginPage = () => {
   }, [login]);
 
   const quickLogin = useCallback(async (r: Role, em: string) => {
-    console.log('[quickLogin] start', r, em);
     setAuthError('');
     setSuccess(true);
     const res = await login(em, 'test', r);
-    console.log('[quickLogin] login result', res);
     const target = res.ok ? res.redirect : r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/dashboard';
-    console.log('[quickLogin] navigating to', target);
     navigate(target, { replace: true });
   }, [login, navigate]);
 
