@@ -372,7 +372,7 @@ const LoginPage = () => {
     window.setTimeout(async () => {
       const res = await login(em, 'x', r);
       const target = res.ok ? res.redirect : r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/dashboard';
-      window.location.replace(target);
+      navigate(target, { replace: true });
     }, 850);
   }, [login]);
 
@@ -381,8 +381,8 @@ const LoginPage = () => {
     setSuccess(true);
     const res = await login(em, 'test', r);
     const target = res.ok ? res.redirect : r === 'admin' ? '/admin' : r === 'reseller' ? '/reseller/dashboard' : '/dashboard';
-    window.location.replace(target);
-  }, [login]);
+    navigate(target, { replace: true });
+  }, [login, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -395,7 +395,7 @@ const LoginPage = () => {
       setSubmitting(false);
       if (localRes.ok) {
         setSuccess(true);
-        window.setTimeout(() => window.location.replace(localRes.redirect), 250);
+        window.setTimeout(() => navigate(localRes.redirect, { replace: true }), 250);
         return;
       }
     }
@@ -404,7 +404,7 @@ const LoginPage = () => {
     setSubmitting(false);
     if (res.ok === true) {
       setSuccess(true);
-      setTimeout(() => window.location.replace(res.redirect), 850);
+      setTimeout(() => navigate(res.redirect, { replace: true }), 850);
     } else {
       setAuthError(res.error);
     }
