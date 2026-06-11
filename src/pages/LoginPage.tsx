@@ -529,8 +529,8 @@ const LoginPage = () => {
             boxShadow: `0 30px 80px -25px rgba(0,0,0,0.7), 0 0 0 1px rgba(120,160,255,0.08) inset`,
             position: 'relative', overflow: 'hidden',
           }}>
-            <span style={{ position: 'absolute', top: 0, left: 0, width: 80, height: 80, background: `radial-gradient(circle at 0 0, ${accent}33, transparent 70%)` }} />
-            <span style={{ position: 'absolute', bottom: 0, right: 0, width: 120, height: 120, background: `radial-gradient(circle at 100% 100%, ${NEON.violet}33, transparent 70%)` }} />
+            <span style={{ position: 'absolute', top: 0, left: 0, width: 80, height: 80, background: `radial-gradient(circle at 0 0, ${accent}33, transparent 70%)`, pointerEvents: 'none' }} />
+            <span style={{ position: 'absolute', bottom: 0, right: 0, width: 120, height: 120, background: `radial-gradient(circle at 100% 100%, ${NEON.violet}33, transparent 70%)`, pointerEvents: 'none' }} />
 
             <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 18 }}>
               {(['user', 'reseller', 'admin'] as Role[]).map(r => {
