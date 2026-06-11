@@ -89,13 +89,13 @@ export const api = new ApiClient(API_BASE_URL);
 export function setAuthToken(token: string) {
   api.setToken(token);
   if (typeof window !== 'undefined') {
-    localStorage.setItem('auth_token', token);
+    localStorage.setItem('saashub_token', token);
   }
 }
 
 export function getAuthToken(): string | null {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('auth_token');
+    return localStorage.getItem('saashub_token');
   }
   return null;
 }
@@ -103,13 +103,13 @@ export function getAuthToken(): string | null {
 export function clearAuthToken() {
   api.clearToken();
   if (typeof window !== 'undefined') {
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('saashub_token');
   }
 }
 
 // Initialize token from localStorage
 if (typeof window !== 'undefined') {
-  const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem('saashub_token');
   if (token) {
     api.setToken(token);
   }

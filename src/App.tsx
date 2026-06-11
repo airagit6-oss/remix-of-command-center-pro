@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ApiStatusProvider } from "@/contexts/ApiStatusContext";
 import AuthGuard from "@/components/AuthGuard";
 import AdminGuard from "@/components/AdminGuard";
 import ResellerGuard from "@/components/ResellerGuard";
@@ -60,6 +61,7 @@ import ResellerSubscriptionsPage from "./pages/ResellerSubscriptionsPage";
 import ResellerProductsPage from "./pages/ResellerProductsPage";
 import ResellerEarningsPage from "./pages/ResellerEarningsPage";
 import ResellerSettingsPage from "./pages/ResellerSettingsPage";
+import ResellerReferralsPage from "./pages/ResellerReferralsPage";
 import ResellerCommissionsPage from "./pages/reseller/ResellerCommissionsPage";
 import ResellerReportsPage from "./pages/reseller/ResellerReportsPage";
 import ResellerMarketingPage from "./pages/reseller/ResellerMarketingPage";
@@ -126,6 +128,19 @@ import {
   AuthorEmbedsPage, AuthorAbTestsPage, AuthorRoadmapPage,
 } from "./pages/author/AuthorPagesPremium";
 
+// Internal Chat Bot
+import EmployeeInternalChatPage from "./pages/dashboard/EmployeeInternalChatPage";
+
+// Author Product Upload (End-to-End)
+import AuthorProductUploadPage from "./pages/dashboard/AuthorProductUploadPage";
+
+// Marketplace Manager Approvals
+import MarketplaceManagerApprovalsPage from "./pages/admin/MarketplaceManagerApprovalsPage";
+
+// Achievement Management System
+import AchievementManagementCenter from "./pages/admin/AchievementManagementCenter";
+import UserAchievementDashboard from "./pages/dashboard/UserAchievementDashboard";
+
 const queryClient = new QueryClient();
 
 const setMeta = (selector: string, value: string) => {
@@ -158,12 +173,13 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <AuthProvider>
-        <CartProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <RouteMeta />
-            <Routes>
+        <ApiStatusProvider>
+          <CartProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <RouteMeta />
+              <Routes>
               {/* Public routes */}
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignupPage />} />
@@ -225,7 +241,11 @@ const App = () => (
                 <Route path="refunds" element={<RefundsPage />} />
                 <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="security" element={<SecurityPage />} />
+                <Route path="chat" element={<EmployeeInternalChatPage />} />
               </Route>
+
+              {/* Reseller Application - Public */}
+              <Route path="/reseller/apply" element={<ResellerApplyPage />} />
 
               {/* Reseller — reseller/admin role required */}
               <Route
@@ -239,6 +259,7 @@ const App = () => (
                 <Route index element={<Navigate to="dashboard" replace />} />
                 <Route path="dashboard" element={<ResellerDashboardPage />} />
                 <Route path="leads" element={<ResellerLeadsPage />} />
+                <Route path="referrals" element={<ResellerReferralsPage />} />
                 <Route path="pipeline" element={<ResellerPipelinePage />} />
                 <Route path="contacts" element={<ResellerContactsPage />} />
                 <Route path="users" element={<ResellerUsersPage />} />
@@ -250,6 +271,7 @@ const App = () => (
                 <Route path="marketing" element={<ResellerMarketingPage />} />
                 <Route path="reports" element={<ResellerReportsPage />} />
                 <Route path="settings" element={<ResellerSettingsPage />} />
+                <Route path="chat" element={<EmployeeInternalChatPage />} />
               </Route>
 
               {/* Admin / Boss panel — auth-gated (admin role) */}
@@ -270,6 +292,9 @@ const App = () => (
                 <Route path="users" element={<UsersPage />} />
                 <Route path="vendors" element={<VendorsPage />} />
                 <Route path="approvals" element={<ApprovalsPage />} />
+                <Route path="approvals/review" element={<MarketplaceManagerApprovalsPage />} />
+                <Route path="achievements"   element={<AchievementManagementCenter />} />
+                <Route path="chat" element={<EmployeeInternalChatPage />} />
                 <Route path="orders" element={<AdminOrdersPage />} />
                 <Route path="subscriptions" element={<AdminSubscriptionsPage />} />
                 <Route path="revenue" element={<RevenuePage />} />
@@ -298,6 +323,7 @@ const App = () => (
                 <Route path="gamification/notifications" element={<AMSNotificationsPage />} />
                 <Route path="gamification/audit"       element={<AMSAuditPage />} />
                 <Route path="gamification/analytics"   element={<AMSAnalyticsPage />} />
+                <Route path="chat" element={<EmployeeInternalChatPage />} />
               </Route>
 
               {/* Author Studio — auth-gated */}
@@ -314,6 +340,8 @@ const App = () => (
                 <Route path="products"    element={<AuthorProductsPage />} />
                 <Route path="upload"      element={<AuthorUploadCenterPage />} />
                 <Route path="upload/new"  element={<AuthorUploadWizardPage />} />
+                <Route path="upload/e2e"  element={<AuthorProductUploadPage />} />
+                <Route path="achievements" element={<UserAchievementDashboard />} />
                 <Route path="profile"      element={<AuthorProfilePage />} />
                 <Route path="notifications" element={<AuthorNotificationsPage />} />
                 <Route path="verification" element={<AuthorVerificationPage />} />
@@ -366,6 +394,7 @@ const App = () => (
             </Routes>
           </BrowserRouter>
         </CartProvider>
+        </ApiStatusProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

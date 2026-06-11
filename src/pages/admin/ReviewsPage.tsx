@@ -8,6 +8,7 @@ import {
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { api } from '@/lib/api';
 
 // ─────────────────────────── Types & Seed Data ───────────────────────────
 type ReviewStatus = 'pending' | 'approved' | 'rejected' | 'spam' | 'reported' | 'escalated' | 'archived';
@@ -159,7 +160,9 @@ const Sparkline = ({ data, color = 'hsl(var(--primary))' }: { data: number[]; co
 
 // ─────────────────────────── Main Page ───────────────────────────
 const ReviewsPage = () => {
-  const [reviews, setReviews] = useState<Review[]>(SEED);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [activeQueue, setActiveQueue] = useState<'all' | ReviewStatus>('all');
   const [search, setSearch] = useState('');
@@ -168,6 +171,26 @@ const ReviewsPage = () => {
   const [countryF, setCountryF] = useState<string>('all');
   const [verifiedF, setVerifiedF] = useState<'all' | 'yes' | 'no'>('all');
   const [riskF, setRiskF] = useState<'all' | 'low' | 'med' | 'high'>('all');
+
+  // Load reviews from real API
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await api.get<Review[]>('/admin/reviews');
+        setReviews(data);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load reviews';
+        setError(message);
+        console.error('Failed to fetch reviews:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchReviews();
+  }, []);
   const [drawer, setDrawer] = useState<Review | null>(null);
   const [liveOn, setLiveOn] = useState(true);
   const [feed, setFeed] = useState<{ id: string; user: string; product: string; rating: number; t: number }[]>([]);

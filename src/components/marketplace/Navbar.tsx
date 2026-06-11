@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Search, ShoppingCart, User, X, LogIn, LogOut, Users, Menu, Crown,
   LayoutDashboard, Globe, DollarSign, MessageCircle, Heart, Bell, Check, Sparkles,
@@ -9,21 +10,139 @@ import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Logo } from '@/components/brand/Logo';
 
-type Lang = { code: string; label: string; flag: string };
+type Lang = { code: string; label: string; nativeName?: string };
+
+// 125 supported languages
 const LANGS: Lang[] = [
-  { code: 'en', label: 'English', flag: '🇺🇸' },
-  { code: 'hi', label: 'Hindi', flag: '🇮🇳' },
-  { code: 'ar', label: 'Arabic', flag: '🇸🇦' },
-  { code: 'fr', label: 'French', flag: '🇫🇷' },
-  { code: 'es', label: 'Spanish', flag: '🇪🇸' },
-  { code: 'pt', label: 'Portuguese', flag: '🇵🇹' },
-  { code: 'bn', label: 'Bengali', flag: '🇧🇩' },
-  { code: 'ur', label: 'Urdu', flag: '🇵🇰' },
-  { code: 'sw', label: 'Swahili', flag: '🇰🇪' },
-  { code: 'tr', label: 'Turkish', flag: '🇹🇷' },
-  { code: 'ja', label: 'Japanese', flag: '🇯🇵' },
-  { code: 'ko', label: 'Korean', flag: '🇰🇷' },
-  { code: 'de', label: 'German', flag: '🇩🇪' },
+  // Core 10 languages
+  { code: 'en', label: 'English', nativeName: 'English' },
+  { code: 'es', label: 'Spanish', nativeName: 'Español' },
+  { code: 'zh-CN', label: 'Simplified Chinese', nativeName: '简体中文' },
+  { code: 'hi', label: 'Hindi', nativeName: 'हिन्दी' },
+  { code: 'ar', label: 'Arabic', nativeName: 'العربية' },
+  { code: 'fr', label: 'French', nativeName: 'Français' },
+  { code: 'de', label: 'German', nativeName: 'Deutsch' },
+  { code: 'pt-BR', label: 'Portuguese (Brazil)', nativeName: 'Português Brasileiro' },
+  { code: 'ja', label: 'Japanese', nativeName: '日本語' },
+  { code: 'ru', label: 'Russian', nativeName: 'Русский' },
+  { code: 'ko', label: 'Korean', nativeName: '한국어' },
+  { code: 'id', label: 'Indonesian', nativeName: 'Bahasa Indonesia' },
+  { code: 'vi', label: 'Vietnamese', nativeName: 'Tiếng Việt' },
+  { code: 'th', label: 'Thai', nativeName: 'ไทย' },
+  { code: 'tr', label: 'Turkish', nativeName: 'Türkçe' },
+  { code: 'nl', label: 'Dutch', nativeName: 'Nederlands' },
+  { code: 'pl', label: 'Polish', nativeName: 'Polski' },
+  { code: 'ro', label: 'Romanian', nativeName: 'Română' },
+  { code: 'el', label: 'Greek', nativeName: 'Ελληνικά' },
+  { code: 'sv', label: 'Swedish', nativeName: 'Svenska' },
+  { code: 'no', label: 'Norwegian', nativeName: 'Norsk' },
+  { code: 'da', label: 'Danish', nativeName: 'Dansk' },
+  { code: 'fi', label: 'Finnish', nativeName: 'Suomi' },
+  // Phase 1 - African languages
+  { code: 'sw', label: 'Swahili', nativeName: 'Kiswahili' },
+  { code: 'yo', label: 'Yoruba', nativeName: 'Yorùbá' },
+  { code: 'ha', label: 'Hausa', nativeName: 'Hausa' },
+  { code: 'ig', label: 'Igbo', nativeName: 'Igbo' },
+  { code: 'am', label: 'Amharic', nativeName: 'አማርኛ' },
+  { code: 'so', label: 'Somali', nativeName: 'Soomaaliga' },
+  { code: 'tl', label: 'Tagalog', nativeName: 'Tagalog' },
+  { code: 'af', label: 'Afrikaans', nativeName: 'Afrikaans' },
+  { code: 'zu', label: 'Zulu', nativeName: 'Isizulu' },
+  { code: 'ms', label: 'Malay', nativeName: 'Bahasa Melayu' },
+  // Phase 2 - European and Central Asian
+  { code: 'uk', label: 'Ukrainian', nativeName: 'Українська' },
+  { code: 'be', label: 'Belarusian', nativeName: 'Беларуская' },
+  { code: 'bg', label: 'Bulgarian', nativeName: 'Български' },
+  { code: 'hr', label: 'Croatian', nativeName: 'Hrvatski' },
+  { code: 'sr', label: 'Serbian', nativeName: 'Српски' },
+  { code: 'sq', label: 'Albanian', nativeName: 'Shqipë' },
+  { code: 'hu', label: 'Hungarian', nativeName: 'Magyar' },
+  { code: 'cs', label: 'Czech', nativeName: 'Čeština' },
+  { code: 'sk', label: 'Slovak', nativeName: 'Slovenčina' },
+  { code: 'bn', label: 'Bengali', nativeName: 'বাংলা' },
+  { code: 'pa', label: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ' },
+  { code: 'ta', label: 'Tamil', nativeName: 'தமிழ்' },
+  { code: 'te', label: 'Telugu', nativeName: 'తెలుగు' },
+  { code: 'ml', label: 'Malayalam', nativeName: 'മലയാളം' },
+  { code: 'my', label: 'Burmese', nativeName: 'မြန်မာ' },
+  { code: 'km', label: 'Khmer', nativeName: 'ខ្មែរ' },
+  { code: 'lo', label: 'Lao', nativeName: 'ລາວ' },
+  { code: 'hy', label: 'Armenian', nativeName: 'Հայերեն' },
+  { code: 'ka', label: 'Georgian', nativeName: 'ქართული' },
+  { code: 'et', label: 'Estonian', nativeName: 'Eesti' },
+  { code: 'lv', label: 'Latvian', nativeName: 'Latviešu' },
+  { code: 'lt', label: 'Lithuanian', nativeName: 'Lietuvių' },
+  { code: 'ku', label: 'Kurdish', nativeName: 'Kurdî' },
+  { code: 'or', label: 'Odia', nativeName: 'ଓଡ଼ିଆ' },
+  { code: 'ur', label: 'Urdu', nativeName: 'اردو' },
+  { code: 'ps', label: 'Pashto', nativeName: 'پشتو' },
+  { code: 'he', label: 'Hebrew', nativeName: 'עברית' },
+  // Phase 3 - North African/Middle Eastern
+  { code: 'ar-EG', label: 'Egyptian Arabic', nativeName: 'مصري' },
+  { code: 'ar-MA', label: 'Moroccan Arabic', nativeName: 'درارج' },
+  { code: 'ar-TN', label: 'Tunisian Arabic', nativeName: 'تونسي' },
+  { code: 'ar-DZ', label: 'Algerian Arabic', nativeName: 'جزايري' },
+  { code: 'ar-JO', label: 'Jordanian Arabic', nativeName: 'أردني' },
+  { code: 'ar-LB', label: 'Lebanese Arabic', nativeName: 'لبناني' },
+  { code: 'ar-SY', label: 'Syrian Arabic', nativeName: 'سوري' },
+  { code: 'ar-SA', label: 'Saudi Arabic', nativeName: 'سعودي' },
+  { code: 'mr', label: 'Marathi', nativeName: 'मराठी' },
+  { code: 'gu', label: 'Gujarati', nativeName: 'ગુજરાતી' },
+  { code: 'kn', label: 'Kannada', nativeName: 'ಕನ್ನಡ' },
+  { code: 'sg', label: 'Singaporean', nativeName: 'Singapore' },
+  { code: 'ph', label: 'Filipino', nativeName: 'Filipino' },
+  { code: 'mm', label: 'Myanmar', nativeName: 'မြန်မာ' },
+  { code: 'zh-HK', label: 'Cantonese', nativeName: '粵語' },
+  { code: 'zh-TW', label: 'Traditional Chinese', nativeName: '繁體中文' },
+  { code: 'ja-JP', label: 'Japanese (Japan)', nativeName: '日本語' },
+  { code: 'ko-KR', label: 'Korean (South)', nativeName: '한국어' },
+  { code: 'mn', label: 'Mongolian', nativeName: 'Монгол' },
+  { code: 'kk', label: 'Kazakh', nativeName: 'Қазақ' },
+  { code: 'uz', label: 'Uzbek', nativeName: 'Ўзбек' },
+  { code: 'tg', label: 'Tajik', nativeName: 'Тоҷикӣ' },
+  { code: 'az', label: 'Azerbaijani', nativeName: 'Azərbaycanca' },
+  { code: 'mk', label: 'Macedonian', nativeName: 'Македонски' },
+  { code: 'is', label: 'Icelandic', nativeName: 'Íslenska' },
+  { code: 'mt', label: 'Maltese', nativeName: 'Malti' },
+  { code: 'sl', label: 'Slovenian', nativeName: 'Slovenščina' },
+  { code: 'bs', label: 'Bosnian', nativeName: 'Bosanski' },
+  { code: 'cy', label: 'Welsh', nativeName: 'Cymraeg' },
+  { code: 'ga', label: 'Irish', nativeName: 'Gaeilge' },
+  { code: 'hi-IN', label: 'Hindi (India)', nativeName: 'हिन्दी' },
+  { code: 'bn-BD', label: 'Bengali (Bangladesh)', nativeName: 'বাংলা' },
+  // Phase 4 - Sub-Saharan & Pacific
+  { code: 'rw', label: 'Kinyarwanda', nativeName: 'Kinyarwanda' },
+  { code: 'ki', label: 'Kikuyu', nativeName: 'Gikuyu' },
+  { code: 'ln', label: 'Lingala', nativeName: 'Lingala' },
+  { code: 'ny', label: 'Chichewa', nativeName: 'Chichewa' },
+  { code: 'st', label: 'Sotho', nativeName: 'Sesotho' },
+  { code: 'tw', label: 'Twi', nativeName: 'Twi' },
+  { code: 'xh', label: 'Xhosa', nativeName: 'isiXhosa' },
+  { code: 'ss', label: 'Siswati', nativeName: 'SiSwati' },
+  { code: 'fj', label: 'Fijian', nativeName: 'Vosa Vakaviti' },
+  { code: 'to', label: 'Tongan', nativeName: 'Tonga' },
+  { code: 'sm', label: 'Samoan', nativeName: 'Samoa' },
+  { code: 'mi', label: 'Maori', nativeName: 'Te Reo Māori' },
+  { code: 'qu', label: 'Quechua', nativeName: 'Quechua' },
+  { code: 'ay', label: 'Aymara', nativeName: 'Aymara' },
+  { code: 'nv', label: 'Navajo', nativeName: 'Diné' },
+  { code: 'gn', label: 'Guarani', nativeName: 'Guarani' },
+  { code: 'ht', label: 'Haitian Creole', nativeName: 'Kreyòl Ayisyen' },
+  { code: 'eu', label: 'Basque', nativeName: 'Euskera' },
+  { code: 'gl', label: 'Galician', nativeName: 'Galego' },
+  { code: 'ca', label: 'Catalan', nativeName: 'Català' },
+  { code: 'scn', label: 'Sicilian', nativeName: 'Sicilianu' },
+  { code: 'co', label: 'Corsican', nativeName: 'Corsu' },
+  { code: 'ti', label: 'Tigrinya', nativeName: 'ትግርኛ' },
+  { code: 'rn', label: 'Rundi', nativeName: 'Kirundi' },
+  { code: 'gv', label: 'Manx', nativeName: 'Manx' },
+  { code: 'pt-PT', label: 'Portuguese (Portugal)', nativeName: 'Português' },
+  { code: 'es-MX', label: 'Spanish (Mexico)', nativeName: 'Español Mexicano' },
+  { code: 'en-IN', label: 'English (India)', nativeName: 'English' },
+  { code: 'en-GB', label: 'English (UK)', nativeName: 'English' },
+  { code: 'en-AU', label: 'English (Australia)', nativeName: 'English' },
+  { code: 'fa', label: 'Persian', nativeName: 'فارسی' },
+  { code: 'ckb', label: 'Central Kurdish', nativeName: 'کوردی' },
 ];
 
 type Cur = { code: string; symbol: string; label: string };
@@ -48,6 +167,7 @@ interface NavbarProps {
 export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
   const { totalItems, items, showMiniCart, setShowMiniCart, removeFromCart, totalPrice } = useCart();
   const { isLoggedIn, isAdmin, isReseller, logout } = useAuth();
+  const { i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,6 +197,7 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
   const pickLang = (code: string) => {
     setLang(code);
     localStorage.setItem('saashub_lang', code);
+    i18n.changeLanguage(code);
     setOpenMenu(null);
   };
   const pickCurrency = (code: string) => {
@@ -278,7 +399,7 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
                         autoFocus
                         value={langQuery}
                         onChange={e => setLangQuery(e.target.value)}
-                        placeholder="Search 120+ languages…"
+                        placeholder="Search 125+ languages…"
                         className="flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted-foreground"
                       />
                     </div>
@@ -293,7 +414,6 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
                         }`}
                       >
                         <span className="flex items-center gap-2.5">
-                          <span className="text-base leading-none">{l.flag}</span>
                           <span className="font-medium">{l.label}</span>
                           <span className="text-[10px] uppercase text-muted-foreground">{l.code}</span>
                         </span>

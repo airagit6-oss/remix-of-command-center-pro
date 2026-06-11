@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 import {
   Activity,
   ArrowUpRight,
@@ -112,28 +113,51 @@ const Avatar = ({ name }: { name: string }) => {
 };
 
 const AdminSubscriptionsPage = () => {
+  const [subscriptions, setSubscriptions] = useState<Sub[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<'All' | Sub['status']>('All');
-  const [open, setOpen] = useState<string | null>('SUB-0004');
+  const [open, setOpen] = useState<string | null>(null);
+
+  // Load subscriptions from real API
+  useEffect(() => {
+    const fetchSubscriptions = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await api.get<Sub[]>('/admin/subscriptions');
+        setSubscriptions(data);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load subscriptions';
+        setError(message);
+        console.error('Failed to fetch subscriptions:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubscriptions();
+  }, []);
 
   const filtered = useMemo(() => {
-    return seed.filter(s => {
+    return subscriptions.filter(s => {
       const matchQ = !query || (s.user + s.company + s.email + s.id).toLowerCase().includes(query.toLowerCase());
       const matchF = filter === 'All' || s.status === filter;
       return matchQ && matchF;
     });
-  }, [query, filter]);
+  }, [query, filter, subscriptions]);
 
-  const mrr = seed.filter(s => s.status === 'Active').reduce((a, s) => a + (s.billing === 'Monthly' ? s.amount : Math.round(s.amount / 12)), 0);
+  const mrr = subscriptions.filter(s => s.status === 'Active').reduce((a, s) => a + (s.billing === 'Monthly' ? s.amount : Math.round(s.amount / 12)), 0);
   const arr = mrr * 12;
-  const active = seed.filter(s => s.status === 'Active').length;
-  const churnRate = ((seed.filter(s => s.status === 'Past Due' || s.status === 'Cancelled').length / seed.length) * 100).toFixed(1);
-  const ltv = seed.reduce((a, s) => a + s.ltv, 0);
+  const active = subscriptions.filter(s => s.status === 'Active').length;
+  const churnRate = ((subscriptions.filter(s => s.status === 'Past Due' || s.status === 'Cancelled').length / Math.max(subscriptions.length, 1)) * 100).toFixed(1);
+  const ltv = subscriptions.reduce((a, s) => a + s.ltv, 0);
 
   const kpis = [
     { label: 'Monthly Recurring', value: `$${mrr.toLocaleString()}`, sub: '+12.4% vs last mo', icon: TrendingUp, tone: 'sky' as const, spark: [10,14,12,18,22,20,26,30,34,38,44,52] },
     { label: 'Annual Run Rate', value: `$${(arr / 1000).toFixed(1)}k`, sub: 'Forecast +18% Q3', icon: Sparkles, tone: 'emerald' as const, spark: [20,22,28,32,30,36,40,46,52,58,64,72] },
-    { label: 'Active Subscribers', value: active.toString(), sub: `${seed.length} total accounts`, icon: Users, tone: 'sky' as const, spark: [4,5,5,6,6,7,7,7,8,8,8,8] },
+    { label: 'Active Subscribers', value: active.toString(), sub: `${subscriptions.length} total accounts`, icon: Users, tone: 'sky' as const, spark: [4,5,5,6,6,7,7,7,8,8,8,8] },
     { label: 'Churn Risk', value: `${churnRate}%`, sub: 'AI watching 2 accounts', icon: Heart, tone: 'rose' as const, spark: [22,20,18,16,14,12,14,16,18,16,14,12] },
   ];
 

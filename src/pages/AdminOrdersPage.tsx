@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 import {
   Activity,
   ArrowUpRight,
@@ -112,21 +113,44 @@ const Avatar = ({ name }: { name: string }) => {
 };
 
 const AdminOrdersPage = () => {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<'All' | Order['status']>('All');
-  const [open, setOpen] = useState<string | null>('ORD-10244');
+  const [open, setOpen] = useState<string | null>(null);
 
-  const filtered = useMemo(() => seed.filter(o => {
+  // Load orders from real API
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await api.get<Order[]>('/admin/orders');
+        setOrders(data);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load orders';
+        setError(message);
+        console.error('Failed to fetch orders:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  const filtered = useMemo(() => orders.filter(o => {
     const matchQ = !query || (o.user + o.company + o.email + o.id + o.product).toLowerCase().includes(query.toLowerCase());
     const matchF = filter === 'All' || o.status === filter;
     return matchQ && matchF;
-  }), [query, filter]);
+  }), [query, filter, orders]);
 
-  const grossRevenue = seed.filter(o => o.status === 'Paid').reduce((a, o) => a + o.amount, 0);
-  const refunded = seed.filter(o => o.status === 'Refunded').reduce((a, o) => a + o.amount, 0);
-  const paidCount = seed.filter(o => o.status === 'Paid').length;
+  const grossRevenue = orders.filter(o => o.status === 'Paid').reduce((a, o) => a + o.amount, 0);
+  const refunded = orders.filter(o => o.status === 'Refunded').reduce((a, o) => a + o.amount, 0);
+  const paidCount = orders.filter(o => o.status === 'Paid').length;
   const aov = Math.round(grossRevenue / Math.max(1, paidCount));
-  const fraudWatch = seed.filter(o => o.fraud > 50).length;
+  const fraudWatch = orders.filter(o => o.fraud > 50).length;
 
   const kpis = [
     { label: 'Gross Revenue', value: `$${grossRevenue.toLocaleString()}`, sub: '+18.2% week over week', icon: TrendingUp, tone: 'emerald' as const, spark: [10,14,12,18,22,20,26,30,34,38,44,52] },

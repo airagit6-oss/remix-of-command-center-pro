@@ -1,4 +1,38 @@
-const ResellerPayoutsHistoryPage = () => (
+import { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
+
+interface Payout {
+  date: string;
+  method: string;
+  ref: string;
+  amount: string;
+  status: 'Paid' | 'Pending' | 'Failed';
+}
+
+const ResellerPayoutsHistoryPage = () => {
+  const [payouts, setPayouts] = useState<Payout[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPayouts = async () => {
+      try {
+        setLoading(true);
+        const data = await api.get<Payout[]>('/reseller/payouts');
+        setPayouts(data || []);
+      } catch (error) {
+        console.error('Failed to fetch payouts:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPayouts();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-8">Loading payouts...</div>;
+  }
+
+  return (
   <div>
     <h1 className="text-2xl font-bold mb-1" style={{ color: '#1a1a1a' }}>Payouts history</h1>
     <p className="text-sm mb-6" style={{ color: '#6d7175' }}>All past payouts to your account.</p>
@@ -14,12 +48,7 @@ const ResellerPayoutsHistoryPage = () => (
           </tr>
         </thead>
         <tbody className="divide-y" style={{ color: '#1a1a1a' }}>
-          {[
-            { date: 'Apr 1, 2025', method: 'PayPal', ref: 'PP-A82391', amount: '$2,140.00', status: 'Paid' },
-            { date: 'Mar 1, 2025', method: 'Bank transfer', ref: 'BNK-7710', amount: '$1,890.50', status: 'Paid' },
-            { date: 'Feb 1, 2025', method: 'PayPal', ref: 'PP-A71224', amount: '$1,455.00', status: 'Paid' },
-            { date: 'Jan 1, 2025', method: 'Bank transfer', ref: 'BNK-7421', amount: '$2,012.00', status: 'Paid' },
-          ].map(p => (
+          {payouts.map(p => (
             <tr key={p.ref}>
               <td className="px-5 py-3">{p.date}</td>
               <td className="px-5 py-3">{p.method}</td>
@@ -32,5 +61,6 @@ const ResellerPayoutsHistoryPage = () => (
       </table>
     </div>
   </div>
-);
+  );
+};
 export default ResellerPayoutsHistoryPage;

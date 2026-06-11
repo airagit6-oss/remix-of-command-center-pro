@@ -582,8 +582,10 @@ const channelIcon: Record<Channel, typeof Mail> = {
 };
 
 function AlertRulesConsole() {
-  const [rules, setRules] = useState<AlertRule[]>(seedRules);
-  const [selectedId, setSelectedId] = useState<string>(seedRules[0].id);
+  const [rules, setRules] = useState<AlertRule[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string>('');
   const [creating, setCreating] = useState(false);
   const [draft, setDraft] = useState<AlertRule>({
     id: "", name: "New Anomaly Rule", enabled: true,
@@ -592,6 +594,27 @@ function AlertRulesConsole() {
     escalation: [{ level: 1, after: "0m", to: "On-call" }],
     lastFired: "—", fires24h: 0,
   });
+
+  // Load alert rules from real API
+  useEffect(() => {
+    const fetchRules = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await api.get<AlertRule[]>('/admin/alert-rules');
+        setRules(data);
+        if (data.length > 0) setSelectedId(data[0].id);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load rules';
+        setError(message);
+        console.error('Failed to fetch alert rules:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRules();
+  }, []);
 
   const selected = rules.find((r) => r.id === selectedId) ?? rules[0];
 

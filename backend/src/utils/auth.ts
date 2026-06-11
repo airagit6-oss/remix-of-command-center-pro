@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { SignOptions } from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET: string = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const BCRYPT_ROUNDS = 10;
 
 /**
@@ -30,8 +31,8 @@ export function generateToken(userId: string, expiresIn: string = '7d'): string 
       id: userId,
       iat: Math.floor(Date.now() / 1000),
     },
-    JWT_SECRET,
-    { expiresIn }
+    Buffer.from(JWT_SECRET),
+    { expiresIn } as SignOptions
   );
 }
 

@@ -1,20 +1,38 @@
 import { ImageIcon, Link2, Mail, Copy, Check } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
 
 interface Asset { icon: typeof ImageIcon; name: string; desc: string; ext: string; }
 
-const assets: Asset[] = [
-  { icon: ImageIcon, name: 'Banner pack (12 sizes)', desc: 'PNG + JPG, 970×250 to 728×90', ext: 'zip' },
-  { icon: Mail, name: 'Email templates', desc: '5 ready-to-use HTML templates', ext: 'zip' },
-  { icon: ImageIcon, name: 'Social media kit', desc: 'Instagram, Twitter, LinkedIn', ext: 'zip' },
-  { icon: Mail, name: 'Cold outreach scripts', desc: '8 proven sequences', ext: 'txt' },
-];
-
-const referral = 'https://saashub.app/?ref=partner-2847';
-
 const ResellerMarketingPage = () => {
+  const [assets, setAssets] = useState<Asset[]>([]);
+  const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [referral, setReferral] = useState('https://saashub.app/?ref=partner-2847');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [assetsData, referralData] = await Promise.all([
+          api.get<Asset[]>('/reseller/marketing-assets'),
+          api.get<{ url: string }>('/reseller/referral-link')
+        ]);
+        if (assetsData) setAssets(assetsData);
+        if (referralData?.url) setReferral(referralData.url);
+      } catch (error) {
+        console.error('Failed to fetch marketing data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-8">Loading marketing assets...</div>;
+  }
 
   const copy = async () => {
     try {

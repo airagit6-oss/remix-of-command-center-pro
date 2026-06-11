@@ -2,24 +2,39 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, AlertCircle } from "lucide-react";
 
 export default function LogsPage() {
   const { t } = useTranslation('common');
   const [logs, setLogs] = useState<any[]>([]);
   const [filter, setFilter] = useState("");
   const [eventFilter, setEventFilter] = useState("all");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    api.get('/logs').then(data => {
-      setLogs(data || []);
-    });
-    const iv = setInterval(() => {
-      api.get('/logs').then(data => {
+    const fetchLogs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await api.get('/logs');
         setLogs(data || []);
-      });
-    }, 2000);
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : 'Failed to fetch logs';
+        setError(errorMsg);
+        console.error('Logs API Error:', err);
+        setLogs([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Fetch immediately
+    fetchLogs();
+    
+    // Poll every 2 seconds
+    const iv = setInterval(fetchLogs, 2000);
     return () => clearInterval(iv);
   }, []);
 
@@ -37,6 +52,17 @@ export default function LogsPage() {
 
   return (
     <div className="flex flex-col h-full gap-3">
+      {/* Error Alert */}
+      {error && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive">
+          <AlertCircle className="h-5 w-5 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="font-medium">Failed to load logs</p>
+            <p className="text-xs text-destructive/80">{error}</p>
+          </div>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-sm">
@@ -71,6 +97,20 @@ export default function LogsPage() {
 
       {/* Logs Table */}
       <div className="dd-panel flex-1 flex flex-col min-h-0">
+        {loading && logs.length === 0 && (
+          <div className="flex items-center justify-center flex-1">
+            <p className="text-muted-foreground">Loading logs...</p>
+          </div>
+        )}
+
+        {!loading && logs.length === 0 && !error && (
+          <div className="flex items-center justify-center flex-1">
+            <div className="text-center">
+              <p className="font-medium text-muted-foreground mb-1">No logs available</p>
+              <p className="text-xs text-muted-foreground">Backend logs endpoint may not be responding. Check server status.</p>
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-[140px_100px_100px_120px_70px_1fr] gap-2 px-3 py-2 border-b border-border text-xs text-muted-foreground uppercase tracking-wider font-medium">
           <span>{t('timestamp', { defaultValue: 'Timestamp' })}</span>
           <span>{t('event', { defaultValue: 'Event' })}</span>

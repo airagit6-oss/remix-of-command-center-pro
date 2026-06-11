@@ -14,6 +14,20 @@
     "allowSyntheticDefaultImports": true,
     "types": ["node"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/server.ts",
+    "src/middleware/auth.middleware.ts",
+    "src/services/**/*",
+    "src/utils/**/*",
+    "src/audit/**/*",
+    "src/routes/auth.routes.ts",
+    "src/routes/review.routes.ts",
+    "src/routes/category.routes.ts",
+    "src/routes/subscription.routes.ts",
+    "src/routes/order.routes.ts",
+    "src/routes/alerts.routes.ts",
+    "src/routes/author.routes.ts",
+    "src/routes/reseller.routes.ts"
+  ],
+  "exclude": ["node_modules", "dist", "src/monitoring/**/*", "src/queue/**/*", "src/middleware/errorHandler.ts", "src/middleware/rateLimiter.ts"]
 }

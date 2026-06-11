@@ -26,7 +26,8 @@ const getGroups = (t: any) => [
   {
     label: t('sales', { defaultValue: 'Sales' }),
     items: [
-      { to: '/reseller/leads', label: t('referrals', { defaultValue: 'Referrals' }), icon: UserPlus, badge: '6' },
+      { to: '/reseller/leads', label: t('leads', { defaultValue: 'Leads' }), icon: UserPlus, badge: '6' },
+      { to: '/reseller/referrals', label: t('referrals', { defaultValue: 'Referrals' }), icon: Users },
       { to: '/reseller/pipeline', label: t('pipeline', { defaultValue: 'Pipeline' }), icon: Kanban },
       { to: '/reseller/contacts', label: t('clients', { defaultValue: 'Clients' }), icon: BookUser },
     ],
@@ -174,8 +175,10 @@ const ResellerLayout = () => {
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const currentPage = allItems.find(n => location.pathname.startsWith(n.to));
   const { t } = useTranslation('common');
+  const groups = getGroups(t);
+  const allItems = groups.flatMap(g => g.items);
+  const currentPage = allItems.find(n => location.pathname.startsWith(n.to));
   const pageTitle = currentPage?.label ?? t('partner_dashboard', { defaultValue: 'Partner Dashboard' });
   const matches = searchQuery.trim()
     ? allItems.filter(item => item.label.toLowerCase().includes(searchQuery.trim().toLowerCase()))

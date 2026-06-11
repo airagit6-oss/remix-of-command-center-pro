@@ -1,0 +1,5528 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Base
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  role          UserRole  @default(CUSTOMER)
+  isVerified    Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime @updatedAt
+
+  authorProfile    AuthorProfile?
+  resellerProfile  ResellerProfile?
+  cart             Cart?
+  orders           Order[]
+  subscriptions    Subscription[]
+  referrals        Referral[]  @relation("Referrer")
+  referredBy       Referral?   @relation("ReferredUser")
+  leads            Lead[]
+  commissions     Commission[]
+  payouts         Payout[]
+  auditLogs        AuditLog[]
+  notifications    Notification[]
+  notificationPreferences NotificationPreference[]
+  wallet           Wallet?
+  reviews          Review[]
+  comments         Comment[]
+  wishlist         Wishlist[]
+  twoFactorSecret  String?
+  twoFactorEnabled Boolean   @default(false)
+  sessions         Session[]
+  devices          Device[]
+  securityEvents   SecurityEvent[]
+  activityLogs     ActivityLog[]
+  
+  // Support Ecosystem Relations
+  supportTickets   SupportTicket[]
+  ticketMessages   TicketMessage[]
+  chatSessions     LiveChatSession[]
+  kbArticles       KnowledgeBaseArticle[]
+  forumPosts       ForumPost[]
+  forumComments    ForumComment[]
+  bugReports       BugReport[]
+  featureRequests  FeatureRequest[]
+  customerFeedback CustomerFeedback[]
+  
+  // Finance OS Relations
+  commissionLedger CommissionLedger[]
+  settlementLedger SettlementLedger[]
+  
+  // Achievement System Relations
+  achievementProfile  AchievementProfile?
+  spotlightedAs       Spotlight?    @relation("Spotlight")
+  hallOfFameEntries   HallOfFame[]  @relation("HallOfFame")
+  
+  // Digital Asset Protection Relations
+  downloadWatermarks DownloadWatermark[]
+  downloadFingerprints DownloadFingerprint[]
+  
+  // Product Health Center Relations
+  crashReports CrashReport[]
+  productBugReports ProductBugReport[]
+  userComplaints UserComplaint[]
+  
+  // Customer Success Center Relations
+  customerOnboarding CustomerOnboarding?
+  usageTracking UsageTracking[]
+  adoptionTracking AdoptionTracking[]
+  renewalPredictions RenewalPrediction[]
+  churnPredictions ChurnPrediction[]
+  campaignTargets CampaignTarget[]
+  
+  // Partner OS Relations
+  partner Partner?
+  
+  // Enterprise Commission Engine Relations
+  commissionLedgerEntries CommissionLedgerEntry[]
+  teamCommissionsAsLead TeamCommission[] @relation("TeamCommissionLead")
+  teamCommissionsAsMember TeamCommission[] @relation("TeamCommissionMember")
+  performanceCommissions PerformanceCommission[]
+  
+  // Renewal Commission Center Relations
+  licenseRenewals LicenseRenewalTracking[]
+  subscriptionRenewals SubscriptionRenewalTracking[]
+  renewalRevenues RenewalRevenue[]
+  renewalForecasts RenewalForecast[]
+  autoRenewalCommissions AutoRenewalCommission[]
+  
+  // B2B Sales Center Relations
+  corporateLeadsAsAssignee CorporateLead[] @relation("CorporateLeadAssignee")
+  enterpriseLeadsAsAssignee EnterpriseLead[] @relation("EnterpriseLeadAssignee")
+  bulkDealsAsAssignee BulkDeal[] @relation("BulkDealAssignee")
+
+  @@index([email])
+  @@index([role])
+}
+
+enum UserRole {
+  GUEST
+  CUSTOMER
+  AUTHOR
+  RESELLER
+  ADMIN
+  SUPER_ADMIN
+}
+
+// Author Profile
+model AuthorProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  bio             String?
+  website         String?
+  socialLinks     Json?
+  
+  isKYCVerified   Boolean  @default(false)
+  kycSubmittedAt  DateTime?
+  kycVerifiedAt   DateTime?
+  kycDocuments    Json?
+  
+  totalRevenue    Decimal  @default(0) @db.Decimal(20, 2)
+  totalSales      Int      @default(0)
+  followers       Int      @default(0)
+  rating          Decimal  @default(0) @db.Decimal(3, 2)
+  
+  availableBalance Decimal @default(0) @db.Decimal(20, 2)
+  pendingBalance    Decimal @default(0) @db.Decimal(20, 2)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  products        Product[]
+  earnings        AuthorEarnings[]
+  authorAnalytics AuthorAnalytics[]
+
+  @@index([userId])
+  @@index([isKYCVerified])
+}
+
+// Reseller Profile
+model ResellerProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  referralCode    String   @unique
+  referralLink    String?
+  
+  totalReferrals  Int      @default(0)
+  totalLeads      Int      @default(0)
+  conversionRate  Decimal  @default(0) @db.Decimal(5, 2)
+  
+  totalCommissions Decimal @default(0) @db.Decimal(20, 2)
+  availableBalance Decimal @default(0) @db.Decimal(20, 2)
+  pendingBalance    Decimal @default(0) @db.Decimal(20, 2)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  leads           Lead[]
+  commissions     Commission[]
+  earnings        ResellerEarnings[]
+  resellerAnalytics ResellerAnalytics[]
+
+  @@index([userId])
+  @@index([referralCode])
+}
+
+// Product
+model Product {
+  id          String       @id @default(cuid())
+  authorId    String
+  author      AuthorProfile @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  name        String
+  description String
+  price       Decimal      @db.Decimal(20, 2)
+  status      ProductStatus @default(DRAFT)
+  
+  media       Json?
+  tags        String[]
+  categoryId  String?
+  category    Category?   @relation(fields: [categoryId], references: [id])
+  
+  sales       Int          @default(0)
+  revenue     Decimal      @default(0) @db.Decimal(20, 2)
+  rating      Decimal      @default(0) @db.Decimal(3, 2)
+  reviews     Int          @default(0)
+  
+  publishedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  orderItems  OrderItem[]
+  mediaFiles  ProductMedia[]
+  reviews     Review[]
+  wishlist    Wishlist[]
+  approval    ProductApproval?
+  leakReports LeakReport[]
+  crashReports CrashReport[]
+  productBugReports ProductBugReport[]
+  issues      Issue[]
+  knownIssues KnownIssue[]
+  versionHealth VersionHealth[]
+  userComplaints UserComplaint[]
+
+  @@index([authorId])
+  @@index([status])
+  @@index([categoryId])
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  SUSPENDED
+}
+
+// Product Media
+model ProductMedia {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  type      MediaType
+  url       String
+  alt       String?
+  order     Int      @default(0)
+  
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  AUDIO
+}
+
+// Order
+model Order {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  totalAmount Decimal  @db.Decimal(20, 2)
+  status      OrderStatus @default(PENDING)
+  
+  referralId  String?
+  referral    Referral? @relation(fields: [referralId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems  OrderItem[]
+  paymentIntents PaymentIntent[]
+  invoices    Invoice[]
+  licenses    License[]
+  refunds     Refund[]
+  taxRecords  TaxRecord[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([referralId])
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+// Order Item
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  
+  quantity  Int
+  price     Decimal  @db.Decimal(20, 2)
+  total     Decimal  @db.Decimal(20, 2)
+  
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+// Referral
+model Referral {
+  id              String   @id @default(cuid())
+  referrerId      String
+  referrer        User     @relation("Referrer", fields: [referrerId], references: [id])
+  referredUserId  String   @unique
+  referredUser    User     @relation("ReferredUser", fields: [referredUserId], references: [id])
+  
+  code            String
+  status          ReferralStatus @default(PENDING)
+  commission      Decimal? @db.Decimal(20, 2)
+  
+  orderId         String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([referrerId])
+  @@index([referredUserId])
+  @@index([code])
+  @@index([status])
+}
+
+enum ReferralStatus {
+  PENDING
+  CONVERTED
+  EXPIRED
+  CANCELLED
+}
+
+// Lead
+model Lead {
+  id          String     @id @default(cuid())
+  resellerId  String
+  reseller    ResellerProfile @relation(fields: [resellerId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?      @relation(fields: [userId], references: [id])
+  
+  name        String
+  email       String
+  phone       String?
+  source      String
+  notes       String?
+  status      LeadStatus @default(NEW)
+  value       Decimal?   @db.Decimal(20, 2)
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  activities  LeadActivity[]
+
+  @@index([resellerId])
+  @@index([userId])
+  @@index([email])
+  @@index([status])
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  LOST
+}
+
+// Lead Activity
+model LeadActivity {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  
+  action    String
+  notes     String?
+  
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
+}
+
+// Commission
+model Commission {
+  id          String           @id @default(cuid())
+  resellerId  String
+  reseller    ResellerProfile  @relation(fields: [resellerId], references: [id])
+  userId      String
+  user        User             @relation(fields: [userId], references: [id])
+  
+  orderId     String?
+  referralId  String?
+  
+  type        CommissionType
+  amount      Decimal          @db.Decimal(20, 2)
+  rate        Decimal          @db.Decimal(5, 2)
+  
+  status      CommissionStatus @default(PENDING)
+  
+  processedAt DateTime?
+  approvedBy  String?
+  
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([resellerId])
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+}
+
+enum CommissionType {
+  REFERRAL
+  LEAD_CONVERSION
+  RECURRING
+  BONUS
+}
+
+enum CommissionStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
+  HELD
+}
+
+// Commission Rule
+model CommissionRule {
+  id          String   @id @default(cuid())
+  name        String
+  type        CommissionType
+  
+  rate        Decimal  @db.Decimal(5, 2)
+  minAmount   Decimal? @db.Decimal(20, 2)
+  maxAmount   Decimal? @db.Decimal(20, 2)
+  
+  conditions  Json?
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([isActive])
+}
+
+// Payout
+model Payout {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  
+  amount      Decimal      @db.Decimal(20, 2)
+  method      PayoutMethod
+  status      PayoutStatus @default(PENDING)
+  
+  accountDetails Json?
+  
+  requestedAt DateTime     @default(now())
+  processedAt DateTime?
+  
+  transactionId String?
+  notes       String?
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([requestedAt])
+}
+
+enum PayoutMethod {
+  BANK_TRANSFER
+  PAYPAL
+  CRYPTO
+  CHECK
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Author Earnings
+model AuthorEarnings {
+  id          String   @id @default(cuid())
+  authorId    String
+  author      AuthorProfile @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  orderId     String?
+  productId   String?
+  
+  type        EarningType
+  amount      Decimal  @db.Decimal(20, 2)
+  
+  status      EarningStatus @default(PENDING)
+  
+  createdAt   DateTime @default(now())
+
+  @@index([authorId])
+  @@index([status])
+  @@index([type])
+}
+
+enum EarningType {
+  SALE
+  REFUND
+  BONUS
+  ADJUSTMENT
+}
+
+enum EarningStatus {
+  PENDING
+  AVAILABLE
+  PAID
+  HELD
+}
+
+// Reseller Earnings
+model ResellerEarnings {
+  id          String   @id @default(cuid())
+  resellerId  String
+  reseller    ResellerProfile @relation(fields: [resellerId], references: [id], onDelete: Cascade)
+  
+  commissionId String?
+  
+  type        EarningType
+  amount      Decimal  @db.Decimal(20, 2)
+  
+  status      EarningStatus @default(PENDING)
+  
+  createdAt   DateTime @default(now())
+
+  @@index([resellerId])
+  @@index([status])
+  @@index([type])
+}
+
+// Author Analytics
+model AuthorAnalytics {
+  id          String   @id @default(cuid())
+  authorId    String
+  author      AuthorProfile @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  
+  date        DateTime @db.Date
+  metric      String
+  value       Decimal  @db.Decimal(20, 2)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+
+  @@unique([authorId, date, metric])
+  @@index([authorId])
+  @@index([date])
+}
+
+// Reseller Analytics
+model ResellerAnalytics {
+  id          String   @id @default(cuid())
+  resellerId  String
+  reseller    ResellerProfile @relation(fields: [resellerId], references: [id], onDelete: Cascade)
+  
+  date        DateTime @db.Date
+  metric      String
+  value       Decimal  @db.Decimal(20, 2)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+
+  @@unique([resellerId, date, metric])
+  @@index([resellerId])
+  @@index([date])
+}
+
+// KYC Record
+model KYCRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  
+  type        KYCType
+  status      KYCStatus @default(PENDING)
+  
+  documents   Json
+  notes       String?
+  
+  submittedAt DateTime @default(now())
+  reviewedAt  DateTime?
+  reviewedBy  String?
+  
+  rejectionReason String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum KYCType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum KYCStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+// Notification
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  
+  channels  NotificationChannel[] // Which channels this notification was sent to
+  status    NotificationStatus @default(SENT)
+  
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  
+  sentAt    DateTime @default(now())
+  
+  templateId String?
+  template   NotificationTemplate? @relation(fields: [templateId], references: [id])
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  ORDER
+  PAYOUT
+  COMMISSION
+  REFERRAL
+  LEAD
+  PRODUCT
+  SYSTEM
+  ALERT
+  LICENSE
+  WALLET
+  SECURITY
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  WHATSAPP
+  PUSH
+  SMS
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  READ
+}
+
+// Notification Template
+model NotificationTemplate {
+  id          String   @id @default(cuid())
+  
+  name        String   @unique
+  type        NotificationType
+  channels    NotificationChannel[]
+  
+  subject     String? // For email/push
+  body        String   // Template body with placeholders
+  htmlBody    String? // HTML version for email
+  
+  variables   Json? // Available variables in template
+  
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  notifications Notification[]
+
+  @@index([type])
+  @@index([isActive])
+}
+
+// Notification Preference
+model NotificationPreference {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type        NotificationType
+  channels    NotificationChannel[]
+  enabled     Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, type])
+  @@index([userId])
+  @@index([type])
+}
+
+// Notification History
+model NotificationHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  
+  type        NotificationType
+  channel     NotificationChannel
+  
+  status      NotificationStatus
+  
+  subject     String?
+  body        String
+  
+  error       String?
+  
+  sentAt      DateTime @default(now())
+  deliveredAt DateTime?
+  
+  metadata    Json?
+
+  @@index([userId])
+  @@index([type])
+  @@index([channel])
+  @@index([status])
+  @@index([sentAt])
+}
+
+// Feature Flag
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  
+  key         String   @unique
+  name        String
+  description String?
+  
+  enabled     Boolean  @default(true)
+  
+  // Targeting
+  roles       UserRole[]
+  countries   String[] // ISO country codes
+  userSegments String[] // e.g., 'beta', 'premium', 'enterprise'
+  
+  // A/B Testing
+  isABTest    Boolean  @default(false)
+  variantA    Json?    // Configuration for variant A
+  variantB    Json?    // Configuration for variant B
+  splitPercentage Int @default(50) // 0-100
+  
+  // Metadata
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([key])
+  @@index([enabled])
+  @@index([isABTest])
+}
+
+// Queue Job
+model QueueJob {
+  id          String   @id @default(cuid())
+  
+  queue       QueueType
+  type        String   // Job type within queue
+  priority    Int      @default(0) // Higher priority = processed first
+  
+  data        Json
+  status      JobStatus @default(PENDING)
+  
+  attempts    Int      @default(0)
+  maxAttempts Int      @default(3)
+  
+  error       String?
+  errorMessage Json?
+  
+  scheduledAt DateTime? // For delayed jobs
+  startedAt   DateTime?
+  completedAt DateTime?
+  failedAt    DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([queue])
+  @@index([status])
+  @@index([priority])
+  @@index([scheduledAt])
+  @@index([createdAt])
+}
+
+enum QueueType {
+  EMAIL
+  NOTIFICATION
+  LICENSE
+  WEBHOOK
+  PAYOUT
+  REPORT
+  CLEANUP
+  SYNC
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  RETRYING
+}
+
+// Scheduled Job
+model ScheduledJob {
+  id          String   @id @default(cuid())
+  
+  name        String
+  type        JobType
+  description String?
+  
+  // Schedule
+  cronExpression String? // e.g., "0 0 * * *" for daily at midnight
+  intervalMinutes Int? // Alternative to cron: run every X minutes
+  runAt      DateTime? // One-time scheduled job
+  
+  enabled     Boolean  @default(true)
+  
+  // Execution tracking
+  lastRunAt   DateTime?
+  nextRunAt   DateTime?
+  lastSuccessAt DateTime?
+  lastFailureAt DateTime?
+  
+  successCount Int @default(0)
+  failureCount Int @default(0)
+  
+  // Configuration
+  config      Json?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([enabled])
+  @@index([nextRunAt])
+  @@index([cronExpression])
+}
+
+enum JobType {
+  RENEWAL
+  CLEANUP
+  REPORT
+  BACKUP
+  REMINDER
+  SYNC
+}
+
+// Event
+model Event {
+  id          String   @id @default(cuid())
+  
+  eventType  EventType
+  aggregateId String   // ID of the entity that triggered the event
+  aggregateType String // Type of entity (Order, Payment, License, etc.)
+  
+  data        Json
+  metadata    Json?
+  
+  publishedAt DateTime @default(now())
+  
+  @@index([eventType])
+  @@index([aggregateId])
+  @@index([aggregateType])
+  @@index([publishedAt])
+}
+
+enum EventType {
+  ORDER_CREATED
+  ORDER_UPDATED
+  ORDER_CANCELLED
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  PAYMENT_REFUNDED
+  LICENSE_CREATED
+  LICENSE_ACTIVATED
+  LICENSE_EXPIRED
+  LICENSE_REVOKED
+  COMMISSION_CREATED
+  COMMISSION_PAID
+  PAYOUT_CREATED
+  PAYOUT_PROCESSED
+  NOTIFICATION_TRIGGERED
+  USER_REGISTERED
+  USER_VERIFIED
+  PRODUCT_CREATED
+  PRODUCT_UPDATED
+  SUBSCRIPTION_CREATED
+  SUBSCRIPTION_RENEWED
+  SUBSCRIPTION_CANCELLED
+}
+
+// Event Subscription
+model EventSubscription {
+  id          String   @id @default(cuid())
+  
+  eventType   EventType
+  webhookUrl  String
+  secret      String? // For webhook signature verification
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([eventType])
+  @@index([enabled])
+}
+
+// Event Log
+model EventLog {
+  id          String   @id @default(cuid())
+  
+  eventId     String
+  subscriptionId String
+  
+  eventType   EventType
+  webhookUrl  String
+  
+  status      EventDeliveryStatus @default(PENDING)
+  
+  statusCode  Int?
+  response    String?
+  error       String?
+  
+  attempts    Int      @default(0)
+  
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  failedAt    DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([eventId])
+  @@index([subscriptionId])
+  @@index([eventType])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum EventDeliveryStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  RETRYING
+}
+
+// Custom Field Definition
+model CustomFieldDefinition {
+  id          String   @id @default(cuid())
+  
+  entityType CustomFieldType
+  name        String
+  key         String
+  type        FieldType
+  
+  required    Boolean  @default(false)
+  unique      Boolean  @default(false)
+  
+  options     Json?    // For select/multi-select fields
+  validation  Json?    // Validation rules (min, max, pattern, etc.)
+  defaultValue Json?
+  
+  enabled     Boolean  @default(true)
+  order       Int      @default(0)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  values      CustomFieldValue[]
+
+  @@unique([entityType, key])
+  @@index([entityType])
+  @@index([enabled])
+  @@index([key])
+}
+
+enum CustomFieldType {
+  PRODUCT
+  AUTHOR
+  CUSTOMER
+  RESELLER
+}
+
+enum FieldType {
+  TEXT
+  NUMBER
+  EMAIL
+  URL
+  DATE
+  DATETIME
+  BOOLEAN
+  SELECT
+  MULTI_SELECT
+  TEXTAREA
+  JSON
+}
+
+// Custom Field Value
+model CustomFieldValue {
+  id          String   @id @default(cuid())
+  
+  fieldId     String
+  field       CustomFieldDefinition @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  
+  entityId    String   // ID of the entity (product, author, customer, reseller)
+  value       Json
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([fieldId, entityId])
+  @@index([fieldId])
+  @@index([entityId])
+}
+
+// Form Definition
+model FormDefinition {
+  id          String   @id @default(cuid())
+  
+  type        FormType
+  name        String
+  description String?
+  
+  schema      Json     // Form schema (fields, validation, etc.)
+  config      Json?    // Form configuration (submit action, notifications, etc.)
+  
+  enabled     Boolean  @default(true)
+  published   Boolean  @default(false)
+  
+  version     Int      @default(1)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  submissions FormSubmission[]
+
+  @@index([type])
+  @@index([enabled])
+  @@index([published])
+}
+
+enum FormType {
+  KYC
+  LEAD
+  SUPPORT
+  CUSTOM
+}
+
+// Form Submission
+model FormSubmission {
+  id          String   @id @default(cuid())
+  
+  formId      String
+  form        FormDefinition @relation(fields: [formId], references: [id], onDelete: Cascade)
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  
+  data        Json     // Submitted form data
+  status      FormSubmissionStatus @default(PENDING)
+  
+  notes       String?
+  
+  submittedAt DateTime @default(now())
+  reviewedAt  DateTime?
+  reviewedBy  String?
+  
+  metadata    Json?
+
+  @@index([formId])
+  @@index([userId])
+  @@index([status])
+  @@index([submittedAt])
+}
+
+enum FormSubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  UNDER_REVIEW
+}
+
+// System Health Check
+model SystemHealthCheck {
+  id          String   @id @default(cuid())
+  
+  component   HealthComponent
+  status      HealthStatus
+  
+  metrics     Json?    // Component-specific metrics
+  message     String?  // Status message or error
+  
+  checkedAt   DateTime @default(now())
+
+  @@index([component])
+  @@index([status])
+  @@index([checkedAt])
+}
+
+enum HealthComponent {
+  API
+  DATABASE
+  QUEUE
+  WEBHOOK
+  CRON
+  STORAGE
+  REDIS
+  CDN
+}
+
+enum HealthStatus {
+  HEALTHY
+  DEGRADED
+  UNHEALTHY
+  UNKNOWN
+}
+
+// Config Rule
+model ConfigRule {
+  id          String   @id @default(cuid())
+  
+  type        ConfigType
+  category    String   // e.g., 'TAX_RATE', 'COMMISSION_PERCENTAGE', 'LICENSE_DURATION'
+  key         String
+  value       Json
+  
+  description String?
+  
+  enabled     Boolean  @default(true)
+  priority    Int      @default(0)
+  
+  validFrom   DateTime?
+  validTo     DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([type, key])
+  @@index([type])
+  @@index([category])
+  @@index([enabled])
+  @@index([validFrom, validTo])
+}
+
+enum ConfigType {
+  TAX
+  COMMISSION
+  LICENSE
+  RENEWAL
+  REFERRAL
+  NOTIFICATION
+  PAYMENT
+  WALLET
+  PAYOUT
+  SUBSCRIPTION
+}
+
+// CRM Contact
+model CRMContact {
+  id          String   @id @default(cuid())
+  
+  type        CRMType
+  contactId   String   // ID of the related entity (User, Author, Reseller, Lead)
+  
+  firstName   String
+  lastName    String
+  email       String
+  phone       String?
+  
+  company     String?
+  title       String?
+  industry    String?
+  
+  source      String?  // Where the contact came from
+  tags        String[] // Custom tags
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([contactId])
+  @@index([email])
+  @@index([tags])
+}
+
+enum CRMType {
+  LEAD
+  CUSTOMER
+  AUTHOR
+  RESELLER
+}
+
+// Pipeline Stage
+model PipelineStage {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  order       Int
+  
+  color       String?
+  probability Int?     // Win probability at this stage
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+}
+
+// Opportunity
+model Opportunity {
+  id          String   @id @default(cuid())
+  
+  contactId   String
+  contact     CRMContact @relation(fields: [contactId], references: [id])
+  
+  stageId     String
+  stage       PipelineStage @relation(fields: [stageId], references: [id])
+  
+  title       String
+  description String?
+  value       Float
+  currency    String   @default("USD")
+  
+  expectedCloseDate DateTime?
+  actualCloseDate   DateTime?
+  
+  status      OpportunityStatus @default(OPEN)
+  probability Int      @default(0)
+  
+  assignedTo  String?  // User ID
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([contactId])
+  @@index([stageId])
+  @@index([status])
+  @@index([expectedCloseDate])
+}
+
+enum OpportunityStatus {
+  OPEN
+  WON
+  LOST
+  ABANDONED
+}
+
+// Follow Up
+model FollowUp {
+  id          String   @id @default(cuid())
+  
+  contactId   String
+  contact     CRMContact @relation(fields: [contactId], references: [id])
+  
+  type        FollowUpType
+  subject     String
+  description String?
+  
+  dueDate     DateTime
+  completedAt DateTime?
+  status      FollowUpStatus @default(PENDING)
+  
+  assignedTo  String?  // User ID
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([contactId])
+  @@index([dueDate])
+  @@index([status])
+  @@index([assignedTo])
+}
+
+enum FollowUpType {
+  CALL
+  EMAIL
+  MEETING
+  TASK
+  REMINDER
+}
+
+enum FollowUpStatus {
+  PENDING
+  COMPLETED
+  SKIPPED
+  CANCELLED
+}
+
+// Meeting Note
+model MeetingNote {
+  id          String   @id @default(cuid())
+  
+  contactId   String
+  contact     CRMContact @relation(fields: [contactId], references: [id])
+  
+  title       String
+  description String?
+  
+  meetingDate DateTime
+  duration    Int?     // Minutes
+  
+  attendees   String[] // User IDs
+  location    String?
+  meetingType MeetingType
+  
+  outcome     String?
+  actionItems Json?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([contactId])
+  @@index([meetingDate])
+}
+
+enum MeetingType {
+  IN_PERSON
+  CALL
+  VIDEO
+  CHAT
+}
+
+// Call Note
+model CallNote {
+  id          String   @id @default(cuid())
+  
+  contactId   String
+  contact     CRMContact @relation(fields: [contactId], references: [id])
+  
+  subject     String
+  description String?
+  
+  callDate    DateTime
+  duration    Int?     // Minutes
+  direction   CallDirection
+  
+  phoneNumber String?
+  outcome     String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([contactId])
+  @@index([callDate])
+}
+
+enum CallDirection {
+  INBOUND
+  OUTBOUND
+}
+
+// Task Assignment
+model TaskAssignment {
+  id          String   @id @default(cuid())
+  
+  contactId   String?
+  contact     CRMContact? @relation(fields: [contactId], references: [id])
+  
+  title       String
+  description String?
+  
+  dueDate     DateTime?
+  completedAt DateTime?
+  status      TaskStatus @default(PENDING)
+  priority    TaskPriority @default(MEDIUM)
+  
+  assignedTo  String   // User ID
+  assignedBy  String   // User ID
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([contactId])
+  @@index([assignedTo])
+  @@index([dueDate])
+  @@index([status])
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// Customer Journey
+model CustomerJourney {
+  id          String   @id @default(cuid())
+  
+  contactId   String
+  contact     CRMContact @relation(fields: [contactId], references: [id])
+  
+  stage       JourneyStage
+  description String?
+  
+  enteredAt   DateTime @default(now())
+  exitedAt    DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([contactId])
+  @@index([stage])
+}
+
+enum JourneyStage {
+  AWARENESS
+  INTEREST
+  CONSIDERATION
+  INTENT
+  EVALUATION
+  PURCHASE
+  RETENTION
+  ADVOCACY
+}
+
+// Customer Health Score
+model CustomerHealthScore {
+  id          String   @id @default(cuid())
+  
+  contactId   String
+  contact     CRMContact @relation(fields: [contactId], references: [id])
+  
+  score       Int      // 0-100
+  category    HealthCategory
+  
+  factors     Json?    // Factors affecting the score
+  
+  calculatedAt DateTime @default(now())
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([contactId])
+  @@index([score])
+  @@index([category])
+}
+
+enum HealthCategory {
+  EXCELLENT
+  GOOD
+  AVERAGE
+  POOR
+  CRITICAL
+}
+
+// Lost Customer Recovery
+model LostCustomerRecovery {
+  id          String   @id @default(cuid())
+  
+  contactId   String
+  contact     CRMContact @relation(fields: [contactId], references: [id])
+  
+  reason      String
+  description String?
+  
+  recoveryAttempts Int @default(0)
+  lastAttemptAt DateTime?
+  
+  status      RecoveryStatus @default(NEW)
+  recoveredAt DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([contactId])
+  @@index([status])
+}
+
+enum RecoveryStatus {
+  NEW
+  IN_PROGRESS
+  RECOVERED
+  ABANDONED
+}
+
+// Automation Workflow
+model AutomationWorkflow {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  
+  enabled     Boolean  @default(true)
+  
+  triggers    Json     // Array of trigger definitions
+  conditions  Json     // Array of condition definitions
+  actions     Json     // Array of action definitions
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  executions  WorkflowExecution[]
+
+  @@index([enabled])
+}
+
+// Workflow Execution
+model WorkflowExecution {
+  id          String   @id @default(cuid())
+  
+  workflowId  String
+  workflow    AutomationWorkflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  
+  triggeredBy String   // Entity that triggered the workflow
+  triggerData Json?
+  
+  status      ExecutionStatus @default(PENDING)
+  
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  errorMessage String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([workflowId])
+  @@index([status])
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Automation Trigger
+model AutomationTrigger {
+  id          String   @id @default(cuid())
+  
+  type        TriggerType
+  config      Json     // Trigger-specific configuration
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([enabled])
+}
+
+enum TriggerType {
+  EVENT
+  SCHEDULE
+  CONDITION
+  WEBHOOK
+  MANUAL
+}
+
+// Automation Condition
+model AutomationCondition {
+  id          String   @id @default(cuid())
+  
+  type        ConditionType
+  config      Json     // Condition-specific configuration
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([enabled])
+}
+
+enum ConditionType {
+  EQUALS
+  NOT_EQUALS
+  GREATER_THAN
+  LESS_THAN
+  CONTAINS
+  NOT_CONTAINS
+  CUSTOM
+}
+
+// Automation Action
+model AutomationAction {
+  id          String   @id @default(cuid())
+  
+  type        ActionType
+  config      Json     // Action-specific configuration
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([enabled])
+}
+
+enum ActionType {
+  ASSIGN
+  FOLLOW_UP
+  REMINDER
+  ESCALATE
+  RENEWAL
+  NOTIFICATION
+  PAYOUT
+  APPROVAL
+  WEBHOOK
+  EMAIL
+  SMS
+  CUSTOM
+}
+
+// Auto Assignment Rule
+model AutoAssignmentRule {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  
+  entityType  String   // Ticket, Lead, Opportunity, etc.
+  conditions  Json     // Conditions for assignment
+  
+  assignTo    String   // User ID or role
+  strategy    AssignmentStrategy @default(ROUND_ROBIN)
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([entityType])
+  @@index([enabled])
+}
+
+enum AssignmentStrategy {
+  ROUND_ROBIN
+  LEAST_LOADED
+  RANDOM
+  PRIORITY
+}
+
+// Auto Follow Up Rule
+model AutoFollowUpRule {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  
+  entityType  String   // Contact, Ticket, Lead, etc.
+  conditions  Json     // Conditions for follow-up
+  delay       Int      // Hours before follow-up
+  
+  template    String?  // Message template
+  channel     FollowUpChannel @default(EMAIL)
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([entityType])
+  @@index([enabled])
+}
+
+enum FollowUpChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  IN_APP
+}
+
+// Auto Reminder Rule
+model AutoReminderRule {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  
+  reminderType ReminderType
+  conditions  Json     // Conditions for reminder
+  schedule    Json     // Schedule configuration
+  
+  template    String?  // Message template
+  channel     FollowUpChannel @default(EMAIL)
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([reminderType])
+  @@index([enabled])
+}
+
+enum ReminderType {
+  RENEWAL
+  PAYMENT
+  TASK
+  MEETING
+  FOLLOW_UP
+  CUSTOM
+}
+
+// Auto Escalation Rule
+model AutoEscalationRule {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  
+  entityType  String   // Ticket, Lead, Opportunity, etc.
+  conditions  Json     // Conditions for escalation
+  timeThreshold Int    // Minutes before escalation
+  
+  escalateTo  String   // User ID or role
+  notify      Boolean  @default(true)
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([entityType])
+  @@index([enabled])
+}
+
+// Auto Renewal Rule
+model AutoRenewalRule {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  
+  entityType  String   // License, Subscription
+  conditions  Json     // Conditions for auto-renewal
+  
+  renewalPeriod String // monthly, yearly
+  paymentMethod String
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([entityType])
+  @@index([enabled])
+}
+
+// Auto Notification Rule
+model AutoNotificationRule {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  
+  eventType   String   // Event type to trigger notification
+  conditions  Json     // Conditions for notification
+  
+  template    String?  // Message template
+  channels    String[] // email, sms, push, in-app
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([eventType])
+  @@index([enabled])
+}
+
+// Auto Payout Rule
+model AutoPayoutRule {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  
+  entityType  String   // Author, Reseller
+  conditions  Json     // Conditions for auto-payout
+  
+  threshold   Float    // Minimum balance for payout
+  schedule    Json     // Schedule configuration
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([entityType])
+  @@index([enabled])
+}
+
+// Auto Approval Rule
+model AutoApprovalRule {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  
+  entityType  String   // Product, KYC, Payout, etc.
+  conditions  Json     // Conditions for auto-approval
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([entityType])
+  @@index([enabled])
+}
+
+// Finance OS - General Ledger
+model GeneralLedger {
+  id          String   @id @default(cuid())
+  
+  accountCode String
+  accountName String
+  accountType LedgerAccountType
+  
+  balance     Decimal  @default(0) @db.Decimal(20, 2)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  entries     LedgerEntry[]
+
+  @@unique([accountCode])
+  @@index([accountType])
+}
+
+enum LedgerAccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+// Ledger Entry
+model LedgerEntry {
+  id          String   @id @default(cuid())
+  
+  ledgerId    String
+  ledger      GeneralLedger @relation(fields: [ledgerId], references: [id])
+  
+  entryType   EntryType
+  amount      Decimal  @db.Decimal(20, 2)
+  description String?
+  
+  referenceId String?  // Reference to order, payment, etc.
+  referenceType String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ledgerId])
+  @@index([entryType])
+  @@index([referenceId])
+}
+
+enum EntryType {
+  DEBIT
+  CREDIT
+}
+
+// Income Ledger
+model IncomeLedger {
+  id          String   @id @default(cuid())
+  
+  source      IncomeSource
+  amount      Decimal  @db.Decimal(20, 2)
+  currency    String   @default("USD")
+  
+  referenceId String?
+  referenceType String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([source])
+  @@index([createdAt])
+}
+
+enum IncomeSource {
+  PRODUCT_SALE
+  SUBSCRIPTION
+  COMMISSION
+  REFERRAL
+  OTHER
+}
+
+// Expense Ledger
+model ExpenseLedger {
+  id          String   @id @default(cuid())
+  
+  category    ExpenseCategory
+  amount      Decimal  @db.Decimal(20, 2)
+  currency    String   @default("USD")
+  
+  referenceId String?
+  referenceType String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([createdAt])
+}
+
+enum ExpenseCategory {
+  OPERATIONAL
+  MARKETING
+  DEVELOPMENT
+  SUPPORT
+  INFRASTRUCTURE
+  OTHER
+}
+
+// Commission Ledger
+model CommissionLedger {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation("CommissionLedgerUser", fields: [userId], references: [id])
+  
+  orderId     String?
+  productId   String?
+  
+  amount      Decimal  @db.Decimal(20, 2)
+  rate        Float
+  currency    String   @default("USD")
+  
+  status      CommissionStatus @default(PENDING)
+  paidAt      DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum CommissionStatus {
+  PENDING
+  APPROVED
+  PAID
+  CANCELLED
+}
+
+// Settlement Ledger
+model SettlementLedger {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation("SettlementLedgerUser", fields: [userId], references: [id])
+  
+  amount      Decimal  @db.Decimal(20, 2)
+  currency    String   @default("USD")
+  
+  status      SettlementStatus @default(PENDING)
+  settledAt   DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum SettlementStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// GST Report
+model GSTReport {
+  id          String   @id @default(cuid())
+  
+  period      String   // YYYY-MM
+  startDate   DateTime
+  endDate     DateTime
+  
+  totalRevenue Decimal @db.Decimal(20, 2)
+  totalTax     Decimal @db.Decimal(20, 2)
+  totalExpense Decimal @db.Decimal(20, 2)
+  taxCredit    Decimal @db.Decimal(20, 2)
+  netTax       Decimal @db.Decimal(20, 2)
+  
+  status      ReportStatus @default(DRAFT)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([period])
+  @@index([status])
+}
+
+// TDS Report
+model TDSReport {
+  id          String   @id @default(cuid())
+  
+  period      String   // YYYY-MM
+  startDate   DateTime
+  endDate     DateTime
+  
+  totalDeductible Decimal @db.Decimal(20, 2)
+  totalTax     Decimal @db.Decimal(20, 2)
+  
+  status      ReportStatus @default(DRAFT)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([period])
+  @@index([status])
+}
+
+enum ReportStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+// Profit & Loss Statement
+model ProfitLossStatement {
+  id          String   @id @default(cuid())
+  
+  period      String   // YYYY-MM
+  startDate   DateTime
+  endDate     DateTime
+  
+  totalRevenue    Decimal @db.Decimal(20, 2)
+  totalExpense    Decimal @db.Decimal(20, 2)
+  grossProfit     Decimal @db.Decimal(20, 2)
+  operatingExpense Decimal @db.Decimal(20, 2)
+  netProfit       Decimal @db.Decimal(20, 2)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([period])
+}
+
+// Cash Flow Statement
+model CashFlowStatement {
+  id          String   @id @default(cuid())
+  
+  period      String   // YYYY-MM
+  startDate   DateTime
+  endDate     DateTime
+  
+  operatingCashFlow Decimal @db.Decimal(20, 2)
+  investingCashFlow Decimal @db.Decimal(20, 2)
+  financingCashFlow Decimal @db.Decimal(20, 2)
+  netCashFlow       Decimal @db.Decimal(20, 2)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([period])
+}
+
+// Revenue Forecast
+model RevenueForecast {
+  id          String   @id @default(cuid())
+  
+  period      String   // YYYY-MM
+  forecastType ForecastType
+  
+  forecastAmount Decimal @db.Decimal(20, 2)
+  actualAmount   Decimal? @db.Decimal(20, 2)
+  variance      Decimal? @db.Decimal(20, 2)
+  
+  confidence   Float?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([period])
+  @@index([forecastType])
+}
+
+enum ForecastType {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+// Product Approval Workflow
+model ProductApproval {
+  id          String   @id @default(cuid())
+  
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  status      ApprovalStatus @default(DRAFT)
+  
+  submittedBy String
+  submittedAt DateTime?
+  
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  
+  rejectionReason String?
+  changeRequests  Json?
+  
+  publishedAt DateTime?
+  archivedAt  DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([status])
+  @@index([submittedBy])
+}
+
+enum ApprovalStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  NEEDS_CHANGES
+  PUBLISHED
+  ARCHIVED
+}
+
+// Digital Asset Protection
+model DownloadWatermark {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation("DownloadWatermarkUser", fields: [userId], references: [id])
+  
+  productId   String
+  licenseId   String?
+  
+  watermarkType WatermarkType
+  watermarkData Json?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([productId])
+  @@index([licenseId])
+}
+
+enum WatermarkType {
+  TEXT
+  IMAGE
+  INVISIBLE
+  FINGERPRINT
+}
+
+// Leak Tracking
+model LeakReport {
+  id          String   @id @default(cuid())
+  
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  
+  source      String
+  sourceUrl   String?
+  
+  reportedBy  String
+  reportedAt  DateTime @default(now())
+  
+  status      LeakStatus @default(NEW)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([status])
+}
+
+enum LeakStatus {
+  NEW
+  INVESTIGATING
+  CONFIRMED
+  FALSE_POSITIVE
+  RESOLVED
+}
+
+// Download Fingerprinting
+model DownloadFingerprint {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation("DownloadFingerprintUser", fields: [userId], references: [id])
+  
+  productId   String
+  licenseId   String?
+  
+  fingerprint String
+  deviceInfo  Json?
+  ipAddress   String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([productId])
+  @@index([fingerprint])
+}
+
+// Secure File Delivery
+model SecureDelivery {
+  id          String   @id @default(cuid())
+  
+  productId   String
+  licenseId   String?
+  
+  deliveryUrl String
+  accessKey   String
+  
+  expiresAt   DateTime
+  accessCount Int      @default(0)
+  maxAccess   Int?
+  
+  status      DeliveryStatus @default(ACTIVE)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([licenseId])
+  @@index([status])
+}
+
+enum DeliveryStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+  CONSUMED
+}
+
+// Abuse Detection
+model AbuseReport {
+  id          String   @id @default(cuid())
+  
+  type        AbuseType
+  severity    AbuseSeverity
+  
+  userId      String?
+  productId   String?
+  licenseId   String?
+  
+  description String
+  evidence    Json?
+  
+  status      AbuseStatus @default(NEW)
+  
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([userId])
+  @@index([productId])
+}
+
+enum AbuseType {
+  DOWNLOAD_ABUSE
+  SHARING_ABUSE
+  LICENSE_ABUSE
+  PAYMENT_ABUSE
+  REFUND_ABUSE
+  OTHER
+}
+
+enum AbuseSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AbuseStatus {
+  NEW
+  INVESTIGATING
+  CONFIRMED
+  FALSE_POSITIVE
+  RESOLVED
+  IGNORED
+}
+
+// Product Health Center
+model CrashReport {
+  id          String   @id @default(cuid())
+  
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  
+  userId      String?
+  user        User?    @relation("CrashReportUser", fields: [userId], references: [id])
+  
+  version     String
+  platform    String
+  os          String?
+  
+  stackTrace  String
+  errorMessage String?
+  
+  status      CrashStatus @default(NEW)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([status])
+  @@index([version])
+}
+
+enum CrashStatus {
+  NEW
+  INVESTIGATING
+  CONFIRMED
+  FIXED
+  IGNORED
+}
+
+// Product Bug Report
+model ProductBugReport {
+  id          String   @id @default(cuid())
+  
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  
+  userId      String?
+  user        User?    @relation("ProductBugReportUser", fields: [userId], references: [id])
+  
+  title       String
+  description String
+  severity    BugSeverity
+  priority    BugPriority
+  
+  status      BugStatus @default(NEW)
+  
+  assignedTo  String?
+  resolvedAt  DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([status])
+  @@index([severity])
+}
+
+enum BugSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum BugPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum BugStatus {
+  NEW
+  IN_PROGRESS
+  IN_REVIEW
+  RESOLVED
+  CLOSED
+}
+
+// Issue Tracking
+model Issue {
+  id          String   @id @default(cuid())
+  
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  
+  type        IssueType
+  title       String
+  description String
+  severity    IssueSeverity
+  
+  status      IssueStatus @default(OPEN)
+  
+  assignedTo  String?
+  resolvedAt  DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([status])
+  @@index([type])
+}
+
+enum IssueType {
+  BUG
+  FEATURE_REQUEST
+  IMPROVEMENT
+  DOCUMENTATION
+  PERFORMANCE
+  SECURITY
+}
+
+enum IssueSeverity {
+  TRIVIAL
+  MINOR
+  MAJOR
+  CRITICAL
+  BLOCKER
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  IN_REVIEW
+  RESOLVED
+  CLOSED
+  REOPENED
+}
+
+// Known Issues
+model KnownIssue {
+  id          String   @id @default(cuid())
+  
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  
+  version     String
+  title       String
+  description String
+  workaround  String?
+  
+  severity    IssueSeverity
+  status      KnownIssueStatus @default(ACTIVE)
+  
+  fixedInVersion String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([status])
+  @@index([version])
+}
+
+enum KnownIssueStatus {
+  ACTIVE
+  INVESTIGATING
+  FIXING
+  FIXED
+  IGNORED
+}
+
+// Version Health
+model VersionHealth {
+  id          String   @id @default(cuid())
+  
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  
+  version     String
+  
+  crashRate   Float    @default(0)
+  bugCount    Int      @default(0)
+  issueCount  Int      @default(0)
+  
+  healthScore Float    @default(100)
+  
+  status      VersionHealthStatus @default(HEALTHY)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([version])
+  @@index([status])
+}
+
+enum VersionHealthStatus {
+  HEALTHY
+  DEGRADED
+  UNHEALTHY
+  CRITICAL
+}
+
+// User Complaint
+model UserComplaint {
+  id          String   @id @default(cuid())
+  
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  
+  userId      String
+  user        User     @relation("UserComplaintUser", fields: [userId], references: [id])
+  
+  category    ComplaintCategory
+  subject     String
+  description String
+  severity    ComplaintSeverity
+  
+  status      ComplaintStatus @default(NEW)
+  
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([productId])
+  @@index([userId])
+  @@index([status])
+}
+
+enum ComplaintCategory {
+  FUNCTIONALITY
+  PERFORMANCE
+  USABILITY
+  DOCUMENTATION
+  SUPPORT
+  BILLING
+  OTHER
+}
+
+enum ComplaintSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ComplaintStatus {
+  NEW
+  INVESTIGATING
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  ESCALATED
+}
+
+// Customer Success Center
+model CustomerOnboarding {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  status      OnboardingStatus @default(NOT_STARTED)
+  
+  steps       Json?
+  completedSteps Int @default(0)
+  totalSteps  Int
+  
+  startedAt   DateTime?
+  completedAt DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+enum OnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+// Usage Tracking
+model UsageTracking {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation("UsageTrackingUser", fields: [userId], references: [id])
+  
+  productId   String?
+  
+  action      String
+  feature     String?
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([productId])
+  @@index([action])
+}
+
+// Adoption Tracking
+model AdoptionTracking {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation("AdoptionTrackingUser", fields: [userId], references: [id])
+  
+  productId   String
+  
+  adoptionScore Float @default(0)
+  
+  featuresUsed String[]
+  lastUsedAt  DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([productId])
+}
+
+// Renewal Prediction
+model RenewalPrediction {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation("RenewalPredictionUser", fields: [userId], references: [id])
+  
+  subscriptionId String?
+  
+  renewalProbability Float
+  riskLevel   RenewalRiskLevel
+  
+  factors     Json?
+  
+  predictedAt DateTime @default(now())
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([subscriptionId])
+  @@index([riskLevel])
+}
+
+enum RenewalRiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// Churn Prediction
+model ChurnPrediction {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation("ChurnPredictionUser", fields: [userId], references: [id])
+  
+  churnProbability Float
+  riskLevel   ChurnRiskLevel
+  
+  factors     Json?
+  
+  predictedAt DateTime @default(now())
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([riskLevel])
+}
+
+enum ChurnRiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// Retention Campaign
+model RetentionCampaign {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  
+  type        CampaignType
+  status      CampaignStatus @default(DRAFT)
+  
+  targetAudience Json?
+  
+  startDate   DateTime?
+  endDate     DateTime?
+  
+  metrics     Json?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([type])
+}
+
+enum CampaignType {
+  EMAIL
+  SMS
+  PUSH
+  IN_APP
+  SURVEY
+  OFFER
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+// Campaign Target
+model CampaignTarget {
+  id          String   @id @default(cuid())
+  
+  campaignId  String
+  campaign    RetentionCampaign @relation(fields: [campaignId], references: [id])
+  
+  userId      String
+  user        User     @relation("CampaignTargetUser", fields: [userId], references: [id])
+  
+  status      TargetStatus @default(PENDING)
+  
+  sentAt      DateTime?
+  openedAt    DateTime?
+  clickedAt   DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([campaignId])
+  @@index([userId])
+  @@index([status])
+}
+
+enum TargetStatus {
+  PENDING
+  SENT
+  OPENED
+  CLICKED
+  CONVERTED
+  FAILED
+}
+
+// Partner OS
+model Partner {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  type        PartnerType
+  status      PartnerStatus @default(PENDING)
+  
+  companyName String?
+  contactName String?
+  contactEmail String?
+  contactPhone String?
+  
+  region      String?
+  territory   String?
+  
+  commissionRate Float?
+  revenueShare Float?
+  
+  contractUrl String?
+  contractSignedAt DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  revenues    PartnerRevenue[]
+  commissions PartnerCommission[]
+  payouts     PartnerPayout[]
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+}
+
+enum PartnerType {
+  TECHNOLOGY
+  AGENCY
+  CHANNEL
+  REGIONAL
+  ENTERPRISE
+}
+
+enum PartnerStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  TERMINATED
+}
+
+// Partner Revenue
+model PartnerRevenue {
+  id          String   @id @default(cuid())
+  
+  partnerId   String
+  partner     Partner  @relation(fields: [partnerId], references: [id])
+  
+  period      String
+  periodType  PeriodType
+  
+  totalRevenue Decimal @default(0) @db.Decimal(20, 2)
+  commissionRevenue Decimal @default(0) @db.Decimal(20, 2)
+  
+  transactions Int @default(0)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([partnerId])
+  @@index([period])
+}
+
+enum PeriodType {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+// Partner Commission
+model PartnerCommission {
+  id          String   @id @default(cuid())
+  
+  partnerId   String
+  partner     Partner  @relation(fields: [partnerId], references: [id])
+  
+  orderId     String?
+  subscriptionId String?
+  
+  amount      Decimal @db.Decimal(20, 2)
+  rate        Float
+  
+  status      CommissionStatus @default(PENDING)
+  
+  calculatedAt DateTime @default(now())
+  paidAt      DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([partnerId])
+  @@index([status])
+}
+
+// Partner Payout
+model PartnerPayout {
+  id          String   @id @default(cuid())
+  
+  partnerId   String
+  partner     Partner  @relation(fields: [partnerId], references: [id])
+  
+  amount      Decimal @db.Decimal(20, 2)
+  currency    String
+  
+  method      PayoutMethod
+  details     Json?
+  
+  status      PayoutStatus @default(PENDING)
+  
+  requestedAt DateTime @default(now())
+  processedAt DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([partnerId])
+  @@index([status])
+}
+
+enum PayoutMethod {
+  BANK
+  UPI
+  PAYPAL
+  STRIPE
+  WISE
+  PAYONEER
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Enterprise Commission Engine
+model CommissionRule {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  
+  type        CommissionRuleType
+  scope       CommissionScope
+  
+  conditions  Json?
+  rates       Json?
+  
+  status      RuleStatus @default(ACTIVE)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ledgerEntries CommissionLedgerEntry[]
+
+  @@index([type])
+  @@index([scope])
+  @@index([status])
+}
+
+enum CommissionRuleType {
+  SPLIT
+  TEAM
+  MANAGER
+  REGIONAL
+  PERFORMANCE
+  RECURRING
+  RENEWAL
+  CUSTOM
+}
+
+enum CommissionScope {
+  GLOBAL
+  PRODUCT
+  CATEGORY
+  USER
+  TEAM
+  REGION
+}
+
+enum RuleStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+// Commission Ledger Entry
+model CommissionLedgerEntry {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation("CommissionLedgerEntryUser", fields: [userId], references: [id])
+  
+  ruleId      String?
+  rule        CommissionRule? @relation(fields: [ruleId], references: [id])
+  
+  sourceType  CommissionSourceType
+  sourceId    String?
+  
+  amount      Decimal @db.Decimal(20, 2)
+  rate        Float
+  
+  status      LedgerEntryStatus @default(PENDING)
+  
+  calculatedAt DateTime @default(now())
+  paidAt      DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([ruleId])
+  @@index([sourceType])
+  @@index([status])
+}
+
+enum CommissionSourceType {
+  ORDER
+  SUBSCRIPTION
+  RENEWAL
+  REFERRAL
+  TEAM_SALE
+  MANAGER_OVERRIDE
+  REGIONAL_SALE
+  PERFORMANCE_BONUS
+}
+
+enum LedgerEntryStatus {
+  PENDING
+  APPROVED
+  PAID
+  CANCELLED
+}
+
+// Renewal Commission Center
+model LicenseRenewalTracking {
+  id          String   @id @default(cuid())
+  
+  licenseId   String
+  license     License  @relation(fields: [licenseId], references: [id])
+  
+  resellerId  String?
+  reseller    User?    @relation("LicenseRenewalReseller", fields: [resellerId], references: [id])
+  
+  originalOrderId String?
+  
+  renewedAt   DateTime
+  expiresAt   DateTime
+  
+  amount      Decimal @db.Decimal(20, 2)
+  commissionAmount Decimal @db.Decimal(20, 2)
+  commissionRate Float
+  
+  status      RenewalStatus @default(COMPLETED)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([licenseId])
+  @@index([resellerId])
+  @@index([renewedAt])
+  @@index([status])
+}
+
+enum RenewalStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Subscription Renewal Tracking
+model SubscriptionRenewalTracking {
+  id          String   @id @default(cuid())
+  
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id])
+  
+  resellerId  String?
+  reseller    User?    @relation("SubscriptionRenewalReseller", fields: [resellerId], references: [id])
+  
+  renewedAt   DateTime
+  nextBillingAt DateTime
+  
+  amount      Decimal @db.Decimal(20, 2)
+  commissionAmount Decimal @db.Decimal(20, 2)
+  commissionRate Float
+  
+  status      RenewalStatus @default(COMPLETED)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([subscriptionId])
+  @@index([resellerId])
+  @@index([renewedAt])
+  @@index([status])
+}
+
+// Renewal Revenue
+model RenewalRevenue {
+  id          String   @id @default(cuid())
+  
+  resellerId  String?
+  reseller    User?    @relation("RenewalRevenueReseller", fields: [resellerId], references: [id])
+  
+  period      String
+  periodType  PeriodType
+  
+  licenseRenewals Int @default(0)
+  subscriptionRenewals Int @default(0)
+  
+  totalRevenue Decimal @default(0) @db.Decimal(20, 2)
+  commissionRevenue Decimal @default(0) @db.Decimal(20, 2)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([resellerId])
+  @@index([period])
+}
+
+// Renewal Forecast
+model RenewalForecast {
+  id          String   @id @default(cuid())
+  
+  resellerId  String?
+  reseller    User?    @relation("RenewalForecastReseller", fields: [resellerId], references: [id])
+  
+  period      String
+  periodType  PeriodType
+  
+  expectedRenewals Int
+  expectedRevenue Decimal @db.Decimal(20, 2)
+  expectedCommission Decimal @db.Decimal(20, 2)
+  
+  confidence  Float
+  
+  factors     Json?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([resellerId])
+  @@index([period])
+}
+
+// Auto Renewal Commission
+model AutoRenewalCommission {
+  id          String   @id @default(cuid())
+  
+  resellerId  String
+  reseller    User     @relation("AutoRenewalCommissionReseller", fields: [resellerId], references: [id])
+  
+  sourceType  RenewalSourceType
+  sourceId    String
+  
+  amount      Decimal @db.Decimal(20, 2)
+  rate        Float
+  
+  status      LedgerEntryStatus @default(PENDING)
+  
+  calculatedAt DateTime @default(now())
+  paidAt      DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([resellerId])
+  @@index([sourceType])
+  @@index([status])
+}
+
+enum RenewalSourceType {
+  LICENSE
+  SUBSCRIPTION
+}
+
+// B2B Sales Center
+model CorporateLead {
+  id          String   @id @default(cuid())
+  
+  companyId   String
+  companyName String
+  industry    String?
+  
+  contactName String
+  contactEmail String
+  contactPhone String?
+  
+  address     String?
+  city        String?
+  state       String?
+  country     String?
+  postalCode  String?
+  
+  leadSource  String?
+  leadStatus  LeadStatus @default(NEW)
+  
+  estimatedValue Decimal? @db.Decimal(20, 2)
+  estimatedDealSize Int?
+  
+  assignedTo  String?
+  assignedUser User?    @relation("CorporateLeadAssignee", fields: [assignedTo], references: [id])
+  
+  notes       String?
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([leadStatus])
+  @@index([assignedTo])
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL_SENT
+  NEGOTIATING
+  WON
+  LOST
+}
+
+// Enterprise Lead
+model EnterpriseLead {
+  id          String   @id @default(cuid())
+  
+  companyId   String
+  companyName String
+  industry    String?
+  
+  contactName String
+  contactEmail String
+  contactPhone String?
+  
+  address     String?
+  city        String?
+  state       String?
+  country     String?
+  postalCode  String?
+  
+  leadSource  String?
+  leadStatus  LeadStatus @default(NEW)
+  
+  estimatedValue Decimal @db.Decimal(20, 2)
+  estimatedDealSize Int
+  
+  tier        EnterpriseTier
+  
+  assignedTo  String?
+  assignedUser User?    @relation("EnterpriseLeadAssignee", fields: [assignedTo], references: [id])
+  
+  notes       String?
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([companyId])
+  @@index([leadStatus])
+  @@index([tier])
+  @@index([assignedTo])
+}
+
+enum EnterpriseTier {
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
+
+// Bulk Deal
+model BulkDeal {
+  id          String   @id @default(cuid())
+  
+  dealName    String
+  description String?
+  
+  clientId    String
+  clientName  String
+  
+  products    Json?
+  
+  totalValue  Decimal @db.Decimal(20, 2)
+  discountPercentage Float
+  finalValue  Decimal @db.Decimal(20, 2)
+  
+  dealStatus  DealStatus @default(DRAFT)
+  
+  assignedTo  String?
+  assignedUser User?    @relation("BulkDealAssignee", fields: [assignedTo], references: [id])
+  
+  validUntil  DateTime?
+  signedAt    DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  proposals Proposal[]
+  quotations Quotation[]
+  contracts Contract[]
+  pipelines DealPipeline[]
+
+  @@index([dealStatus])
+  @@index([assignedTo])
+}
+
+enum DealStatus {
+  DRAFT
+  SENT
+  REVIEWING
+  NEGOTIATING
+  APPROVED
+  SIGNED
+  REJECTED
+  EXPIRED
+}
+
+// Proposal
+model Proposal {
+  id          String   @id @default(cuid())
+  
+  dealId      String?
+  deal        BulkDeal? @relation(fields: [dealId], references: [id])
+  
+  clientId    String
+  clientName  String
+  
+  title       String
+  content     Json?
+  
+  status      ProposalStatus @default(DRAFT)
+  
+  sentAt      DateTime?
+  viewedAt    DateTime?
+  acceptedAt  DateTime?
+  rejectedAt  DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([dealId])
+  @@index([status])
+}
+
+enum ProposalStatus {
+  DRAFT
+  SENT
+  VIEWED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+// Quotation
+model Quotation {
+  id          String   @id @default(cuid())
+  
+  dealId      String?
+  deal        BulkDeal? @relation(fields: [dealId], references: [id])
+  
+  clientId    String
+  clientName  String
+  
+  items       Json?
+  
+  subtotal    Decimal @db.Decimal(20, 2)
+  tax         Decimal @db.Decimal(20, 2)
+  discount    Decimal @db.Decimal(20, 2)
+  total       Decimal @db.Decimal(20, 2)
+  
+  currency    String @default(USD)
+  validUntil  DateTime?
+  
+  status      QuotationStatus @default(DRAFT)
+  
+  sentAt      DateTime?
+  acceptedAt  DateTime?
+  rejectedAt  DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([dealId])
+  @@index([status])
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+// Contract
+model Contract {
+  id          String   @id @default(cuid())
+  
+  dealId      String?
+  deal        BulkDeal? @relation(fields: [dealId], references: [id])
+  
+  clientId    String
+  clientName  String
+  
+  title       String
+  content     Json?
+  
+  startDate   DateTime
+  endDate     DateTime
+  
+  status      ContractStatus @default(DRAFT)
+  
+  signedAt    DateTime?
+  signedBy    String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([dealId])
+  @@index([status])
+}
+
+enum ContractStatus {
+  DRAFT
+  SENT
+  REVIEWING
+  SIGNED
+  ACTIVE
+  TERMINATED
+  EXPIRED
+}
+
+// Deal Pipeline
+model DealPipeline {
+  id          String   @id @default(cuid())
+  
+  dealId      String?
+  deal        BulkDeal? @relation(fields: [dealId], references: [id])
+  
+  stage       PipelineStage
+  probability Float
+  
+  estimatedCloseDate DateTime?
+  actualCloseDate DateTime?
+  
+  notes       String?
+  
+  movedAt     DateTime @default(now())
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([dealId])
+  @@index([stage])
+}
+
+enum PipelineStage {
+  LEAD
+  QUALIFIED
+  PROPOSAL
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+// Team Commission
+model TeamCommission {
+  id          String   @id @default(cuid())
+  
+  teamId      String
+  teamLeadId String
+  teamLead   User     @relation("TeamCommissionLead", fields: [teamLeadId], references: [id])
+  
+  memberId    String
+  member     User     @relation("TeamCommissionMember", fields: [memberId], references: [id])
+  
+  orderId     String?
+  subscriptionId String?
+  
+  amount      Decimal @db.Decimal(20, 2)
+  rate        Float
+  
+  level       Int
+  
+  status      LedgerEntryStatus @default(PENDING)
+  
+  calculatedAt DateTime @default(now())
+  paidAt      DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([teamId])
+  @@index([teamLeadId])
+  @@index([memberId])
+  @@index([status])
+}
+
+// Performance Commission
+model PerformanceCommission {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation("PerformanceCommissionUser", fields: [userId], references: [id])
+  
+  period      String
+  periodType  PeriodType
+  
+  metrics     Json?
+  
+  targetAmount Decimal @db.Decimal(20, 2)
+  actualAmount Decimal @db.Decimal(20, 2)
+  
+  achievedPercentage Float
+  bonusRate  Float
+  bonusAmount Decimal @db.Decimal(20, 2)
+  
+  status      LedgerEntryStatus @default(PENDING)
+  
+  calculatedAt DateTime @default(now())
+  paidAt      DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([period])
+  @@index([status])
+}
+
+// VIP Customer Tracking
+model VIPCustomer {
+  id          String   @id @default(cuid())
+  
+  contactId   String
+  contact     CRMContact @relation(fields: [contactId], references: [id])
+  
+  tier        VIPTier
+  benefits    Json?
+  
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([contactId])
+  @@index([tier])
+}
+
+enum VIPTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+  DIAMOND
+}
+
+// Support Ticket
+model SupportTicket {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  subject     String
+  description String
+  
+  category    TicketCategory
+  priority    TicketPriority @default(MEDIUM)
+  status      TicketStatus @default(OPEN)
+  
+  assignedTo  String?  // User ID
+  assignedAt  DateTime?
+  
+  slaDeadline DateTime?
+  slaBreached Boolean  @default(false)
+  
+  resolvedAt  DateTime?
+  resolution  String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  messages    TicketMessage[]
+
+  @@index([userId])
+  @@index([assignedTo])
+  @@index([status])
+  @@index([category])
+  @@index([slaDeadline])
+}
+
+enum TicketCategory {
+  GENERAL
+  TECHNICAL
+  BILLING
+  FEATURE_REQUEST
+  BUG_REPORT
+  ACCOUNT
+  LICENSE
+  DOWNLOAD
+  REFUND
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+  CRITICAL
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  PENDING_CUSTOMER
+  RESOLVED
+  CLOSED
+  ESCALATED
+}
+
+// Ticket Message
+model TicketMessage {
+  id          String   @id @default(cuid())
+  
+  ticketId    String
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  message     String
+  attachments String[]
+  isInternal  Boolean  @default(false)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([ticketId])
+  @@index([userId])
+}
+
+// Live Chat Session
+model LiveChatSession {
+  id          String   @id @default(cuid())
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  
+  visitorId   String?  // For anonymous visitors
+  
+  agentId     String?  // User ID of support agent
+  status      ChatStatus @default(ACTIVE)
+  
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  messages    ChatMessage[]
+
+  @@index([userId])
+  @@index([agentId])
+  @@index([status])
+}
+
+enum ChatStatus {
+  ACTIVE
+  WAITING
+  CLOSED
+  TRANSFERRED
+}
+
+// Chat Message
+model ChatMessage {
+  id          String   @id @default(cuid())
+  
+  sessionId   String
+  session     LiveChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  senderId    String
+  senderType  SenderType
+  message     String
+  attachments String[]
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([sessionId])
+}
+
+enum SenderType {
+  USER
+  AGENT
+  SYSTEM
+}
+
+// Knowledge Base Article
+model KnowledgeBaseArticle {
+  id          String   @id @default(cuid())
+  
+  title       String
+  slug        String   @unique
+  content     String
+  excerpt     String?
+  
+  category    String
+  tags        String[]
+  
+  published   Boolean  @default(false)
+  featured    Boolean  @default(false)
+  
+  viewCount   Int      @default(0)
+  helpfulCount Int     @default(0)
+  
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([category])
+  @@index([published])
+  @@index([tags])
+}
+
+// Community Forum Post
+model ForumPost {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  title       String
+  content     String
+  
+  category    String
+  tags        String[]
+  
+  status      PostStatus @default(PUBLISHED)
+  pinned      Boolean  @default(false)
+  locked      Boolean  @default(false)
+  
+  viewCount   Int      @default(0)
+  likeCount   Int      @default(0)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  comments    ForumComment[]
+
+  @@index([userId])
+  @@index([category])
+  @@index([status])
+  @@index([tags])
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+  DELETED
+}
+
+// Forum Comment
+model ForumComment {
+  id          String   @id @default(cuid())
+  
+  postId      String
+  post        ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  parentId    String?
+  parent      ForumComment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies     ForumComment[] @relation("CommentReplies")
+  
+  content     String
+  
+  likeCount   Int      @default(0)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([postId])
+  @@index([userId])
+  @@index([parentId])
+}
+
+// Bug Report
+model BugReport {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  title       String
+  description String
+  
+  severity    BugSeverity @default(MEDIUM)
+  status      BugStatus @default(OPEN)
+  
+  productId   String?
+  environment String?
+  steps       String?
+  
+  assignedTo  String?
+  
+  resolvedAt  DateTime?
+  resolution  String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([severity])
+  @@index([productId])
+}
+
+enum BugSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+  BLOCKER
+}
+
+enum BugStatus {
+  OPEN
+  IN_PROGRESS
+  IN_REVIEW
+  RESOLVED
+  CLOSED
+  WONT_FIX
+}
+
+// Feature Request
+model FeatureRequest {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  title       String
+  description String
+  
+  category    String
+  status      FeatureStatus @default(OPEN)
+  
+  voteCount   Int      @default(0)
+  votedBy     String[] // User IDs who voted
+  
+  plannedFor  String?
+  releasedAt  DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([category])
+  @@index([voteCount])
+}
+
+enum FeatureStatus {
+  OPEN
+  UNDER_REVIEW
+  PLANNED
+  IN_DEVELOPMENT
+  RELEASED
+  DECLINED
+}
+
+// Roadmap Item
+model RoadmapItem {
+  id          String   @id @default(cuid())
+  
+  title       String
+  description String
+  
+  category    String
+  status      RoadmapStatus @default(PLANNED)
+  
+  priority    Int      @default(0)
+  order       Int
+  
+  plannedFor  String?
+  releasedAt  DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([status])
+  @@index([order])
+}
+
+enum RoadmapStatus {
+  PLANNED
+  IN_PROGRESS
+  RELEASED
+  CANCELLED
+}
+
+// Customer Feedback
+model CustomerFeedback {
+  id          String   @id @default(cuid())
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  type        FeedbackType
+  rating      Int      // 1-5
+  subject     String
+  message     String
+  
+  productId   String?
+  orderId     String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([type])
+  @@index([rating])
+  @@index([productId])
+}
+
+enum FeedbackType {
+  PRODUCT
+  SUPPORT
+  WEBSITE
+  BILLING
+  GENERAL
+}
+
+// SLA Policy
+model SLAPolicy {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  
+  category    TicketCategory
+  
+  responseTime Int     // Minutes
+  resolutionTime Int   // Minutes
+  
+  businessHoursOnly Boolean @default(false)
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([enabled])
+}
+
+// Escalation Rule
+model EscalationRule {
+  id          String   @id @default(cuid())
+  
+  name        String
+  description String?
+  
+  category    TicketCategory
+  priority    TicketPriority
+  
+  timeThreshold Int   // Minutes before escalation
+  
+  escalateTo  String   // User ID or role
+  notify      Boolean  @default(true)
+  
+  enabled     Boolean  @default(true)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([priority])
+  @@index([enabled])
+}
+
+// Audit Log
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  
+  action      String
+  entity      String
+  entityId    String?
+  
+  changes     Json?
+  metadata    Json?
+  
+  ipAddress   String?
+  userAgent   String?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
+}
+
+// Session
+model Session {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  token       String   @unique
+  ipAddress   String?
+  userAgent   String?
+  
+  lastSeenAt  DateTime @default(now())
+  expiresAt   DateTime
+  
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+// Device
+model Device {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  deviceId    String
+  deviceName  String?
+  deviceType  String?
+  os          String?
+  browser     String?
+  
+  ipAddress   String?
+  location   Json?
+  
+  isTrusted   Boolean  @default(false)
+  lastSeenAt  DateTime @default(now())
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([deviceId])
+  @@index([isTrusted])
+}
+
+// Security Event
+model SecurityEvent {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  
+  eventType   SecurityEventType
+  severity    SecuritySeverity
+  
+  description String
+  metadata    Json?
+  
+  ipAddress   String?
+  userAgent   String?
+  
+  resolved    Boolean  @default(false)
+  resolvedAt  DateTime?
+  resolvedBy  String?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([eventType])
+  @@index([severity])
+  @@index([resolved])
+  @@index([createdAt])
+}
+
+enum SecurityEventType {
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  PASSWORD_CHANGE
+  2FA_ENABLED
+  2FA_DISABLED
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
+  SUSPICIOUS_ACTIVITY
+  DATA_BREACH_ATTEMPT
+  UNAUTHORIZED_ACCESS
+  PAYMENT_FAILURE
+  FRAUD_DETECTED
+  RISK_ALERT
+}
+
+enum SecuritySeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// Activity Log
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  
+  action      String
+  resource    String
+  resourceId  String?
+  
+  metadata    Json?
+  
+  ipAddress   String?
+  userAgent   String?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+}
+
+// Cart
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  sessionId String?
+  
+  items     CartItem[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([sessionId])
+}
+
+// Cart Item
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  
+  productId String
+  quantity  Int
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cartId])
+  @@index([productId])
+}
+
+// Payment Intent
+model PaymentIntent {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  
+  amount      Decimal  @db.Decimal(20, 2)
+  currency    String   @default("USD")
+  
+  provider    PaymentProvider
+  providerId  String?
+  
+  status      PaymentStatus @default(PENDING)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([providerId])
+  @@index([status])
+}
+
+enum PaymentProvider {
+  STRIPE
+  PAYPAL
+  CRYPTO
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+// Transaction
+model Transaction {
+  id          String   @id @default(cuid())
+  paymentId   String
+  payment     PaymentIntent @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  
+  type        TransactionType
+  amount      Decimal  @db.Decimal(20, 2)
+  
+  gateway     String
+  gatewayId   String?
+  
+  status      TransactionStatus @default(PENDING)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([paymentId])
+  @@index([gatewayId])
+  @@index([status])
+}
+
+enum TransactionType {
+  CHARGE
+  REFUND
+  PARTIAL_REFUND
+  DISPUTE
+  CHARGEBACK
+  // Wallet Transaction Types
+  CREDIT
+  DEBIT
+  TRANSFER_IN
+  TRANSFER_OUT
+  COMMISSION_EARNED
+  PAYOUT_REQUESTED
+  PAYOUT_PROCESSED
+  REFUND_TO_WALLET
+  WITHDRAWAL
+  DEPOSIT
+  BONUS
+  PENALTY
+  ADJUSTMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Invoice
+model Invoice {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  
+  invoiceNumber String @unique
+  
+  subtotal    Decimal  @db.Decimal(20, 2)
+  tax         Decimal  @db.Decimal(20, 2) @default(0)
+  discount    Decimal  @db.Decimal(20, 2) @default(0)
+  total       Decimal  @db.Decimal(20, 2)
+  
+  currency    String   @default("USD")
+  
+  billedTo    Json
+  billedFrom  Json
+  
+  status      InvoiceStatus @default(DRAFT)
+  
+  paidAt      DateTime?
+  dueDate     DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([invoiceNumber])
+  @@index([status])
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+// License
+model License {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  productId   String
+  
+  licenseKey  String   @unique
+  type        LicenseType
+  
+  status      LicenseStatus @default(ACTIVE)
+  
+  validFrom   DateTime @default(now())
+  validUntil  DateTime?
+  
+  maxActivations Int @default(1)
+  currentActivations Int @default(0)
+  
+  // Protection Features
+  domainBinding String? // Specific domain restriction
+  ipBinding    String? // Specific IP restriction
+  deviceBinding String? // Specific device ID restriction
+  
+  maxDownloads Int @default(-1) // -1 = unlimited
+  currentDownloads Int @default(0)
+  
+  watermarkEnabled Boolean @default(false)
+  watermarkText String?
+  
+  secureDownloadToken String? // Temporary token for secure downloads
+  secureDownloadExpiresAt DateTime?
+  
+  piracyDetectionEnabled Boolean @default(true)
+  piracyAlerts Int @default(0)
+  lastPiracyCheckAt DateTime?
+  
+  // Renewal Fields
+  autoRenew   Boolean  @default(false)
+  renewalPeriod String? // 'monthly', 'yearly'
+  lastRenewedAt DateTime?
+  nextRenewalAt DateTime?
+  renewalCount Int @default(0)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  activations LicenseActivation[]
+  licenseAnalytics LicenseAnalytics[]
+  renewals    LicenseRenewal[]
+  renewalTracking LicenseRenewalTracking[]
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([licenseKey])
+  @@index([status])
+  @@index([domainBinding])
+  @@index([ipBinding])
+  @@index([deviceBinding])
+}
+
+enum LicenseType {
+  STANDARD
+  PREMIUM
+  ENTERPRISE
+  LIFETIME
+  TRIAL
+}
+
+enum LicenseStatus {
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  REVOKED
+}
+
+// License Activation
+model LicenseActivation {
+  id          String   @id @default(cuid())
+  licenseId   String
+  license     License  @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+  
+  deviceId    String?
+  deviceName  String?
+  ipAddress   String?
+  userAgent   String?
+  
+  activatedAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+  
+  isActive    Boolean  @default(true)
+
+  @@index([licenseId])
+  @@index([deviceId])
+  @@index([isActive])
+}
+
+// License Analytics
+model LicenseAnalytics {
+  id          String   @id @default(cuid())
+  licenseId   String
+  license     License  @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+  
+  eventType   LicenseAnalyticsEventType
+  metadata    Json?
+  
+  ipAddress   String?
+  userAgent   String?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([licenseId])
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+enum LicenseAnalyticsEventType {
+  ACTIVATION
+  DEACTIVATION
+  DOWNLOAD
+  DOWNLOAD_FAILED
+  PIRACY_ALERT
+  DOMAIN_VIOLATION
+  IP_VIOLATION
+  DEVICE_VIOLATION
+  DOWNLOAD_LIMIT_EXCEEDED
+  ACTIVATION_LIMIT_EXCEEDED
+  LICENSE_EXPIRED
+  LICENSE_REVOKED
+  LICENSE_SUSPENDED
+  LICENSE_RENEWED
+  LICENSE_UPGRADED
+}
+
+// License Renewal
+model LicenseRenewal {
+  id          String   @id @default(cuid())
+  licenseId   String
+  license     License  @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+  
+  previousValidUntil DateTime
+  newValidUntil DateTime
+  
+  amount      Decimal  @db.Decimal(20, 2)
+  currency    String   @default("USD")
+  
+  paymentMethod String?
+  paymentId   String?
+  
+  status      RenewalStatus @default(PENDING)
+  
+  renewedAt   DateTime @default(now())
+  
+  metadata    Json?
+
+  @@index([licenseId])
+  @@index([status])
+  @@index([renewedAt])
+}
+
+enum RenewalStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+// Refund
+model Refund {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  transactionId String?
+  
+  amount      Decimal  @db.Decimal(20, 2)
+  reason      String?
+  
+  status      RefundStatus @default(PENDING)
+  
+  processedBy String?
+  processedAt DateTime?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([transactionId])
+  @@index([status])
+}
+
+enum RefundStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// Tax Record
+model TaxRecord {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  
+  country     String
+  state       String?
+  city        String?
+  
+  taxRate     Decimal  @db.Decimal(5, 4)
+  taxAmount   Decimal  @db.Decimal(20, 2)
+  
+  taxId       String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([orderId])
+  @@index([country])
+}
+
+// Subscription
+model Subscription {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  provider          PaymentProvider
+  providerId        String   @unique
+  
+  status            SubscriptionStatus @default(ACTIVE)
+  priceId           String
+  
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  
+  cancelAtPeriodEnd Boolean  @default(false)
+  canceledAt        DateTime?
+  
+  // Renewal Fields
+  autoRenew         Boolean  @default(true)
+  renewalPeriod     String? // 'monthly', 'yearly'
+  lastRenewedAt     DateTime?
+  nextRenewalAt     DateTime?
+  renewalCount      Int      @default(0)
+  
+  metadata          Json?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  renewals          SubscriptionRenewal[]
+  renewalTracking SubscriptionRenewalTracking[]
+
+  @@index([userId])
+  @@index([providerId])
+  @@index([status])
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+  UNPAID
+  INCOMPLETE
+  EXPIRED
+  TRIALING
+}
+
+// Subscription Renewal
+model SubscriptionRenewal {
+  id          String   @id @default(cuid())
+  subscriptionId String
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  previousPeriodEnd DateTime
+  newPeriodEnd DateTime
+  
+  amount      Decimal  @db.Decimal(20, 2)
+  currency    String   @default("USD")
+  
+  paymentMethod String?
+  paymentId   String?
+  
+  status      RenewalStatus @default(PENDING)
+  
+  renewedAt   DateTime @default(now())
+  
+  metadata    Json?
+
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([renewedAt])
+}
+
+// Payment Webhook Log
+model PaymentWebhookLog {
+  id          String   @id @default(cuid())
+  provider    PaymentProvider
+  eventType   String
+  
+  payload     Json
+  signature   String?
+  
+  processed   Boolean  @default(false)
+  error       String?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([provider])
+  @@index([eventType])
+  @@index([processed])
+  @@index([createdAt])
+}
+
+// Wallet
+model Wallet {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  balance     Decimal  @default(0) @db.Decimal(20, 2)
+  availableBalance Decimal @default(0) @db.Decimal(20, 2)
+  pendingBalance Decimal @default(0) @db.Decimal(20, 2)
+  
+  currency    String   @default("USD")
+  
+  walletType  WalletType @default(CUSTOMER)
+  
+  isFrozen    Boolean  @default(false)
+  frozenAt    DateTime?
+  frozenReason String?
+  
+  totalCredit Decimal  @default(0) @db.Decimal(20, 2)
+  totalDebit  Decimal  @default(0) @db.Decimal(20, 2)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  transactions WalletTransaction[]
+  ledgerEntries WalletLedger[]
+
+  @@index([userId])
+  @@index([walletType])
+  @@index([isFrozen])
+}
+
+enum WalletType {
+  CUSTOMER
+  AUTHOR
+  RESELLER
+  ADMIN
+}
+
+// Wallet Transaction
+model WalletTransaction {
+  id          String   @id @default(cuid())
+  walletId    String
+  wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  
+  type        TransactionType
+  amount      Decimal  @db.Decimal(20, 2)
+  balanceAfter Decimal @db.Decimal(20, 2)
+  
+  description String?
+  referenceId String?
+  referenceType String?
+  
+  status      TransactionStatus @default(COMPLETED)
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([walletId])
+  @@index([type])
+  @@index([referenceId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// Wallet Ledger
+model WalletLedger {
+  id          String   @id @default(cuid())
+  walletId    String
+  wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  
+  entryType   LedgerEntryType
+  amount      Decimal  @db.Decimal(20, 2)
+  balanceBefore Decimal @db.Decimal(20, 2)
+  balanceAfter Decimal @db.Decimal(20, 2)
+  
+  description String
+  referenceId String?
+  referenceType String?
+  
+  metadata    Json?
+  
+  createdAt   DateTime @default(now())
+
+  @@index([walletId])
+  @@index([entryType])
+  @@index([referenceId])
+  @@index([createdAt])
+}
+
+enum LedgerEntryType {
+  CREDIT
+  DEBIT
+  TRANSFER_IN
+  TRANSFER_OUT
+  COMMISSION
+  PAYOUT
+  REFUND
+  WITHDRAWAL
+  DEPOSIT
+  FEE
+  ADJUSTMENT
+}
+
+// Category
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  
+  parentId    String?
+  parent      Category? @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Category[] @relation("CategoryHierarchy")
+  
+  icon        String?
+  color       String?
+  
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    Product[]
+
+  @@index([slug])
+  @@index([parentId])
+  @@index([isActive])
+}
+
+// Review
+model Review {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  rating      Int      // 1-5 stars
+  title       String?
+  content     String
+  
+  isVerified  Boolean  @default(false) // Verified purchase
+  isFeatured  Boolean  @default(false)
+  
+  helpfulCount Int     @default(0)
+  
+  status      ReviewStatus @default(PENDING)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  comments    Comment[]
+
+  @@index([productId])
+  @@index([userId])
+  @@index([rating])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  HIDDEN
+}
+
+// Comment
+model Comment {
+  id          String   @id @default(cuid())
+  reviewId    String?
+  review      Review?  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  productId   String?
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  content     String
+  parentId    String?
+  parent      Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Comment[] @relation("CommentReplies")
+  
+  isEdited    Boolean  @default(false)
+  
+  status      CommentStatus @default(PENDING)
+  
+  spamScore   Float    @default(0)
+  isSpam      Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([reviewId])
+  @@index([productId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum CommentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  HIDDEN
+  SPAM
+}
+
+// Wishlist
+model Wishlist {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  notes       String?
+  
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// ACHIEVEMENT MANAGEMENT SYSTEM - DATABASE MODELS
+// ============================================================================
+// Purpose: Growth Journey for Reseller, Franchise, Author, Vendor, Affiliate, Influencer
+// Flow: Activity → XP → Levels → Ranks → Badges → Trophies → Rewards → Motivation
+// ============================================================================
+
+// User Achievement Profile
+model AchievementProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  currentLevel    Int       @default(1)
+  currentRank     String    @default("BEGINNER")
+  totalXP         Int       @default(0)
+  currentXP       Int       @default(0)
+  xpNeeded        Int       @default(100)
+  
+  totalBadgesUnlocked   Int @default(0)
+  totalTrophiesUnlocked Int @default(0)
+  totalRewardsEarned    Int @default(0)
+  
+  currentStreak   Int       @default(0)
+  longestStreak   Int       @default(0)
+  lastActivityAt  DateTime?
+  
+  leaderboardRank Int?
+  leaderboardScore Int @default(0)
+  
+  userRole        UserRole
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  userLevels      UserLevel[]
+  userBadges      UserBadge[]
+  userTrophies    UserTrophy[]
+  userRewards     UserReward[]
+  userChallenges  UserChallenge[]
+  activityLogs    AchievementActivityLog[]
+  
+  @@index([userId])
+  @@index([currentLevel])
+  @@index([leaderboardRank])
+  @@index([userRole])
+}
+
+// Levels
+model Level {
+  id              String    @id @default(cuid())
+  levelNumber     Int       @unique
+  title           String
+  description     String
+  minXP           Int
+  maxXP           Int
+  color           String    @default("#3B82F6")
+  icon            String
+  requiredRank    String?
+  unlocksBadges   String[]
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  userLevels      UserLevel[]
+  
+  @@index([levelNumber])
+  @@index([minXP])
+}
+
+// User's level progression
+model UserLevel {
+  id                String    @id @default(cuid())
+  userId            String
+  achievementProfile AchievementProfile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  
+  levelId           String
+  level             Level     @relation(fields: [levelId], references: [id])
+  
+  unlockedAt        DateTime  @default(now())
+  
+  @@unique([userId, levelId])
+  @@index([userId])
+  @@index([levelId])
+}
+
+// Ranks (Role-based)
+model Rank {
+  id              String    @id @default(cuid())
+  rankName        String    @unique
+  rankTitle       String
+  description     String
+  userRole        UserRole
+  
+  minLevel        Int
+  minXP           Int
+  minActivities   Int?
+  
+  color           String    @default("#3B82F6")
+  badgeIcon       String
+  badgeAnimation  String
+  
+  perks           String[]
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([userRole])
+  @@index([minLevel])
+}
+
+// Badges
+model Badge {
+  id              String    @id @default(cuid())
+  badgeName       String    @unique
+  title           String
+  description     String
+  
+  category        BadgeCategory
+  userRole        UserRole?
+  
+  requirementType BadgeRequirementType
+  requirementValue Int
+  
+  icon            String
+  color           String    @default("#FCD34D")
+  rarity          BadgeRarity
+  
+  autoUnlock      Boolean   @default(true)
+  requiresApproval Boolean  @default(false)
+  
+  xpBonus         Int       @default(0)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  userBadges      UserBadge[]
+  
+  @@index([category])
+  @@index([userRole])
+}
+
+// User's badges
+model UserBadge {
+  id                String    @id @default(cuid())
+  userId            String
+  achievementProfile AchievementProfile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  
+  badgeId           String
+  badge             Badge     @relation(fields: [badgeId], references: [id])
+  
+  unlockedAt        DateTime  @default(now())
+  seenAt            DateTime?
+  isNew             Boolean   @default(true)
+  
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([badgeId])
+}
+
+// Trophies (Major Achievements)
+model Trophy {
+  id              String    @id @default(cuid())
+  trophyName      String    @unique
+  title           String
+  description     String
+  category        TrophyCategory
+  
+  requirementType String
+  requirementValue Int
+  
+  icon            String
+  displayOrder    Int
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  userTrophies    UserTrophy[]
+  
+  @@index([category])
+}
+
+// User's trophies
+model UserTrophy {
+  id                String    @id @default(cuid())
+  userId            String
+  achievementProfile AchievementProfile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  
+  trophyId          String
+  trophy            Trophy    @relation(fields: [trophyId], references: [id])
+  
+  unlockedAt        DateTime  @default(now())
+  season            Int
+  rank              Int?
+  
+  @@index([userId])
+  @@index([trophyId])
+  @@unique([userId, trophyId, season])
+}
+
+// Rewards (Physical & Digital)
+model Reward {
+  id              String    @id @default(cuid())
+  rewardName      String    @unique
+  title           String
+  description     String
+  
+  rewardType      RewardType
+  
+  value           Float
+  currency        String?
+  duration        Int?
+  
+  requiredTrophyId String?
+  requiredBadgeId  String?
+  requiredRank     String?
+  requiredLevel    Int?
+  
+  maxClaimsPerUser Int   @default(1)
+  totalAvailable   Int?
+  claimedCount     Int   @default(0)
+  
+  expiresAt        DateTime?
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  userRewards      UserReward[]
+  
+  @@index([rewardType])
+}
+
+// Claimed rewards
+model UserReward {
+  id                String    @id @default(cuid())
+  userId            String
+  achievementProfile AchievementProfile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  
+  rewardId          String
+  reward            Reward    @relation(fields: [rewardId], references: [id])
+  
+  claimedAt         DateTime  @default(now())
+  usedAt            DateTime?
+  expiresAt         DateTime?
+  status            RewardStatus
+  
+  @@index([userId])
+  @@index([rewardId])
+  @@index([status])
+}
+
+// Challenges (Weekly, Monthly, Yearly)
+model Challenge {
+  id              String    @id @default(cuid())
+  challengeName   String    @unique
+  title           String
+  description     String
+  
+  challengeType   ChallengeType
+  userRole        UserRole?
+  
+  startsAt        DateTime
+  endsAt          DateTime
+  season          Int
+  
+  goalDescription String
+  goalMetric      String
+  targetValue     Int
+  
+  rewardType      String
+  rewardValue     Int
+  topRewardCount  Int?
+  
+  isActive        Boolean   @default(true)
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  userChallenges  UserChallenge[]
+  
+  @@index([challengeType])
+  @@index([userRole])
+}
+
+// User's challenge progress
+model UserChallenge {
+  id                String    @id @default(cuid())
+  userId            String
+  achievementProfile AchievementProfile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  
+  challengeId       String
+  challenge         Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  
+  currentProgress   Int       @default(0)
+  completed         Boolean   @default(false)
+  completedAt       DateTime?
+  
+  ranking           Int?
+  prizeAwarded      Boolean   @default(false)
+  
+  @@unique([userId, challengeId])
+  @@index([userId])
+  @@index([challengeId])
+}
+
+// Achievement Settings (Admin Config)
+model AchievementSetting {
+  id              String    @id @default(cuid())
+  
+  baseXPPerActivity Int   @default(10)
+  xpMultiplier    Float   @default(1.0)
+  xpPerReferral   Int     @default(50)
+  xpPerSale       Int     @default(100)
+  xpPerLead       Int     @default(25)
+  xpPerProductUpload Int  @default(75)
+  xpPerEngagement Int     @default(5)
+  
+  baseXPRequiredPerLevel Int @default(100)
+  xpIncreasePerLevel Float   @default(1.5)
+  maxLevel        Int     @default(50)
+  
+  leaderboardUpdateFrequency String @default("daily")
+  leaderboardEnabled Boolean @default(true)
+  
+  weeklyChallenge Boolean @default(true)
+  monthlyChallenge Boolean @default(true)
+  yearlyChallenge Boolean @default(true)
+  
+  notifyOnLevelUp Boolean @default(true)
+  notifyOnBadge   Boolean @default(true)
+  notifyOnTrophy  Boolean @default(true)
+  notifyOnReward  Boolean @default(true)
+  
+  achievementsEnabled Boolean @default(true)
+  gamificationEnabled Boolean @default(true)
+  
+  updatedAt       DateTime  @updatedAt
+}
+
+// Activity Log (Track XP-earning activities)
+model AchievementActivityLog {
+  id                String    @id @default(cuid())
+  userId            String
+  achievementProfile AchievementProfile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  
+  activityType      AchievementActivityType
+  activityValue     Int
+  xpEarned          Int
+  
+  metadata          Json?
+  
+  createdAt         DateTime  @default(now())
+  
+  @@index([userId])
+  @@index([activityType])
+}
+
+// Role-specific Achievement Rules
+model RoleAchievementRule {
+  id              String    @id @default(cuid())
+  userRole        UserRole  @unique
+  
+  activityXPConfig Json
+  rankOrder       String[]
+  roleBadges      String[]
+  customRules     Json?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Spotlight (Featured Top Performers)
+model Spotlight {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation("Spotlight", fields: [userId], references: [id], onDelete: Cascade)
+  
+  spotlightType   String
+  title           String
+  description     String
+  
+  startDate       DateTime
+  endDate         DateTime
+  
+  achievements    Json?
+  stats           Json?
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@index([userId])
+  @@index([spotlightType])
+}
+
+// Hall of Fame (Yearly Recognition)
+model HallOfFame {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation("HallOfFame", fields: [userId], references: [id], onDelete: Cascade)
+  
+  year            Int
+  userRole        UserRole
+  ranking         Int
+  
+  achievements    String
+  stats           Json
+  
+  createdAt       DateTime  @default(now())
+  
+  @@unique([userId, year, userRole])
+  @@index([year])
+  @@index([userRole])
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum BadgeCategory {
+  SALES
+  LEAD
+  PRODUCT
+  ENGAGEMENT
+  MILESTONE
+  CHALLENGE
+  SPECIAL
+}
+
+enum BadgeRequirementType {
+  XP
+  ACTIVITY_COUNT
+  SALES_COUNT
+  LEAD_COUNT
+  REFERRAL_COUNT
+  PRODUCT_COUNT
+  ENGAGEMENT_COUNT
+  CUSTOM
+}
+
+enum BadgeRarity {
+  COMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+enum TrophyCategory {
+  MONTHLY
+  YEARLY
+  MILESTONE
+  SPECIAL
+}
+
+enum RewardType {
+  COMMISSION
+  LEAD_CREDITS
+  SOFTWARE
+  DISCOUNT
+  ACCESS
+  WALLET
+  RECOGNITION
+  CUSTOM
+}
+
+enum RewardStatus {
+  AVAILABLE
+  CLAIMED
+  USED
+  EXPIRED
+}
+
+enum ChallengeType {
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum AchievementActivityType {
+  SALE
+  LEAD_GENERATED
+  REFERRAL
+  PRODUCT_UPLOAD
+  ENGAGEMENT
+  CHALLENGE_COMPLETED
+  CUSTOM
+}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Search, Bell, PanelLeft, User, Sparkles, Mic, Shield, Activity, Globe2, Zap } from "lucide-react";
+import { Search, Bell, PanelLeft, User, Sparkles, Mic, Shield, Activity, Globe2, Zap, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDashboard } from "./DashboardLayout";
 import { cn } from "@/lib/utils";
@@ -130,6 +130,18 @@ export function TopNavbar({ onToggleSidebar }: { onToggleSidebar: () => void }) 
         </div>
 
         {/* Notifications */}
+        <button
+          onClick={() => navigate("/dashboard/chat")}
+          className="relative p-1.5 rounded-md hover:bg-white/5 text-muted-foreground hover:text-blue-300 transition-colors"
+          aria-label="Internal Chat"
+        >
+          <MessageCircle className="w-4 h-4" />
+          <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 text-[8px] flex items-center justify-center text-white font-bold shadow-[0_0_8px_hsl(200_90%_50%/0.6)]">
+            2
+          </span>
+        </button>
+
+        {/* Alerts */}
         <button
           onClick={() => navigate("/alerts")}
           className="relative p-1.5 rounded-md hover:bg-white/5 text-muted-foreground hover:text-cyan-300 transition-colors"

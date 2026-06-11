@@ -53,6 +53,15 @@ const ProductPage = () => {
   const toggleHelpful = (id: string) => {
     setHelpful(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   };
+  const handleAddToCart = async () => {
+    try {
+      await addToCart(product.id, 1);
+      toast.success(`${product.name} added to cart`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to add to cart';
+      toast.error(errorMsg);
+    }
+  };
 
   const { data: product, isLoading, isError, refetch } = useProduct(id);
   const { data: reviews = [] } = useProductReviews(id);
@@ -532,7 +541,7 @@ const ProductPage = () => {
                       <ShoppingBag className="h-4 w-4" /> Buy Now
                     </button>
                     <button
-                      onClick={() => addToCart(product, selectedPlan)}
+                      onClick={handleAddToCart}
                       className="flex w-full items-center justify-center gap-2 rounded-lg border border-border py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
                     >
                       <ShoppingCart className="h-4 w-4" /> Add to Cart

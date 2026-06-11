@@ -16,6 +16,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
 
 type CouponType =
   | 'Percentage'
@@ -332,7 +333,9 @@ const fmt = (n: number) =>
 type FilterKey = 'all' | 'active' | 'inactive' | 'risk' | 'expiring';
 
 const CouponsPage = () => {
-  const [coupons, setCoupons] = useState<Coupon[]>(seed);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ code: '', percent: '10', limit: '', exp: '', type: 'Percentage' as CouponType });
   const [busy, setBusy] = useState(false);
@@ -340,6 +343,27 @@ const CouponsPage = () => {
   const [filter, setFilter] = useState<FilterKey>('all');
   const [expanded, setExpanded] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
+
+  // Load coupons from real API
+  useEffect(() => {
+    const fetchCoupons = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await api.get<Coupon[]>('/admin/coupons');
+        setCoupons(data);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load coupons';
+        setError(message);
+        console.error('Failed to fetch coupons:', err);
+        toast.error('Failed to load coupons');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCoupons();
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => setTick((t) => t + 1), 4000);

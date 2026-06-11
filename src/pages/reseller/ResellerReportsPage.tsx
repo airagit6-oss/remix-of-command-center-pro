@@ -1,14 +1,9 @@
 import { FileBarChart, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 
 interface Report { name: string; size: string; type: 'PDF' | 'CSV' | 'XLSX'; }
-
-const reports: Report[] = [
-  { name: 'Sales Summary — April 2025', size: '124 KB', type: 'PDF' },
-  { name: 'Commission Statement — Q1 2025', size: '88 KB', type: 'PDF' },
-  { name: 'Lead Conversion Report', size: '52 KB', type: 'CSV' },
-  { name: 'Client Activity — March', size: '210 KB', type: 'XLSX' },
-];
 
 const mimeFor: Record<Report['type'], string> = {
   PDF: 'application/pdf',
@@ -17,6 +12,28 @@ const mimeFor: Record<Report['type'], string> = {
 };
 
 const ResellerReportsPage = () => {
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        setLoading(true);
+        const data = await api.get<Report[]>('/reseller/reports');
+        setReports(data || []);
+      } catch (error) {
+        console.error('Failed to fetch reports:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReports();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-8">Loading reports...</div>;
+  }
+
   const handleDownload = (r: Report) => {
     const content = `${r.name}\nGenerated: ${new Date().toISOString()}\nFormat: ${r.type}\n`;
     const blob = new Blob([content], { type: mimeFor[r.type] });

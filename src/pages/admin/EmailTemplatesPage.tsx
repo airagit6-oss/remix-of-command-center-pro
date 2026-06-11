@@ -1,26 +1,40 @@
 // @ts-nocheck
 import { Mail, Edit3 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { api } from '@/lib/api';
 
 interface Template { name: string; desc: string; updated: string; subject: string; body: string; }
 
-const seed: Template[] = [
-  { name: 'Welcome email', desc: 'Sent on user signup', updated: '2 days ago', subject: 'Welcome to Software Vala 👋', body: 'Hi {{name}},\n\nThanks for signing up.' },
-  { name: 'Order confirmation', desc: 'Sent after successful purchase', updated: '1 week ago', subject: 'Your order is confirmed', body: 'Hi {{name}}, your order #{{id}} is confirmed.' },
-  { name: 'Password reset', desc: 'Sent when user requests password reset', updated: '3 weeks ago', subject: 'Reset your password', body: 'Click here to reset: {{link}}' },
-  { name: 'Subscription renewal', desc: 'Sent before billing date', updated: '1 month ago', subject: 'Your subscription renews soon', body: 'Heads up — your plan renews on {{date}}.' },
-  { name: 'Subscription cancelled', desc: 'Sent when user cancels', updated: '1 month ago', subject: 'Sorry to see you go', body: 'Your subscription was cancelled.' },
-  { name: 'Vendor approval', desc: 'Sent when vendor application is approved', updated: '2 months ago', subject: 'Your vendor application is approved', body: 'Welcome aboard, {{vendor}}.' },
-];
-
 const EmailTemplatesPage = () => {
   const { t } = useTranslation('common');
-  const [templates, setTemplates] = useState<Template[]>(seed);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Template | null>(null);
   const [draft, setDraft] = useState({ subject: '', body: '' });
   const [busy, setBusy] = useState(false);
+
+  // Load email templates from real API
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await api.get<Template[]>('/admin/email-templates');
+        setTemplates(data);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load templates';
+        setError(message);
+        console.error('Failed to fetch templates:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTemplates();
+  }, []);
 
   const open = (t: Template) => { setEditing(t); setDraft({ subject: t.subject, body: t.body }); };
   const close = () => { if (!busy) setEditing(null); };

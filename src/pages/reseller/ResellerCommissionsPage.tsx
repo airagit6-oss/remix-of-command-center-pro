@@ -1,14 +1,58 @@
 import { Percent, TrendingUp, DollarSign } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
 
-const ResellerCommissionsPage = () => (
+interface Commission {
+  id: string;
+  client: string;
+  plan: string;
+  amount: string;
+  date: string;
+}
+
+interface CommissionStats {
+  rate: string;
+  thisMonth: string;
+  lifetime: string;
+}
+
+const ResellerCommissionsPage = () => {
+  const [stats, setStats] = useState<CommissionStats>({ rate: '25%', thisMonth: '$0', lifetime: '$0' });
+  const [commissions, setCommissions] = useState<Commission[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [statsData, commissionsData] = await Promise.all([
+          api.get<CommissionStats>('/reseller/commission-stats'),
+          api.get<Commission[]>('/reseller/commissions')
+        ]);
+        if (statsData) setStats(statsData);
+        if (commissionsData) setCommissions(commissionsData);
+      } catch (error) {
+        console.error('Failed to fetch commissions:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-8">Loading commissions...</div>;
+  }
+
+  return (
   <div>
     <h1 className="text-2xl font-bold mb-1" style={{ color: '#1a1a1a' }}>Commissions</h1>
     <p className="text-sm mb-6" style={{ color: '#6d7175' }}>Track your commission rates and earnings.</p>
     <div className="grid grid-cols-3 gap-4 mb-6">
       {[
-        { icon: Percent, label: 'Commission rate', value: '25%' },
-        { icon: DollarSign, label: 'This month', value: '$2,840' },
-        { icon: TrendingUp, label: 'Lifetime', value: '$48,231' },
+        { icon: Percent, label: 'Commission rate', value: stats.rate },
+        { icon: DollarSign, label: 'This month', value: stats.thisMonth },
+        { icon: TrendingUp, label: 'Lifetime', value: stats.lifetime },
       ].map(s => (
         <div key={s.label} className="rounded-lg bg-white border p-4" style={{ borderColor: '#e1e3e5' }}>
           <s.icon className="h-5 w-5 mb-2" style={{ color: '#008060' }} />
@@ -22,11 +66,7 @@ const ResellerCommissionsPage = () => (
         <h2 className="text-sm font-semibold" style={{ color: '#1a1a1a' }}>Recent commissions</h2>
       </div>
       <div className="divide-y" style={{ borderColor: '#e1e3e5' }}>
-        {[
-          { id: 'COM-001', client: 'Acme Corp', plan: 'Pro', amount: '$72.50', date: 'Apr 12' },
-          { id: 'COM-002', client: 'Globex', plan: 'Starter', amount: '$24.00', date: 'Apr 10' },
-          { id: 'COM-003', client: 'Initech', plan: 'Enterprise', amount: '$245.00', date: 'Apr 8' },
-        ].map(c => (
+        {commissions.map(c => (
           <div key={c.id} className="flex items-center justify-between px-5 py-3">
             <div>
               <p className="text-sm font-medium" style={{ color: '#1a1a1a' }}>{c.client}</p>
@@ -38,5 +78,6 @@ const ResellerCommissionsPage = () => (
       </div>
     </div>
   </div>
-);
+  );
+};
 export default ResellerCommissionsPage;

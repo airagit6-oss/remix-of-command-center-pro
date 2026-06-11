@@ -5,14 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:server": "node dev-server.js",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "build:prod": "vite build && npm start",
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "node server.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed:locales": "node scripts/seed-locale-placeholders.js"
+    "seed:locales": "node scripts/seed-locale-placeholders.js",
+    "seed:achievements": "node backend/seedRunner.js",
+    "prod": "npm run build && npm start",
+    "prod:serve": "npm run build && npm run preview"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -45,7 +45,6 @@ export class StorageService {
         Body: body,
         ContentType: options?.contentType || 'application/octet-stream',
         Metadata: options?.metadata,
-        TagSet: options?.tags ? Object.entries(options.tags).map(([Key, Value]) => ({ Key, Value })) : undefined,
       });
 
       await client.send(command);

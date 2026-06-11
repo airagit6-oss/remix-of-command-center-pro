@@ -24,11 +24,13 @@ export async function getCart(req: FastifyRequest, reply: FastifyReply) {
     }
 
     if (!cart) {
-      return reply.send({ items: [], total: 0 });
+      return reply.send({ cart: { items: [] }, total: 0 });
     }
 
+    // Calculate total as sum of (price * quantity)
     const total = cart.items.reduce((sum, item) => {
-      return sum + (Number(item.quantity) || 0);
+      const itemPrice = item.product?.price || 0;
+      return sum + (itemPrice * (Number(item.quantity) || 0));
     }, 0);
 
     // Validate product availability and prices
@@ -39,8 +41,9 @@ export async function getCart(req: FastifyRequest, reply: FastifyReply) {
       }
     }
 
-    return reply.send({ cart, total });
+    return reply.send({ cart, total: Number(total.toFixed(2)) });
   } catch (error) {
+    console.error('Get cart error:', error);
     reply.status(500).send({ error: 'Failed to fetch cart' });
   }
 }
@@ -106,6 +109,12 @@ export async function addToCart(req: FastifyRequest, reply: FastifyReply) {
       include: { items: { include: { product: true } } }
     });
 
+    // Calculate total as sum of (price * quantity)
+    const total = updatedCart?.items.reduce((sum, item) => {
+      const itemPrice = item.product?.price || 0;
+      return sum + (itemPrice * (Number(item.quantity) || 0));
+    }, 0) || 0;
+
     // Audit log
     if (userId) {
       await prisma.auditLog.create({
@@ -118,8 +127,9 @@ export async function addToCart(req: FastifyRequest, reply: FastifyReply) {
       });
     }
 
-    return reply.send(updatedCart);
+    return reply.send({ cart: updatedCart, total: Number(total.toFixed(2)) });
   } catch (error) {
+    console.error('Add to cart error:', error);
     reply.status(500).send({ error: 'Failed to add to cart' });
   }
 }
@@ -135,10 +145,30 @@ export async function updateCartItem(req: FastifyRequest, reply: FastifyReply) {
       return reply.status(400).send({ error: 'Invalid quantity' });
     }
 
-    const cartItem = await prisma.cartItem.update({
+    const cartItem = await prisma.cartItem.findUnique({
+      where: { id: itemId }
+    });
+
+    if (!cartItem) {
+      return reply.status(404).send({ error: 'Cart item not found' });
+    }
+
+    await prisma.cartItem.update({
       where: { id: itemId },
       data: { quantity }
     });
+
+    // Get updated cart
+    const cart = await prisma.cart.findUnique({
+      where: { id: cartItem.cartId },
+      include: { items: { include: { product: true } } }
+    });
+
+    // Calculate total
+    const total = cart?.items.reduce((sum, item) => {
+      const itemPrice = item.product?.price || 0;
+      return sum + (itemPrice * (Number(item.quantity) || 0));
+    }, 0) || 0;
 
     // Audit log
     if (userId) {
@@ -153,8 +183,9 @@ export async function updateCartItem(req: FastifyRequest, reply: FastifyReply) {
       });
     }
 
-    return reply.send(cartItem);
+    return reply.send({ cart, total: Number(total.toFixed(2)) });
   } catch (error) {
+    console.error('Update cart item error:', error);
     reply.status(500).send({ error: 'Failed to update cart item' });
   }
 }
@@ -165,9 +196,29 @@ export async function removeFromCart(req: FastifyRequest, reply: FastifyReply) {
     const { itemId } = req.params as any;
     const userId = (req as any).user?.id;
 
+    const cartItem = await prisma.cartItem.findUnique({
+      where: { id: itemId }
+    });
+
+    if (!cartItem) {
+      return reply.status(404).send({ error: 'Cart item not found' });
+    }
+
     await prisma.cartItem.delete({
       where: { id: itemId }
     });
+
+    // Get updated cart
+    const cart = await prisma.cart.findUnique({
+      where: { id: cartItem.cartId },
+      include: { items: { include: { product: true } } }
+    });
+
+    // Calculate total
+    const total = cart?.items.reduce((sum, item) => {
+      const itemPrice = item.product?.price || 0;
+      return sum + (itemPrice * (Number(item.quantity) || 0));
+    }, 0) || 0;
 
     // Audit log
     if (userId) {
@@ -181,8 +232,9 @@ export async function removeFromCart(req: FastifyRequest, reply: FastifyReply) {
       });
     }
 
-    return reply.send({ success: true });
+    return reply.send({ cart, total: Number(total.toFixed(2)) });
   } catch (error) {
+    console.error('Remove from cart error:', error);
     reply.status(500).send({ error: 'Failed to remove from cart' });
   }
 }
@@ -218,8 +270,9 @@ export async function clearCart(req: FastifyRequest, reply: FastifyReply) {
       });
     }
 
-    return reply.send({ success: true });
+    return reply.send({ cart: { items: [] }, total: 0 });
   } catch (error) {
+    console.error('Clear cart error:', error);
     reply.status(500).send({ error: 'Failed to clear cart' });
   }
 }

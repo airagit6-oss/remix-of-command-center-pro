@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { api } from '@/lib/api';
 import {
   Activity,
   ArrowUpRight,
@@ -133,21 +134,44 @@ const Logo = ({ name }: { name: string }) => {
 
 const VendorsPage = () => {
   const { t } = useTranslation('common');
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<'All' | Vendor['status']>('All');
-  const [open, setOpen] = useState<string | null>('VND-1108');
+  const [open, setOpen] = useState<string | null>(null);
+
+  // Load vendors from real API
+  useEffect(() => {
+    const fetchVendors = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await api.get<Vendor[]>('/admin/vendors');
+        setVendors(data);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load vendors';
+        setError(message);
+        console.error('Failed to fetch vendors:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVendors();
+  }, []);
 
   const filtered = useMemo(() => {
-    return seed.filter(v => {
+    return vendors.filter(v => {
       const matchQ = !query || (v.name + v.owner + v.email + v.id + v.country).toLowerCase().includes(query.toLowerCase());
       const matchF = filter === 'All' || v.status === filter;
       return matchQ && matchF;
     });
-  }, [query, filter]);
+  }, [query, filter, vendors]);
 
-  const totalRevenue = seed.reduce((a, v) => a + v.revenue, 0);
-  const activeCount = seed.filter(v => v.status === 'Active').length;
-  const pendingCount = seed.filter(v => v.status === 'Pending').length;
+  const totalRevenue = vendors.reduce((a, v) => a + v.revenue, 0);
+  const activeCount = vendors.filter(v => v.status === 'Active').length;
+  const pendingCount = vendors.filter(v => v.status === 'Pending').length;
   const flaggedCount = seed.filter(v => v.fraud > 40 || v.payoutStatus === 'Frozen' || v.payoutStatus === 'On Hold').length;
 
   const kpis = [

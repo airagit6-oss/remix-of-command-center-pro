@@ -30,6 +30,17 @@ export const ProductCard = ({ product }: Props) => {
     toast.success(nowFav ? `Added ${product.name} to favorites` : `Removed ${product.name} from favorites`);
   };
 
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await addToCart(product.id, 1);
+      toast.success(`${product.name} added to cart`);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Failed to add to cart';
+      toast.error(errorMsg);
+    }
+  };
+
   return (
     <div
       className="group relative"
@@ -75,7 +86,7 @@ export const ProductCard = ({ product }: Props) => {
                 <Eye className="h-4 w-4" />
               </Link>
               <button
-                onClick={(e) => { e.stopPropagation(); addToCart(product); }}
+                onClick={handleAddToCart}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-card/90 text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
                 title="Add to Cart"
               >

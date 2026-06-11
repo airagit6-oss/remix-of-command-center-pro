@@ -1,7 +1,17 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
-import { AppError } from './errorHandler';
 import { logger } from '../utils/logger';
+
+// Stub AppError class
+export class AppError extends Error {
+  public statusCode: number;
+
+  constructor(statusCode: number, message: string) {
+    super(message);
+    this.name = 'AppError';
+    this.statusCode = statusCode;
+  }
+}
 
 /**
  * PRODUCTION VALIDATION

@@ -144,6 +144,10 @@ export interface UserProgress {
 const KEY = 'sv_ams_v1';
 const EVT = 'sv:ams-update';
 
+// Cache for snapshot getter to avoid infinite loops in useSyncExternalStore
+let cachedDB: DB | null = null;
+let lastSaved: string = '';
+
 interface DB {
   achievements: Achievement[];
   xp: XPTransaction[];
@@ -247,9 +251,15 @@ function buildLevels(): Level[] {
 }
 
 function load(): DB {
+  // Return cached instance if localStorage hasn't changed
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw === lastSaved && cachedDB) return cachedDB;
+    if (raw) {
+      cachedDB = JSON.parse(raw);
+      lastSaved = raw;
+      return cachedDB;
+    }
   } catch {}
   const seeded: DB = {
     achievements: ACHIEVEMENTS,
@@ -282,7 +292,10 @@ function load(): DB {
 
 function save(db: DB) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(db));
+    const json = JSON.stringify(db);
+    localStorage.setItem(KEY, json);
+    cachedDB = db;
+    lastSaved = json;
     window.dispatchEvent(new CustomEvent(EVT));
   } catch {}
 }

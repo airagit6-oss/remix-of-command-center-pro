@@ -1,24 +1,40 @@
 import { FolderTree, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { api } from '@/lib/api';
 
 interface Category { name: string; subs: string[]; count: number; }
 
-const seed: Category[] = [
-  { name: 'E-commerce', subs: ['Marketplace', 'Headless', 'POS'], count: 24 },
-  { name: 'Education', subs: ['LMS', 'Live classes', 'Quizzes'], count: 18 },
-  { name: 'Manufacturing', subs: ['ERP', 'Quality', 'Lean'], count: 12 },
-  { name: 'CRM & Sales', subs: ['Pipeline', 'Email', 'Analytics'], count: 31 },
-];
-
 const CategoriesPage = () => {
   const { t } = useTranslation('common');
-  const [cats, setCats] = useState<Category[]>(seed);
+  const [cats, setCats] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [subs, setSubs] = useState('');
   const [busy, setBusy] = useState(false);
+
+  // Load categories from real API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await api.get<Category[]>('/admin/categories');
+        setCats(data);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load categories';
+        setError(message);
+        console.error('Failed to fetch categories:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();

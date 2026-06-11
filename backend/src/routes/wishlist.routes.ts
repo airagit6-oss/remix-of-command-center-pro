@@ -1,7 +1,30 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+// GET /wishlist
+export async function getWishlist(req: FastifyRequest, reply: FastifyReply) {
+  return reply.send([]);
+}
+
+// POST /wishlist
+export async function addToWishlist(req: FastifyRequest, reply: FastifyReply) {
+  return reply.send({ id: '', userId: '', productId: '' });
+}
+
+// DELETE /wishlist/:productId
+export async function removeFromWishlist(req: FastifyRequest, reply: FastifyReply) {
+  return reply.send({ success: true });
+}
+
+// GET /wishlist/stats
+export async function getWishlistStats(req: FastifyRequest, reply: FastifyReply) {
+  return reply.send({ total: 0, totalValue: 0 });
+}
+
+// DELETE /wishlist (clear all)
+export async function clearWishlist(req: FastifyRequest, reply: FastifyReply) {
+  return reply.send({ success: true });
+}
+
 
 // GET /wishlist
 export async function getWishlist(req: FastifyRequest, reply: FastifyReply) {

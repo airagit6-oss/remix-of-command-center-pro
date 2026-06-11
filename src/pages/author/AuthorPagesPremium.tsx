@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { api } from '@/lib/api';
 import {
   Eye, Users, Globe, Radio, Sparkles, MessageSquare, Send, Smile, Paperclip,
   Search, Bot, Wand2, FileText, CheckCircle2, AlertTriangle, Languages,
@@ -183,23 +184,31 @@ const THREADS = [
   { id: 't4', name: 'Carlos Vidal', company: 'Mercado Pulse',    last: '¿Tienen versión en español?',         unread: 1, online: true,  flag: '🇪🇸' },
   { id: 't5', name: 'Aiko Tanaka',  company: 'Kyoto Edge',       last: 'Translated reply ready',              unread: 0, online: false, flag: '🇯🇵' },
 ];
-const SEED: Record<string, ChatMsg[]> = {
-  t1: [
-    { from: 'them', text: 'Hi! Considering Hospital ERP for a 220-bed facility.', time: '09:42', reactions: ['👍'] },
-    { from: 'me',   text: 'Welcome aboard, Maya — happy to walk through it.',     time: '09:43' },
-    { from: 'them', text: 'Can you share the SAML setup doc?',                    time: '09:44' },
-  ],
-};
-
 export function AuthorChatCenterPage() {
   const [active, setActive] = useState('t1');
-  const [msgs, setMsgs] = useState<ChatMsg[]>(SEED.t1);
+  const [msgs, setMsgs] = useState<ChatMsg[]>([]);
+  const [loading, setLoading] = useState(false);
   const [draft, setDraft] = useState('');
   const [typing, setTyping] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
   const t = useTicker(4000);
 
-  useEffect(() => { setMsgs(SEED[active] ?? [{ from: 'them', text: 'Hey there 👋', time: 'now' }]); }, [active]);
+  // Fetch messages for active thread from API
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        setLoading(true);
+        const data = await api.get<ChatMsg[]>(`/author/chat/${active}`);
+        setMsgs(data || [{ from: 'them', text: 'Hey there 👋', time: 'now' }]);
+      } catch (err) {
+        console.error('Failed to fetch chat messages:', err);
+        setMsgs([{ from: 'them', text: 'Connection error. Please try again.', time: 'now' }]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMessages();
+  }, [active]);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [msgs.length]);
   useEffect(() => { setTyping(t % 3 === 0); }, [t]);
 
