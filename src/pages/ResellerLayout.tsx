@@ -15,6 +15,7 @@ import {
   SidebarHeader, SidebarFooter, useSidebar,
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/brand/Logo';
+import { Breadcrumb } from '@/components/common/Breadcrumb';
 
 const getGroups = (t: any) => [
   {
@@ -232,6 +233,9 @@ const ResellerLayout = () => {
           </header>
           <ResellerProvider>
             <main className="flex-1 overflow-auto p-6">
+              <div className="mb-4">
+                <Breadcrumb />
+              </div>
               <Outlet />
             </main>
           </ResellerProvider>

@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { LivePulseDock } from '@/pages/author/AuthorPagesPremium';
+import { Breadcrumb } from '@/components/common/Breadcrumb';
 
 const groups = [
   {
@@ -411,6 +412,9 @@ const AuthorLayout = () => {
         <div className="flex-1 flex flex-col min-w-0">
           <AuthorHeader onOpenCommand={() => setCmdOpen(true)} />
           <main className="flex-1 overflow-auto overflow-x-hidden p-3 sm:p-4 md:p-6 pb-32 md:pb-24">
+            <div className="mb-4">
+              <Breadcrumb />
+            </div>
             <Outlet />
           </main>
         </div>

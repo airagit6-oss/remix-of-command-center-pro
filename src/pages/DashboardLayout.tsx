@@ -11,6 +11,7 @@ import {
   SidebarHeader, SidebarFooter, useSidebar,
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/brand/Logo';
+import { Breadcrumb } from '@/components/common/Breadcrumb';
 
 const groups = [
   {
@@ -128,6 +129,9 @@ const DashboardLayout = () => (
           <span className="ml-2 text-sm font-medium text-foreground">My Account</span>
         </header>
         <main className="flex-1 overflow-auto p-6">
+          <div className="mb-4">
+            <Breadcrumb />
+          </div>
           <Outlet />
         </main>
       </div>
