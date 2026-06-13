@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/marketplace/Navbar';
 import { MarketplaceSidebar } from '@/components/marketplace/MarketplaceSidebar';
 import { HeroBanner } from '@/components/marketplace/HeroBanner';
@@ -36,33 +37,37 @@ const HomePage = () => {
               <div>
                 <h4 className="mb-3 font-display text-sm font-bold text-foreground">Platform</h4>
                 <div className="space-y-2">
-                  {['Browse Apps', 'Categories', 'Pricing', 'Enterprise'].map(l => (
-                    <p key={l} className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">{l}</p>
-                  ))}
+                  <Link to="/search" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Browse Apps</Link>
+                  <Link to="/search" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">Categories</Link>
+                  <Link to="/pricing" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">Pricing</Link>
+                  <Link to="/enterprise" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">Enterprise</Link>
                 </div>
               </div>
               <div>
                 <h4 className="mb-3 font-display text-sm font-bold text-foreground">Resources</h4>
                 <div className="space-y-2">
-                  {['Documentation', 'API Reference', 'Tutorials', 'Blog'].map(l => (
-                    <p key={l} className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">{l}</p>
-                  ))}
+                  <Link to="/docs" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">Documentation</Link>
+                  <Link to="/api" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">API Reference</Link>
+                  <Link to="/tutorials" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">Tutorials</Link>
+                  <Link to="/blog" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
                 </div>
               </div>
               <div>
                 <h4 className="mb-3 font-display text-sm font-bold text-foreground">Company</h4>
                 <div className="space-y-2">
-                  {['About', 'Careers', 'Partners', 'Contact'].map(l => (
-                    <p key={l} className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">{l}</p>
-                  ))}
+                  <Link to="/about" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">About</Link>
+                  <Link to="/careers" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">Careers</Link>
+                  <Link to="/partners" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">Partners</Link>
+                  <Link to="/contact" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">Contact</Link>
                 </div>
               </div>
               <div>
                 <h4 className="mb-3 font-display text-sm font-bold text-foreground">Legal</h4>
                 <div className="space-y-2">
-                  {['Privacy', 'Terms', 'Security', 'Compliance'].map(l => (
-                    <p key={l} className="text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">{l}</p>
-                  ))}
+                  <Link to="/privacy" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy</Link>
+                  <Link to="/terms" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">Terms</Link>
+                  <Link to="/security" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">Security</Link>
+                  <Link to="/compliance" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">Compliance</Link>
                 </div>
               </div>
             </div>

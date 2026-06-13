@@ -75,6 +75,7 @@ export const ProductCard = ({ product }: Props) => {
               <button
                 onClick={toggleFav}
                 aria-pressed={isFav}
+                aria-label={isFav ? t('remove_from_favorites') : t('add_to_favorites')}
                 className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${isFav ? 'bg-primary text-primary-foreground' : 'bg-card/90 text-muted-foreground hover:bg-primary hover:text-primary-foreground'}`}
                 title={isFav ? t('remove_from_favorites') : t('add_to_favorites')}
               >
@@ -82,6 +83,7 @@ export const ProductCard = ({ product }: Props) => {
               </button>
               <Link
                 to={`/product/${product.id}`}
+                aria-label={t('view_details')}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-110"
                 title={t('view_details')}
               >
@@ -89,6 +91,7 @@ export const ProductCard = ({ product }: Props) => {
               </Link>
               <button
                 onClick={handleAddToCart}
+                aria-label={t('added_to_cart', { name: product.name })}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-card/90 text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
                 title={t('added_to_cart', { name: product.name })}
               >

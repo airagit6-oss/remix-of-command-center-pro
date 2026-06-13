@@ -19,7 +19,13 @@ export default function MetricsPage() {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-medium text-foreground">{t('metrics_explorer', { defaultValue: 'Metrics Explorer' })}</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-medium text-foreground">{t('metrics_explorer', { defaultValue: 'Metrics Explorer' })}</h2>
+        <div className="inline-flex items-center gap-2 rounded-md bg-amber-500/10 px-2 py-1 text-xs text-amber-600 border border-amber-400/30">
+          <span className="relative flex h-1.5 w-1.5"><span className="absolute inline-flex h-full w-full animate-pulse rounded-full bg-amber-500" /><span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-amber-500" /></span>
+          <span>Demo Data - Not Connected to Backend</span>
+        </div>
+      </div>
       <div className="grid grid-cols-2 gap-3">
         <MetricPanel title={t('cpu_utilization', { defaultValue: 'CPU Utilization (%)' })}>
           <ResponsiveContainer width="100%" height={220}>
