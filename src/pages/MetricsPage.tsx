@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Line, LineChart } from "recharts";
 import { useTranslation } from "react-i18next";
 import { Loader2, AlertCircle } from "lucide-react";
+import { ChartSkeleton } from "@/components/common/Skeleton";
 
 const tt = {
   contentStyle: { background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", borderRadius: 6, fontSize: 12 },
@@ -156,65 +157,76 @@ export default function MetricsPage() {
         </div>
       )}
       <div className="grid grid-cols-2 gap-3">
-        <MetricPanel title={t('cpu_utilization', { defaultValue: 'CPU Utilization (%)' })}>
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={cpuData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
-              <Tooltip {...tt} />
-              <defs>
-                <linearGradient id="cpuG" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--accent))" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Area type="monotone" dataKey="value" stroke="hsl(var(--accent))" strokeWidth={2} fill="url(#cpuG)" dot={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </MetricPanel>
+        {isLoading ? (
+          <>
+            <ChartSkeleton />
+            <ChartSkeleton />
+            <ChartSkeleton />
+            <ChartSkeleton />
+          </>
+        ) : (
+          <>
+            <MetricPanel title={t('cpu_utilization', { defaultValue: 'CPU Utilization (%)' })}>
+              <ResponsiveContainer width="100%" height={220}>
+                <AreaChart data={cpuData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                  <Tooltip {...tt} />
+                  <defs>
+                    <linearGradient id="cpuG" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--accent))" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <Area type="monotone" dataKey="value" stroke="hsl(var(--accent))" strokeWidth={2} fill="url(#cpuG)" dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </MetricPanel>
 
-        <MetricPanel title={t('memory_usage', { defaultValue: 'Memory Usage (%)' })}>
-          <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={memData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
-              <Tooltip {...tt} />
-              <defs>
-                <linearGradient id="memG" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--mp-success))" stopOpacity={0.4} />
-                  <stop offset="100%" stopColor="hsl(var(--mp-success))" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Area type="monotone" dataKey="value" stroke="hsl(var(--mp-success))" strokeWidth={2} fill="url(#memG)" dot={false} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </MetricPanel>
+            <MetricPanel title={t('memory_usage', { defaultValue: 'Memory Usage (%)' })}>
+              <ResponsiveContainer width="100%" height={220}>
+                <AreaChart data={memData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                  <Tooltip {...tt} />
+                  <defs>
+                    <linearGradient id="memG" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--mp-success))" stopOpacity={0.4} />
+                      <stop offset="100%" stopColor="hsl(var(--mp-success))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <Area type="monotone" dataKey="value" stroke="hsl(var(--mp-success))" strokeWidth={2} fill="url(#memG)" dot={false} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </MetricPanel>
 
-        <MetricPanel title={t('network_io', { defaultValue: 'Network I/O (MB/s)' })}>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={netData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
-              <Tooltip {...tt} />
-              <Line type="monotone" dataKey="value" stroke="hsl(var(--mp-warning))" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </MetricPanel>
+            <MetricPanel title={t('network_io', { defaultValue: 'Network I/O (MB/s)' })}>
+              <ResponsiveContainer width="100%" height={220}>
+                <LineChart data={netData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                  <Tooltip {...tt} />
+                  <Line type="monotone" dataKey="value" stroke="hsl(var(--mp-warning))" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </MetricPanel>
 
-        <MetricPanel title={t('disk_io', { defaultValue: 'Disk I/O (ops/s)' })}>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={ioData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
-              <Tooltip {...tt} />
-              <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
-        </MetricPanel>
+            <MetricPanel title={t('disk_io', { defaultValue: 'Disk I/O (ops/s)' })}>
+              <ResponsiveContainer width="100%" height={220}>
+                <LineChart data={ioData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="time" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} tickLine={false} axisLine={false} />
+                  <Tooltip {...tt} />
+                  <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </MetricPanel>
+          </>
+        )}
       </div>
     </div>
   );
