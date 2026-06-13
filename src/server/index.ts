@@ -9,6 +9,11 @@ import cors from 'cors';
 import * as dotenv from 'dotenv';
 import apiManagerRoutes from './routes/apiManager';
 import cartRoutes from './routes/cart';
+import metricsRoutes from './routes/metrics';
+import infrastructureRoutes from './routes/infrastructure';
+import tracesRoutes from './routes/traces';
+import alertsRoutes from './routes/alerts';
+import appsRoutes from './routes/apps';
 
 dotenv.config();
 
@@ -29,6 +34,9 @@ app.use(cors({
   origin: [
     'http://localhost:4173',
     'http://localhost:4174',
+    'http://localhost:4175',
+    'http://localhost:4176',
+    'http://localhost:4177',
     'http://localhost:5173',
     'http://localhost:3000',
     'http://localhost:3001',
@@ -89,11 +97,21 @@ app.get('/health', (req: Request, res: Response) => {
 // API ROUTES
 // ============================================================================
 
-// Mount API v1 routes (cart, etc.)
+// Mount API v1 routes (cart, metrics, infrastructure, traces, alerts, apps)
 app.use('/api/v1/cart', cartRoutes);
+app.use('/api/v1/metrics', metricsRoutes);
+app.use('/api/v1/infrastructure', infrastructureRoutes);
+app.use('/api/v1/traces', tracesRoutes);
+app.use('/api/v1/alerts', alertsRoutes);
+app.use('/api/v1/apps', appsRoutes);
 
-// Also mount cart routes at root for compatibility
+// Also mount at root for compatibility
 app.use('/cart', cartRoutes);
+app.use('/metrics', metricsRoutes);
+app.use('/infrastructure', infrastructureRoutes);
+app.use('/traces', tracesRoutes);
+app.use('/alerts', alertsRoutes);
+app.use('/apps', appsRoutes);
 
 // Mount API Manager routes with /api/ai-api-manager prefix
 app.use('/api/ai-api-manager', apiManagerRoutes);
