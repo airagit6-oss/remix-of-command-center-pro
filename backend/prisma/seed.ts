@@ -101,7 +101,7 @@ async function main() {
       authorId: authorProfile.id,
       name: 'Enterprise CRM System',
       description: 'Full-featured CRM for enterprise businesses',
-      price: 299,
+      price: 249,
       status: 'PUBLISHED',
       media: [{ type: 'IMAGE', url: 'https://example.com/crm.jpg', alt: 'CRM Screenshot' }],
       tags: ['CRM', 'Enterprise', 'Business'],
@@ -119,7 +119,7 @@ async function main() {
       authorId: authorProfile.id,
       name: 'Project Management Tool',
       description: 'Agile project management for teams',
-      price: 199,
+      price: 249,
       status: 'PUBLISHED',
       media: [{ type: 'IMAGE', url: 'https://example.com/pm.jpg', alt: 'PM Screenshot' }],
       tags: ['Project Management', 'Agile', 'Teams'],
@@ -161,14 +161,14 @@ async function main() {
   const order = await prisma.order.create({
     data: {
       userId: customer.id,
-      totalAmount: 299,
+      totalAmount: 249,
       status: 'COMPLETED',
       orderItems: {
         create: {
           productId: product1.id,
           quantity: 1,
-          price: 299,
-          total: 299
+          price: 249,
+          total: 249
         }
       }
     }

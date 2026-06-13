@@ -633,6 +633,231 @@ const LoginPage = () => {
             chips={['Daily payouts', 'White-label', 'Realtime CRM']} />
         </div>
       </main>
+
+      <footer style={{
+        position: 'relative', zIndex: 4,
+        borderTop: `1px solid ${NEON.border}`,
+        padding: '40px 28px',
+        textAlign: 'center',
+      }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          {/* Welcome Header */}
+          <div style={{ marginBottom: 28 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#2D8CFF', letterSpacing: 1.2, marginBottom: 4 }}>
+              ✨ Welcome to SOFTWARE VALA™
+            </h2>
+            <p style={{ fontSize: 13, color: NEON.mute, marginBottom: 12 }}>💡 The Name of Trust</p>
+          </div>
+
+          {/* Contact Info Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 24,
+            marginBottom: 32,
+          }}>
+            {/* WhatsApp Support */}
+            <div style={{ padding: 12 }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: NEON.cyan, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                📱 WhatsApp Support
+              </p>
+              <a href="tel:+918348838383" style={{
+                color: NEON.text,
+                textDecoration: 'none',
+                fontSize: 13,
+                fontWeight: 500,
+                transition: 'color 0.3s',
+              }} onMouseEnter={e => (e.currentTarget.style.color = NEON.cyan)} onMouseLeave={e => (e.currentTarget.style.color = NEON.text)}>
+                +91-8348838383
+              </a>
+            </div>
+
+            {/* Email Support */}
+            <div style={{ padding: 12 }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: NEON.violet, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                📧 Email Support
+              </p>
+              <a href="mailto:hellosoftwarevala@gmail.com" style={{
+                color: NEON.text,
+                textDecoration: 'none',
+                fontSize: 13,
+                fontWeight: 500,
+                transition: 'color 0.3s',
+              }} onMouseEnter={e => (e.currentTarget.style.color = NEON.violet)} onMouseLeave={e => (e.currentTarget.style.color = NEON.text)}>
+                hellosoftwarevala@gmail.com
+              </a>
+            </div>
+
+            {/* Websites */}
+            <div style={{ padding: 12 }}>
+              <p style={{ fontSize: 12, fontWeight: 600, color: NEON.pink, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                🌐 Our Websites
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <a href="https://softwarevala.net" target="_blank" rel="noopener noreferrer" style={{
+                  color: NEON.text,
+                  textDecoration: 'none',
+                  fontSize: 12,
+                  transition: 'color 0.3s',
+                }} onMouseEnter={e => (e.currentTarget.style.color = NEON.pink)} onMouseLeave={e => (e.currentTarget.style.color = NEON.text)}>
+                  🔹 Online Software
+                </a>
+                <a href="https://erpvala.com" target="_blank" rel="noopener noreferrer" style={{
+                  color: NEON.text,
+                  textDecoration: 'none',
+                  fontSize: 12,
+                  transition: 'color 0.3s',
+                }} onMouseEnter={e => (e.currentTarget.style.color = NEON.pink)} onMouseLeave={e => (e.currentTarget.style.color = NEON.text)}>
+                  🔹 Offline Software
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Social Media Links */}
+          <div style={{ marginBottom: 32, paddingBottom: 24, borderBottom: `1px solid ${NEON.border}` }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: NEON.cyan, marginBottom: 18, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              📲 Follow Us On
+            </p>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 14,
+              flexWrap: 'wrap',
+            }}>
+              <a href="https://facebook.com/share/1HpGSvExis" target="_blank" rel="noopener noreferrer" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '12px 18px',
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, rgba(59, 89, 152, 0.2), rgba(59, 89, 152, 0.1))',
+                border: '1px solid rgba(59, 89, 152, 0.4)',
+                color: '#5b7fd4',
+                textDecoration: 'none',
+                fontSize: 13,
+                fontWeight: 600,
+                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                boxShadow: '0 2px 8px rgba(59, 89, 152, 0.1)',
+              }} onMouseEnter={e => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(59, 89, 152, 0.4), rgba(59, 89, 152, 0.2))';
+                e.currentTarget.style.transform = 'translateY(-3px) scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(59, 89, 152, 0.25)';
+              }} onMouseLeave={e => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(59, 89, 152, 0.2), rgba(59, 89, 152, 0.1))';
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 89, 152, 0.1)';
+              }}>
+                f Facebook
+              </a>
+              <a href="https://instagram.com/new_software_vala" target="_blank" rel="noopener noreferrer" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '12px 18px',
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, rgba(217, 83, 126, 0.2), rgba(217, 83, 126, 0.1))',
+                border: '1px solid rgba(217, 83, 126, 0.4)',
+                color: '#f073a0',
+                textDecoration: 'none',
+                fontSize: 13,
+                fontWeight: 600,
+                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                boxShadow: '0 2px 8px rgba(217, 83, 126, 0.1)',
+              }} onMouseEnter={e => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(217, 83, 126, 0.4), rgba(217, 83, 126, 0.2))';
+                e.currentTarget.style.transform = 'translateY(-3px) scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(217, 83, 126, 0.25)';
+              }} onMouseLeave={e => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(217, 83, 126, 0.2), rgba(217, 83, 126, 0.1))';
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(217, 83, 126, 0.1)';
+              }}>
+                📷 Instagram
+              </a>
+              <a href="https://wa.me/918348838383" target="_blank" rel="noopener noreferrer" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '12px 18px',
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, rgba(37, 211, 102, 0.2), rgba(37, 211, 102, 0.1))',
+                border: '1px solid rgba(37, 211, 102, 0.4)',
+                color: '#50d975',
+                textDecoration: 'none',
+                fontSize: 13,
+                fontWeight: 600,
+                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                boxShadow: '0 2px 8px rgba(37, 211, 102, 0.1)',
+              }} onMouseEnter={e => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(37, 211, 102, 0.4), rgba(37, 211, 102, 0.2))';
+                e.currentTarget.style.transform = 'translateY(-3px) scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(37, 211, 102, 0.25)';
+              }} onMouseLeave={e => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(37, 211, 102, 0.2), rgba(37, 211, 102, 0.1))';
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(37, 211, 102, 0.1)';
+              }}>
+                💬 WhatsApp
+              </a>
+              <a href="https://youtube.com/@softwarevala" target="_blank" rel="noopener noreferrer" style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                padding: '12px 18px',
+                borderRadius: 12,
+                background: 'linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.1))',
+                border: '1px solid rgba(255, 0, 0, 0.4)',
+                color: '#ff4444',
+                textDecoration: 'none',
+                fontSize: 13,
+                fontWeight: 600,
+                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                boxShadow: '0 2px 8px rgba(255, 0, 0, 0.1)',
+              }} onMouseEnter={e => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 0, 0, 0.4), rgba(255, 0, 0, 0.2))';
+                e.currentTarget.style.transform = 'translateY(-3px) scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 8px 16px rgba(255, 0, 0, 0.25)';
+              }} onMouseLeave={e => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(255, 0, 0, 0.1))';
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 0, 0, 0.1)';
+              }}>
+                ▶️ YouTube
+              </a>
+            </div>
+          </div>
+
+          {/* Key Promise */}
+          <div style={{
+            padding: 16,
+            borderRadius: 12,
+            background: `linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(139, 92, 246, 0.1))`,
+            border: `1px solid ${NEON.border}`,
+          }}>
+            <p style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: NEON.cyan,
+              margin: 0,
+            }}>
+              ✅ No Advance Payment
+            </p>
+            <p style={{
+              fontSize: 12,
+              color: NEON.mute,
+              marginTop: 8,
+              margin: 0,
+            }}>
+              Transparency and fairness in payment terms. Your trust is our priority.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

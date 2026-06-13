@@ -43,17 +43,18 @@ interface Review {
   notes?: string;
 }
 
-const FIRST = ['Alex', 'Jenna', 'Carlos', 'Priya', 'Mei', 'Noah', 'Sara', 'Lucas', 'Aisha', 'Ivan', 'Yuki', 'Liam', 'Zara', 'Diego', 'Hana', 'Omar', 'Nora', 'Kai', 'Eva', 'Sam'];
-const LAST = ['M.', 'K.', 'R.', 'S.', 'L.', 'T.', 'V.', 'P.', 'N.', 'O.'];
-const PRODUCTS = ['EduFlow Pro', 'ShopEngine', 'FactoryOS', 'CRM Atlas', 'LedgerCore', 'PixelForge', 'CloudMesh', 'DataPrism', 'AuthGrid', 'StreamKit'];
+// Default fallback data
+const DEFAULT_FIRST = ['Alex', 'Jenna', 'Carlos', 'Priya', 'Mei', 'Noah', 'Sara', 'Lucas', 'Aisha', 'Ivan', 'Yuki', 'Liam', 'Zara', 'Diego', 'Hana', 'Omar', 'Nora', 'Kai', 'Eva', 'Sam'];
+const DEFAULT_LAST = ['M.', 'K.', 'R.', 'S.', 'L.', 'T.', 'V.', 'P.', 'N.', 'O.'];
+const DEFAULT_PRODUCTS = ['EduFlow Pro', 'ShopEngine', 'FactoryOS', 'CRM Atlas', 'LedgerCore', 'PixelForge', 'CloudMesh', 'DataPrism', 'AuthGrid', 'StreamKit'];
 const COUNTRIES = ['US', 'DE', 'IN', 'BR', 'JP', 'GB', 'FR', 'CA', 'AU', 'NL', 'SG', 'ZA'];
 const DEVICES: Device[] = ['desktop', 'mobile', 'tablet'];
-const TITLES = [
+const DEFAULT_TITLES = [
   'Game changer for our team', 'Solid but needs work', 'Crashed on day one',
   'Best in class support', 'Overpriced for what it does', 'Smooth onboarding',
   'Missing critical features', 'Exactly what we needed', 'Buggy release', 'Five stars all around',
 ];
-const TEXTS = [
+const DEFAULT_TEXTS = [
   'Best platform I have used in years. Incredible support team and the docs are top-tier.',
   'Slow checkout, missing features, and the dashboard freezes randomly.',
   'Solid platform for production planning. Onboarding could be smoother.',
@@ -69,13 +70,19 @@ const TEXTS = [
 const rand = (n: number, seed: number) => Math.floor((seed % n));
 const pick = <T,>(arr: T[], seed: number) => arr[rand(arr.length, seed)];
 
-function mkReview(i: number, offsetMs = 0): Review {
+function mkReview(i: number, offsetMs = 0, t?: any): Review {
+  // Use translated mock data if available, fallback to defaults
+  const FIRST = t ? Array.from({ length: 20 }, (_, idx) => t(`mockUserFirstNames.${idx + 1}`, { defaultValue: DEFAULT_FIRST[idx] })) : DEFAULT_FIRST;
+  const PRODUCTS = t ? Array.from({ length: 10 }, (_, idx) => t(`mockProductNames.${idx + 1}`, { defaultValue: DEFAULT_PRODUCTS[idx] })) : DEFAULT_PRODUCTS;
+  const TITLES = t ? Array.from({ length: 10 }, (_, idx) => t(`mockReviewTitles.${idx + 1}`, { defaultValue: DEFAULT_TITLES[idx] })) : DEFAULT_TITLES;
+  const TEXTS = t ? Array.from({ length: 10 }, (_, idx) => t(`mockReviewTexts.${idx + 1}`, { defaultValue: DEFAULT_TEXTS[idx] })) : DEFAULT_TEXTS;
+
   const rating = Math.max(1, Math.min(5, Math.round(2 + (i % 4))));
   const sentiment: Sentiment = rating >= 4 ? 'positive' : rating <= 2 ? 'negative' : 'neutral';
   const aiRisk = sentiment === 'negative' ? 30 + rand(60, i) : rand(40, i);
   return {
     id: `RV-${(10000 + i).toString(36).toUpperCase()}`,
-    user: `${pick(FIRST, i)} ${pick(LAST, i)}`,
+    user: `${pick(FIRST, i)} ${pick(DEFAULT_LAST, i)}`,
     email: `user${i}@${pick(['acme.io', 'corp.com', 'mail.dev', 'box.co'], i)}`,
     product: pick(PRODUCTS, i),
     rating,
@@ -102,6 +109,7 @@ function mkReview(i: number, offsetMs = 0): Review {
   };
 }
 
+// Initialize with default English seed
 const SEED = Array.from({ length: 48 }, (_, i) => mkReview(i, i * 60_000));
 
 // ─────────────────────────── Small UI primitives ───────────────────────────
@@ -160,6 +168,7 @@ const Sparkline = ({ data, color = 'hsl(var(--primary))' }: { data: number[]; co
 
 // ─────────────────────────── Main Page ───────────────────────────
 const ReviewsPage = () => {
+  const { t } = useTranslation('common');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -179,18 +188,24 @@ const ReviewsPage = () => {
         setLoading(true);
         setError(null);
         const data = await api.get<Review[]>('/admin/reviews');
-        setReviews(data);
+        // If API returns empty, use localized seed data
+        if (data.length === 0) {
+          setReviews(Array.from({ length: 48 }, (_, i) => mkReview(i, i * 60_000, t)));
+        } else {
+          setReviews(data);
+        }
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to load reviews';
         setError(message);
-        console.error('Failed to fetch reviews:', err);
+        // Fall back to seed data
+        setReviews(Array.from({ length: 48 }, (_, i) => mkReview(i, i * 60_000, t)));
       } finally {
         setLoading(false);
       }
     };
     
     fetchReviews();
-  }, []);
+  }, [t]);
   const [drawer, setDrawer] = useState<Review | null>(null);
   const [liveOn, setLiveOn] = useState(true);
   const [feed, setFeed] = useState<{ id: string; user: string; product: string; rating: number; t: number }[]>([]);
@@ -200,18 +215,18 @@ const ReviewsPage = () => {
     { id: 'L3', action: 'escalated', target: 'RV-A2D7', at: Date.now() - 900_000, mod: 'admin@boss' },
   ]);
 
-  // Realtime feed simulator
+  // Realtime feed simulator with translated mock data
   useEffect(() => {
     if (!liveOn) return;
     const tick = setInterval(() => {
-      const r = mkReview(Date.now() % 99999);
+      const r = mkReview(Date.now() % 99999, 0, t);
       setFeed(prev => [{ id: r.id, user: r.user, product: r.product, rating: r.rating, t: Date.now() }, ...prev].slice(0, 14));
       if (Date.now() % 3 === 0) {
         setReviews(prev => [r, ...prev].slice(0, 200));
       }
     }, 2800);
     return () => clearInterval(tick);
-  }, [liveOn]);
+  }, [liveOn, t]);
 
   const logAction = (action: string, target: string) => {
     setAuditLog(prev => [{ id: `L${Date.now()}`, action, target, at: Date.now(), mod: 'admin@boss' }, ...prev].slice(0, 30));

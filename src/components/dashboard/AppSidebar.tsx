@@ -3,20 +3,28 @@ import {
   DollarSign, Bell, LayoutDashboard, Settings, Compass, Zap, Sparkles, ShieldCheck
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
-const navItems = [
-  { icon: Compass, label: "Overview", path: "/", group: "Command" },
-  { icon: BarChart3, label: "Metrics Explorer", path: "/metrics", group: "Command" },
-  { icon: FileText, label: "Logs Explorer", path: "/logs", group: "Command" },
-  { icon: Zap, label: "Traces / APM", path: "/traces", group: "Command" },
-  { icon: Server, label: "Infrastructure", path: "/infrastructure", group: "Operations" },
-  { icon: Users, label: "Users Monitoring", path: "/users", group: "Operations" },
-  { icon: AppWindow, label: "Apps Monitoring", path: "/apps", group: "Operations" },
-  { icon: DollarSign, label: "Revenue Metrics", path: "/revenue", group: "Business" },
-  { icon: Bell, label: "Alerts", path: "/alerts", group: "Business" },
-  { icon: LayoutDashboard, label: "Dashboards", path: "/dashboards", group: "Business" },
-  { icon: Settings, label: "Settings", path: "/settings", group: "System" },
+interface NavItem {
+  icon: React.ComponentType<{ className: string }>;
+  labelKey: string;
+  path: string;
+  groupKey: string;
+}
+
+const navItems: NavItem[] = [
+  { icon: Compass, labelKey: "overview", path: "/", groupKey: "command" },
+  { icon: BarChart3, labelKey: "metricsExplorer", path: "/metrics", groupKey: "command" },
+  { icon: FileText, labelKey: "logsExplorer", path: "/logs", groupKey: "command" },
+  { icon: Zap, labelKey: "tracesAPM", path: "/traces", groupKey: "command" },
+  { icon: Server, labelKey: "infrastructure", path: "/infrastructure", groupKey: "operations" },
+  { icon: Users, labelKey: "usersMonitoring", path: "/users", groupKey: "operations" },
+  { icon: AppWindow, labelKey: "appsMonitoring", path: "/apps", groupKey: "operations" },
+  { icon: DollarSign, labelKey: "revenueMetrics", path: "/revenue", groupKey: "business" },
+  { icon: Bell, labelKey: "alerts", path: "/alerts", groupKey: "business" },
+  { icon: LayoutDashboard, labelKey: "dashboards", path: "/dashboards", groupKey: "business" },
+  { icon: Settings, labelKey: "settings", path: "/settings", groupKey: "system" },
 ];
 
 interface Props {
@@ -25,7 +33,9 @@ interface Props {
 }
 
 export function AppSidebar({ isOpen }: Props) {
+  const { t } = useTranslation('common');
   let lastGroup = "";
+  
   return (
     <aside
       className={cn(
@@ -72,14 +82,14 @@ export function AppSidebar({ isOpen }: Props) {
       {/* Nav */}
       <nav className="relative flex-1 py-2 overflow-y-auto z-10">
         {navItems.map((item) => {
-          const showGroup = isOpen && item.group !== lastGroup;
-          lastGroup = item.group;
+          const showGroup = isOpen && item.groupKey !== lastGroup;
+          lastGroup = item.groupKey;
           return (
             <div key={item.path}>
               {showGroup && (
                 <div className="px-3 pt-3 pb-1 flex items-center gap-2">
                   <span className="text-[9px] uppercase tracking-[0.22em] text-cyan-300/50 font-medium">
-                    {item.group}
+                    {t(item.groupKey)}
                   </span>
                   <span className="flex-1 h-px bg-gradient-to-r from-cyan-500/30 to-transparent" />
                 </div>
@@ -119,7 +129,7 @@ export function AppSidebar({ isOpen }: Props) {
                         )}
                       />
                     </span>
-                    {isOpen && <span className="truncate flex-1">{item.label}</span>}
+                    {isOpen && <span className="truncate flex-1">{t(item.labelKey)}</span>}
                     {isOpen && isActive && (
                       <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_hsl(186_90%_55%/0.9)] animate-pulse" />
                     )}

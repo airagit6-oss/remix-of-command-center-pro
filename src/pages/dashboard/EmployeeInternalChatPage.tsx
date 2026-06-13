@@ -136,7 +136,7 @@ export const EmployeeInternalChatPage: React.FC = () => {
   const handleDeleteMessage = (messageId: string) => {
     // Only boss can delete
     if (currentUser.role !== 'boss') {
-      alert('Only boss can delete messages');
+      alert(t('only_boss_can_delete'));
       return;
     }
     setMessages(messages.filter((m) => m.id !== messageId));
@@ -145,7 +145,7 @@ export const EmployeeInternalChatPage: React.FC = () => {
   const handleEditMessage = (messageId: string) => {
     // Only boss can edit
     if (currentUser.role !== 'boss') {
-      alert('Only boss can edit messages');
+      alert(t('only_boss_can_edit'));
       return;
     }
 
@@ -253,7 +253,7 @@ export const EmployeeInternalChatPage: React.FC = () => {
                       <Clock size={12} />
                       {getLocalTimeAndDate(msg.timestamp, currentLang)}
                     </span>
-                    {msg.isEdited && <span className="text-xs text-amber-600">(edited)</span>}
+                    {msg.isEdited && <span className="text-xs text-amber-600">{t('edited')}</span>}
                   </div>
 
                   {/* Message Bubble */}
@@ -278,7 +278,7 @@ export const EmployeeInternalChatPage: React.FC = () => {
                           onClick={() => handleSaveEdit(msg.id)}
                           className="rounded bg-green-500 px-2 py-1 text-white hover:bg-green-600"
                         >
-                          Save
+                          {t('save')}
                         </button>
                       </div>
                     ) : (
@@ -307,7 +307,7 @@ export const EmployeeInternalChatPage: React.FC = () => {
                     <button
                       onClick={() => handleCopyMessage(msg.content)}
                       className="rounded p-1 text-slate-500 hover:bg-slate-200"
-                      title="Copy"
+                      title={t('copy')}
                     >
                       <Copy size={14} />
                     </button>
@@ -316,14 +316,14 @@ export const EmployeeInternalChatPage: React.FC = () => {
                         <button
                           onClick={() => handleEditMessage(msg.id)}
                           className="rounded p-1 text-slate-500 hover:bg-yellow-200"
-                          title="Edit"
+                          title={t('edit')}
                         >
                           <Edit2 size={14} />
                         </button>
                         <button
                           onClick={() => handleDeleteMessage(msg.id)}
                           className="rounded p-1 text-slate-500 hover:bg-red-200"
-                          title="Delete"
+                          title={t('delete')}
                         >
                           <Trash2 size={14} />
                         </button>

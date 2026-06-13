@@ -96,11 +96,11 @@ const ResellerSidebar = () => {
           <div className="mx-3 mb-2 rounded-lg px-3 py-2.5" style={{ background: '#2a2a2a' }}>
             <div className="flex items-center gap-2">
               <div className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: '#008060' }}>
-                {(user?.name ?? 'P')[0].toUpperCase()}
+                {(user?.name ?? t('defaultPartner', { defaultValue: 'Partner' }))[0].toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-medium text-white truncate">{user?.name ?? 'Partner'}</p>
-                <p className="text-[10px] text-white/40 truncate">{user?.email ?? 'partner@example.com'}</p>
+                <p className="text-[12px] font-medium text-white truncate">{user?.name ?? t('defaultPartner', { defaultValue: 'Partner' })}</p>
+                <p className="text-[10px] text-white/40 truncate">{user?.email ?? t('defaultEmail', { defaultValue: 'user@example.com' })}</p>
               </div>
             </div>
           </div>

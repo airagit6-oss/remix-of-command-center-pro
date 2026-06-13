@@ -25,6 +25,9 @@ import SuccessPage from "./pages/SuccessPage";
 import SearchPage from "./pages/SearchPage";
 import SupportPage from "./pages/SupportPage";
 import ResellerApplyPage from "./pages/ResellerApplyPage";
+import FranchiseApplyPage from "./pages/FranchiseApplyPage";
+import VendorApplyPage from "./pages/VendorApplyPage";
+import InfluencerApplyPage from "./pages/InfluencerApplyPage";
 import NotFound from "./pages/NotFound";
 import RewardsPage from "./pages/RewardsPage";
 
@@ -62,10 +65,10 @@ import ResellerProductsPage from "./pages/ResellerProductsPage";
 import ResellerEarningsPage from "./pages/ResellerEarningsPage";
 import ResellerSettingsPage from "./pages/ResellerSettingsPage";
 import ResellerReferralsPage from "./pages/ResellerReferralsPage";
-import ResellerCommissionsPage from "./pages/reseller/ResellerCommissionsPage";
-import ResellerReportsPage from "./pages/reseller/ResellerReportsPage";
-import ResellerMarketingPage from "./pages/reseller/ResellerMarketingPage";
-import ResellerPayoutsHistoryPage from "./pages/reseller/ResellerPayoutsHistoryPage";
+import ResellerCommissionsPage from "./pages/ResellerCommissionsPage";
+import ResellerReportsPage from "./pages/ResellerReportsPage";
+import ResellerMarketingPage from "./pages/ResellerMarketingPage";
+import ResellerPayoutsHistoryPage from "./pages/ResellerPayoutsHistoryPage";
 
 // Admin
 import AdminLayout from "./pages/AdminLayout";
@@ -187,6 +190,9 @@ const App = () => (
               <Route path="/search" element={<SearchPage />} />
               <Route path="/support" element={<SupportPage />} />
               <Route path="/reseller-apply" element={<ResellerApplyPage />} />
+              <Route path="/franchise-apply" element={<FranchiseApplyPage />} />
+              <Route path="/vendor-apply" element={<VendorApplyPage />} />
+              <Route path="/influencer-apply" element={<InfluencerApplyPage />} />
               <Route path="/rewards" element={<RewardsPage />} />
 
               {/* Category hierarchy (macro, macro/sub, macro/sub/micro) */}

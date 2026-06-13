@@ -13,44 +13,53 @@ export interface AuthenticatedRequest {
 }
 
 export async function authenticate(req: any, reply: FastifyReply) {
-  // For development: always set a default user
-  // In production, implement proper JWT verification
   const authHeader = req.headers?.authorization;
   
+  // Require Bearer token to be present
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    req.user = {
-      id: 'dev-user-1',
-      email: 'reseller@test.com',
-      role: 'reseller'
-    };
-    return;
+    return reply.status(401).send({ 
+      error: 'UNAUTHORIZED',
+      message: 'Missing or invalid authorization header. Expected: Authorization: Bearer <token>'
+    });
   }
 
   const token = authHeader.substring(7);
   
   if (!token) {
-    req.user = {
-      id: 'dev-user-1',
-      email: 'reseller@test.com',
-      role: 'reseller'
-    };
-    return;
+    return reply.status(401).send({ 
+      error: 'UNAUTHORIZED',
+      message: 'Missing token'
+    });
   }
 
-  // Try to verify token, but fallback to default if it fails
+  // Verify JWT token - NO FALLBACK TO DEFAULT USER
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as any;
+    
+    if (!decoded.id || !decoded.email || !decoded.role) {
+      return reply.status(401).send({ 
+        error: 'INVALID_TOKEN',
+        message: 'Token missing required fields (id, email, role)'
+      });
+    }
+    
     req.user = {
       id: decoded.id,
       email: decoded.email,
       role: decoded.role
     };
-  } catch (e) {
-    req.user = {
-      id: 'dev-user-1',
-      email: 'reseller@test.com',
-      role: 'reseller'
-    };
+  } catch (e: any) {
+    if (e.name === 'TokenExpiredError') {
+      return reply.status(401).send({ 
+        error: 'TOKEN_EXPIRED',
+        message: 'Token has expired'
+      });
+    }
+    
+    return reply.status(401).send({ 
+      error: 'INVALID_TOKEN',
+      message: 'Invalid or malformed token'
+    });
   }
 }
 

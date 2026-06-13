@@ -4,12 +4,14 @@ import {
   ChevronLeft, ChevronRight, Play, Eye, ShoppingBag,
   Sparkles, Star, Users, TrendingUp, Activity, Zap, Shield, BarChart3,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { heroSlides } from '@/lib/marketplaceData';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const HeroBanner = () => {
   const [current, setCurrent] = useState(0);
   const { isLoggedIn, hasSubscription } = useAuth();
+  const { t } = useTranslation('common');
   const [pulse, setPulse] = useState(0);
   const slide = heroSlides[current];
 
@@ -63,10 +65,10 @@ export const HeroBanner = () => {
               {slide.category}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-fuchsia-400/30 bg-fuchsia-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-fuchsia-300 backdrop-blur-sm">
-              <Sparkles className="h-3 w-3" /> AI Recommended
+              <Sparkles className="h-3 w-3" /> {t('ai_recommended')}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-300 backdrop-blur-sm">
-              <TrendingUp className="h-3 w-3" /> Trending
+              <TrendingUp className="h-3 w-3" /> {t('trending')}
             </span>
           </div>
 
@@ -89,11 +91,11 @@ export const HeroBanner = () => {
             <div className="flex items-center gap-1.5 text-foreground/80">
               <Users className="h-3.5 w-3.5 text-cyan-400" />
               <span className="font-semibold">{installCount}</span>
-              <span className="text-muted-foreground">installs</span>
+              <span className="text-muted-foreground">{t('installs')}</span>
             </div>
             <div className="flex items-center gap-1.5 text-foreground/80">
               <Shield className="h-3.5 w-3.5 text-emerald-400" />
-              <span className="text-muted-foreground">Enterprise grade</span>
+              <span className="text-muted-foreground">{t('enterprise_grade')}</span>
             </div>
           </div>
 
@@ -102,20 +104,20 @@ export const HeroBanner = () => {
               to={isLoggedIn && hasSubscription ? '/dashboard' : '/subscription'}
               className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-cyan-500 via-cyan-400 to-fuchsia-500 px-6 py-3 text-sm font-semibold text-background shadow-[0_8px_32px_-8px_rgba(34,211,238,0.6)] transition-all hover:scale-[1.03] hover:shadow-[0_12px_40px_-8px_rgba(34,211,238,0.8)]"
             >
-              <Play className="h-4 w-4" /> Access Now
+              <Play className="h-4 w-4" /> {t('access_now')}
               <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
             </Link>
             <Link
               to={`/product/${slide.id}`}
               className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-foreground backdrop-blur-md transition-colors hover:border-cyan-400/40 hover:bg-white/10"
             >
-              <Eye className="h-4 w-4" /> View Details
+              <Eye className="h-4 w-4" /> {t('view_details')}
             </Link>
             <Link
               to={`/checkout?productId=${slide.id}`}
               className="flex items-center gap-2 rounded-xl border border-fuchsia-400/30 px-6 py-3 text-sm font-medium text-fuchsia-200 transition-colors hover:bg-fuchsia-500/10"
             >
-              <ShoppingBag className="h-4 w-4" /> Buy Now
+              <ShoppingBag className="h-4 w-4" /> {t('buy_now')}
             </Link>
           </div>
 

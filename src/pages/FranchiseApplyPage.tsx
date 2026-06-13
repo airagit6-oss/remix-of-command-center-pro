@@ -1,0 +1,146 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { TrendingUp, Users, Shield, ChevronRight, Store } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { approvalsStore } from '@/lib/approvalsStore';
+
+const benefits = (t: any) => [
+  { icon: Store, title: t('own_territory', { defaultValue: 'Own Territory' }), desc: t('own_territory_desc', { defaultValue: 'Control your exclusive region & customer base' }) },
+  { icon: TrendingUp, title: t('commission_50', { defaultValue: '50% Commission' }), desc: t('commission_50_desc', { defaultValue: 'Higher margins for franchise partners' }) },
+  { icon: Shield, title: t('full_support', { defaultValue: 'Full Support' }), desc: t('full_support_desc', { defaultValue: '24/7 dedicated franchise support & training' }) },
+];
+
+const FranchiseApplyPage = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ 
+    name: '', 
+    email: '', 
+    phone: '', 
+    company: '', 
+    territory: '',
+    investment: '',
+    message: '' 
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (form.name.trim().length < 2) return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) return;
+    if (form.message.trim().length < 5) return;
+    approvalsStore.add({
+      kind: 'franchise',
+      name: form.name.trim(),
+      email: form.email.trim().toLowerCase(),
+      phone: form.phone.trim() || undefined,
+      company: form.company.trim() || undefined,
+      territory: form.territory.trim() || undefined,
+      investment: form.investment.trim() || undefined,
+      message: form.message.trim(),
+      rate: 50,
+    });
+    setSubmitted(true);
+    setTimeout(() => navigate('/'), 3000);
+  };
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="mb-4 text-5xl">🎉</div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">{t('application_submitted', { defaultValue: 'Application Submitted!' })}</h1>
+          <p className="text-muted-foreground mb-6">
+            {t('application_review', { defaultValue: "We'll review your application and get back to you within 24–48 hours." })}
+          </p>
+          <Link to="/" className="rounded-lg bg-primary px-6 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+            {t('back_to_home', { defaultValue: 'Back to Home' })}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const inputClass = 'w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors';
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card px-6 py-4 flex items-center justify-between">
+        <Link to="/" className="font-display text-xl font-bold text-foreground">Software Vala</Link>
+        <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          {t('sign_in', { defaultValue: 'Sign in' })}
+        </Link>
+      </header>
+
+      <div className="max-w-5xl mx-auto px-6 py-16">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-foreground mb-3">{t('become_franchise', { defaultValue: 'Become a Franchise Partner' })}</h1>
+          <p className="text-lg text-muted-foreground">
+            {t('franchise_intro', { defaultValue: 'Build a scalable business with exclusive territory rights and premium support from Software Vala.' })}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+          {benefits(t).map(b => (
+            <div key={b.title} className="rounded-xl border border-border bg-card p-5 text-center">
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+                <b.icon className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-1">{b.title}</h3>
+              <p className="text-sm text-muted-foreground">{b.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="max-w-lg mx-auto">
+          <div className="rounded-xl border border-border bg-card p-8">
+            <h2 className="text-xl font-bold text-foreground mb-6">{t('apply_now', { defaultValue: 'Apply Now' })}</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{t('full_name', { defaultValue: 'Full Name' })}</label>
+                <input type="text" required placeholder={t('your_name_placeholder', { defaultValue: 'Your name' })} className={inputClass}
+                  value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{t('email', { defaultValue: 'Email' })}</label>
+                <input type="email" required placeholder={t('email_placeholder', { defaultValue: 'email@domain.com' })} className={inputClass}
+                  value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{t('phone', { defaultValue: 'Phone' })}</label>
+                <input type="tel" placeholder={t('phone_placeholder', { defaultValue: '+1 (555) 000-0000' })} className={inputClass}
+                  value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{t('company_name', { defaultValue: 'Company Name' })}</label>
+                <input type="text" placeholder={t('company_placeholder', { defaultValue: 'Your company' })} className={inputClass}
+                  value={form.company} onChange={e => setForm(f => ({ ...f, company: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{t('territory', { defaultValue: 'Territory / Region' })}</label>
+                <input type="text" placeholder={t('territory_placeholder', { defaultValue: 'e.g., North America, Asia-Pacific' })} className={inputClass}
+                  value={form.territory} onChange={e => setForm(f => ({ ...f, territory: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{t('investment', { defaultValue: 'Investment Budget' })}</label>
+                <input type="text" placeholder={t('investment_placeholder', { defaultValue: 'e.g., $50,000 - $100,000' })} className={inputClass}
+                  value={form.investment} onChange={e => setForm(f => ({ ...f, investment: e.target.value }))} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1.5">{t('message', { defaultValue: 'Message' })}</label>
+                <textarea required placeholder={t('message_placeholder', { defaultValue: 'Tell us about your vision for this franchise...' })} className={`${inputClass} min-h-24 resize-none`}
+                  value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} />
+              </div>
+              <button type="submit" className="w-full rounded-lg bg-primary px-4 py-2.5 font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
+                {t('submit_application', { defaultValue: 'Submit Application' })}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FranchiseApplyPage;

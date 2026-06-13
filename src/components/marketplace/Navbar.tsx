@@ -12,137 +12,103 @@ import { Logo } from '@/components/brand/Logo';
 
 type Lang = { code: string; label: string; nativeName?: string };
 
-// 125 supported languages
+// 125 supported languages - LOAD FROM SUPPORTED_LANGUAGES ARRAY
 const LANGS: Lang[] = [
-  // Core 10 languages
   { code: 'en', label: 'English', nativeName: 'English' },
   { code: 'es', label: 'Spanish', nativeName: 'Español' },
-  { code: 'zh-CN', label: 'Simplified Chinese', nativeName: '简体中文' },
-  { code: 'hi', label: 'Hindi', nativeName: 'हिन्दी' },
-  { code: 'ar', label: 'Arabic', nativeName: 'العربية' },
   { code: 'fr', label: 'French', nativeName: 'Français' },
   { code: 'de', label: 'German', nativeName: 'Deutsch' },
-  { code: 'pt-BR', label: 'Portuguese (Brazil)', nativeName: 'Português Brasileiro' },
-  { code: 'ja', label: 'Japanese', nativeName: '日本語' },
+  { code: 'it', label: 'Italian', nativeName: 'Italiano' },
+  { code: 'pt', label: 'Portuguese', nativeName: 'Português' },
   { code: 'ru', label: 'Russian', nativeName: 'Русский' },
+  { code: 'ja', label: 'Japanese', nativeName: '日本語' },
+  { code: 'zh', label: 'Chinese', nativeName: '中文' },
   { code: 'ko', label: 'Korean', nativeName: '한국어' },
-  { code: 'id', label: 'Indonesian', nativeName: 'Bahasa Indonesia' },
+  { code: 'ar', label: 'Arabic', nativeName: 'العربية' },
+  { code: 'hi', label: 'Hindi', nativeName: 'हिन्दी' },
   { code: 'vi', label: 'Vietnamese', nativeName: 'Tiếng Việt' },
+  { code: 'id', label: 'Indonesian', nativeName: 'Bahasa Indonesia' },
   { code: 'th', label: 'Thai', nativeName: 'ไทย' },
   { code: 'tr', label: 'Turkish', nativeName: 'Türkçe' },
-  { code: 'nl', label: 'Dutch', nativeName: 'Nederlands' },
   { code: 'pl', label: 'Polish', nativeName: 'Polski' },
-  { code: 'ro', label: 'Romanian', nativeName: 'Română' },
-  { code: 'el', label: 'Greek', nativeName: 'Ελληνικά' },
+  { code: 'nl', label: 'Dutch', nativeName: 'Nederlands' },
   { code: 'sv', label: 'Swedish', nativeName: 'Svenska' },
   { code: 'no', label: 'Norwegian', nativeName: 'Norsk' },
   { code: 'da', label: 'Danish', nativeName: 'Dansk' },
   { code: 'fi', label: 'Finnish', nativeName: 'Suomi' },
-  // Phase 1 - African languages
-  { code: 'sw', label: 'Swahili', nativeName: 'Kiswahili' },
-  { code: 'yo', label: 'Yoruba', nativeName: 'Yorùbá' },
-  { code: 'ha', label: 'Hausa', nativeName: 'Hausa' },
-  { code: 'ig', label: 'Igbo', nativeName: 'Igbo' },
-  { code: 'am', label: 'Amharic', nativeName: 'አማርኛ' },
-  { code: 'so', label: 'Somali', nativeName: 'Soomaaliga' },
-  { code: 'tl', label: 'Tagalog', nativeName: 'Tagalog' },
-  { code: 'af', label: 'Afrikaans', nativeName: 'Afrikaans' },
-  { code: 'zu', label: 'Zulu', nativeName: 'Isizulu' },
-  { code: 'ms', label: 'Malay', nativeName: 'Bahasa Melayu' },
-  // Phase 2 - European and Central Asian
-  { code: 'uk', label: 'Ukrainian', nativeName: 'Українська' },
-  { code: 'be', label: 'Belarusian', nativeName: 'Беларуская' },
-  { code: 'bg', label: 'Bulgarian', nativeName: 'Български' },
-  { code: 'hr', label: 'Croatian', nativeName: 'Hrvatski' },
-  { code: 'sr', label: 'Serbian', nativeName: 'Српски' },
-  { code: 'sq', label: 'Albanian', nativeName: 'Shqipë' },
-  { code: 'hu', label: 'Hungarian', nativeName: 'Magyar' },
+  { code: 'el', label: 'Greek', nativeName: 'Ελληνικά' },
+  { code: 'ro', label: 'Romanian', nativeName: 'Română' },
   { code: 'cs', label: 'Czech', nativeName: 'Čeština' },
+  { code: 'hu', label: 'Hungarian', nativeName: 'Magyar' },
   { code: 'sk', label: 'Slovak', nativeName: 'Slovenčina' },
-  { code: 'bn', label: 'Bengali', nativeName: 'বাংলা' },
+  { code: 'uk', label: 'Ukrainian', nativeName: 'Українська' },
+  { code: 'be', label: 'Belarusian', nativeName: 'Беларусская' },
+  { code: 'he', label: 'Hebrew', nativeName: 'עברית' },
+  { code: 'fa', label: 'Persian', nativeName: 'فارسی' },
+  { code: 'ur', label: 'Urdu', nativeName: 'اردو' },
   { code: 'pa', label: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ' },
+  { code: 'bn', label: 'Bengali', nativeName: 'বাংলা' },
   { code: 'ta', label: 'Tamil', nativeName: 'தமிழ்' },
   { code: 'te', label: 'Telugu', nativeName: 'తెలుగు' },
+  { code: 'kn', label: 'Kannada', nativeName: 'ಕನ್ನಡ' },
   { code: 'ml', label: 'Malayalam', nativeName: 'മലയാളം' },
   { code: 'my', label: 'Burmese', nativeName: 'မြန်မာ' },
   { code: 'km', label: 'Khmer', nativeName: 'ខ្មែរ' },
   { code: 'lo', label: 'Lao', nativeName: 'ລາວ' },
+  { code: 'am', label: 'Amharic', nativeName: 'አማርኛ' },
+  { code: 'af', label: 'Afrikaans', nativeName: 'Afrikaans' },
+  { code: 'sq', label: 'Albanian', nativeName: 'Shqip' },
   { code: 'hy', label: 'Armenian', nativeName: 'Հայերեն' },
-  { code: 'ka', label: 'Georgian', nativeName: 'ქართული' },
+  { code: 'az', label: 'Azerbaijani', nativeName: 'Azərbaycanca' },
+  { code: 'eu', label: 'Basque', nativeName: 'Euskera' },
+  { code: 'bg', label: 'Bulgarian', nativeName: 'Български' },
+  { code: 'ca', label: 'Catalan', nativeName: 'Català' },
+  { code: 'ceb', label: 'Cebuano', nativeName: 'Cebuano' },
+  { code: 'ny', label: 'Chichewa', nativeName: 'Chichewa' },
+  { code: 'zh-CN', label: 'Chinese (Simplified)', nativeName: '简体中文' },
+  { code: 'zh-TW', label: 'Chinese (Traditional)', nativeName: '繁體中文' },
+  { code: 'co', label: 'Corsican', nativeName: 'Corsu' },
+  { code: 'hr', label: 'Croatian', nativeName: 'Hrvatski' },
+  { code: 'eo', label: 'Esperanto', nativeName: 'Esperanto' },
   { code: 'et', label: 'Estonian', nativeName: 'Eesti' },
+  { code: 'tl', label: 'Filipino', nativeName: 'Tagalog' },
+  { code: 'fy', label: 'Frisian', nativeName: 'Frysk' },
+  { code: 'gl', label: 'Galician', nativeName: 'Galego' },
+  { code: 'ka', label: 'Georgian', nativeName: 'ქართული' },
+  { code: 'gu', label: 'Gujarati', nativeName: 'ગુજરાતી' },
+  { code: 'ht', label: 'Haitian Creole', nativeName: 'Kreyòl Ayisyen' },
+  { code: 'ha', label: 'Hausa', nativeName: 'Hausa' },
+  { code: 'haw', label: 'Hawaiian', nativeName: 'Ōlelo Hawaiʻi' },
+  { code: 'hmn', label: 'Hmong', nativeName: 'Hmoob' },
+  { code: 'is', label: 'Icelandic', nativeName: 'Íslenska' },
+  { code: 'ig', label: 'Igbo', nativeName: 'Igbo' },
+  { code: 'ga', label: 'Irish', nativeName: 'Gaeilge' },
+  { code: 'jw', label: 'Javanese', nativeName: 'Jawa' },
+  { code: 'kk', label: 'Kazakh', nativeName: 'Қазақша' },
+  { code: 'rw', label: 'Kinyarwanda', nativeName: 'Ikinyarwanda' },
+  { code: 'ku', label: 'Kurdish', nativeName: 'Kurdî' },
+  { code: 'ckb', label: 'Kurdish (Sorani)', nativeName: 'سۆرانی' },
+  { code: 'ky', label: 'Kyrgyz', nativeName: 'Кыргызча' },
   { code: 'lv', label: 'Latvian', nativeName: 'Latviešu' },
   { code: 'lt', label: 'Lithuanian', nativeName: 'Lietuvių' },
-  { code: 'ku', label: 'Kurdish', nativeName: 'Kurdî' },
-  { code: 'or', label: 'Odia', nativeName: 'ଓଡ଼ିଆ' },
-  { code: 'ur', label: 'Urdu', nativeName: 'اردو' },
-  { code: 'ps', label: 'Pashto', nativeName: 'پشتو' },
-  { code: 'he', label: 'Hebrew', nativeName: 'עברית' },
-  // Phase 3 - North African/Middle Eastern
-  { code: 'ar-EG', label: 'Egyptian Arabic', nativeName: 'مصري' },
-  { code: 'ar-MA', label: 'Moroccan Arabic', nativeName: 'درارج' },
-  { code: 'ar-TN', label: 'Tunisian Arabic', nativeName: 'تونسي' },
-  { code: 'ar-DZ', label: 'Algerian Arabic', nativeName: 'جزايري' },
-  { code: 'ar-JO', label: 'Jordanian Arabic', nativeName: 'أردني' },
-  { code: 'ar-LB', label: 'Lebanese Arabic', nativeName: 'لبناني' },
-  { code: 'ar-SY', label: 'Syrian Arabic', nativeName: 'سوري' },
-  { code: 'ar-SA', label: 'Saudi Arabic', nativeName: 'سعودي' },
-  { code: 'mr', label: 'Marathi', nativeName: 'मराठी' },
-  { code: 'gu', label: 'Gujarati', nativeName: 'ગુજરાતી' },
-  { code: 'kn', label: 'Kannada', nativeName: 'ಕನ್ನಡ' },
-  { code: 'sg', label: 'Singaporean', nativeName: 'Singapore' },
-  { code: 'ph', label: 'Filipino', nativeName: 'Filipino' },
-  { code: 'mm', label: 'Myanmar', nativeName: 'မြန်မာ' },
-  { code: 'zh-HK', label: 'Cantonese', nativeName: '粵語' },
-  { code: 'zh-TW', label: 'Traditional Chinese', nativeName: '繁體中文' },
-  { code: 'ja-JP', label: 'Japanese (Japan)', nativeName: '日本語' },
-  { code: 'ko-KR', label: 'Korean (South)', nativeName: '한국어' },
-  { code: 'mn', label: 'Mongolian', nativeName: 'Монгол' },
-  { code: 'kk', label: 'Kazakh', nativeName: 'Қазақ' },
-  { code: 'uz', label: 'Uzbek', nativeName: 'Ўзбек' },
-  { code: 'tg', label: 'Tajik', nativeName: 'Тоҷикӣ' },
-  { code: 'az', label: 'Azerbaijani', nativeName: 'Azərbaycanca' },
+  { code: 'lb', label: 'Luxembourgish', nativeName: 'Lëtzebuergesch' },
   { code: 'mk', label: 'Macedonian', nativeName: 'Македонски' },
-  { code: 'is', label: 'Icelandic', nativeName: 'Íslenska' },
+  { code: 'mg', label: 'Malagasy', nativeName: 'Malagasy' },
+  { code: 'ms', label: 'Malay', nativeName: 'Melayu' },
   { code: 'mt', label: 'Maltese', nativeName: 'Malti' },
-  { code: 'sl', label: 'Slovenian', nativeName: 'Slovenščina' },
-  { code: 'bs', label: 'Bosnian', nativeName: 'Bosanski' },
-  { code: 'cy', label: 'Welsh', nativeName: 'Cymraeg' },
-  { code: 'ga', label: 'Irish', nativeName: 'Gaeilge' },
-  { code: 'hi-IN', label: 'Hindi (India)', nativeName: 'हिन्दी' },
-  { code: 'bn-BD', label: 'Bengali (Bangladesh)', nativeName: 'বাংলা' },
-  // Phase 4 - Sub-Saharan & Pacific
-  { code: 'rw', label: 'Kinyarwanda', nativeName: 'Kinyarwanda' },
-  { code: 'ki', label: 'Kikuyu', nativeName: 'Gikuyu' },
-  { code: 'ln', label: 'Lingala', nativeName: 'Lingala' },
-  { code: 'ny', label: 'Chichewa', nativeName: 'Chichewa' },
-  { code: 'st', label: 'Sotho', nativeName: 'Sesotho' },
-  { code: 'tw', label: 'Twi', nativeName: 'Twi' },
-  { code: 'xh', label: 'Xhosa', nativeName: 'isiXhosa' },
-  { code: 'ss', label: 'Siswati', nativeName: 'SiSwati' },
-  { code: 'fj', label: 'Fijian', nativeName: 'Vosa Vakaviti' },
-  { code: 'to', label: 'Tongan', nativeName: 'Tonga' },
-  { code: 'sm', label: 'Samoan', nativeName: 'Samoa' },
   { code: 'mi', label: 'Maori', nativeName: 'Te Reo Māori' },
-  { code: 'qu', label: 'Quechua', nativeName: 'Quechua' },
-  { code: 'ay', label: 'Aymara', nativeName: 'Aymara' },
-  { code: 'nv', label: 'Navajo', nativeName: 'Diné' },
-  { code: 'gn', label: 'Guarani', nativeName: 'Guarani' },
-  { code: 'ht', label: 'Haitian Creole', nativeName: 'Kreyòl Ayisyen' },
-  { code: 'eu', label: 'Basque', nativeName: 'Euskera' },
-  { code: 'gl', label: 'Galician', nativeName: 'Galego' },
-  { code: 'ca', label: 'Catalan', nativeName: 'Català' },
-  { code: 'scn', label: 'Sicilian', nativeName: 'Sicilianu' },
-  { code: 'co', label: 'Corsican', nativeName: 'Corsu' },
-  { code: 'ti', label: 'Tigrinya', nativeName: 'ትግርኛ' },
-  { code: 'rn', label: 'Rundi', nativeName: 'Kirundi' },
-  { code: 'gv', label: 'Manx', nativeName: 'Manx' },
-  { code: 'pt-PT', label: 'Portuguese (Portugal)', nativeName: 'Português' },
-  { code: 'es-MX', label: 'Spanish (Mexico)', nativeName: 'Español Mexicano' },
-  { code: 'en-IN', label: 'English (India)', nativeName: 'English' },
-  { code: 'en-GB', label: 'English (UK)', nativeName: 'English' },
-  { code: 'en-AU', label: 'English (Australia)', nativeName: 'English' },
-  { code: 'fa', label: 'Persian', nativeName: 'فارسی' },
-  { code: 'ckb', label: 'Central Kurdish', nativeName: 'کوردی' },
+  { code: 'mr', label: 'Marathi', nativeName: 'मराठी' },
+  { code: 'mn', label: 'Mongolian', nativeName: 'Монгол' },
+  { code: 'ne', label: 'Nepali', nativeName: 'नेपाली' },
+  { code: 'ps', label: 'Pashto', nativeName: 'پښتو' },
+  { code: 'so', label: 'Somali', nativeName: 'Soomaali' },
+  { code: 'st', label: 'Southern Sotho', nativeName: 'Sesotho' },
+  { code: 'su', label: 'Sundanese', nativeName: 'Basa Sunda' },
+  { code: 'sw', label: 'Swahili', nativeName: 'Kiswahili' },
+  { code: 'tg', label: 'Tajik', nativeName: 'Тоҷикӣ' },
+  { code: 'tt', label: 'Tatar', nativeName: 'Татарча' },
+  { code: 'yo', label: 'Yoruba', nativeName: 'Yorùbá' },
+  { code: 'zu', label: 'Zulu', nativeName: 'isiZulu' },
 ];
 
 type Cur = { code: string; symbol: string; label: string };
@@ -178,6 +144,21 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
 
+  // Initialize i18n with saved language on mount
+  useEffect(() => {
+    const savedLang = localStorage.getItem('saashub_lang') || 'en';
+    if (i18n.language !== savedLang) {
+      i18n.changeLanguage(savedLang);
+      setLang(savedLang);
+    }
+    
+    // Set document direction for RTL languages
+    const rtlLanguages = ['ar', 'ar-EG', 'ar-MA', 'ar-TN', 'ar-DZ', 'ar-JO', 'ar-LB', 'ar-SY', 'ar-SA', 'fa', 'ur', 'ps', 'he', 'ku', 'ckb'];
+    const isRTL = rtlLanguages.some(rtlLang => savedLang.startsWith(rtlLang));
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    document.documentElement.lang = savedLang;
+  }, [i18n]);
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
@@ -198,6 +179,14 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
     setLang(code);
     localStorage.setItem('saashub_lang', code);
     i18n.changeLanguage(code);
+    
+    // Set document direction for RTL languages
+    const rtlLanguages = ['ar', 'ar-EG', 'ar-MA', 'ar-TN', 'ar-DZ', 'ar-JO', 'ar-LB', 'ar-SY', 'ar-SA', 'fa', 'ur', 'ps', 'he', 'ku', 'ckb'];
+    const isRTL = rtlLanguages.some(rtlLang => code.startsWith(rtlLang));
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    document.documentElement.lang = code;
+    
+    window.dispatchEvent(new CustomEvent('saashub:language', { detail: code }));
     setOpenMenu(null);
   };
   const pickCurrency = (code: string) => {
@@ -369,14 +358,57 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
               <Search className="h-4 w-4" />
             </button>
 
-            {/* Reseller Apply */}
-            <Link
-              to="/reseller-apply"
-              className="hidden xl:flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:border-cyan-400/40 hover:text-foreground hover:shadow-[0_0_18px_-4px_rgba(34,211,238,0.5)]"
-            >
-              <Sparkles className="h-3.5 w-3.5 text-cyan-300" />
-              Reseller Apply
-            </Link>
+            {/* Apply Now Dropdown */}
+            <div className="relative flex">
+              <button
+                onClick={() => setOpenMenu(openMenu === 'apply' ? null : 'apply')}
+                className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all hover:border-cyan-400/40 hover:text-foreground hover:shadow-[0_0_18px_-4px_rgba(34,211,238,0.5)]"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-cyan-300" />
+                Apply Now
+              </button>
+              {openMenu === 'apply' && (
+                <div className="absolute right-0 top-12 z-50 w-56 overflow-hidden rounded-xl border border-white/10 bg-background/95 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.7)] backdrop-blur-2xl animate-fade-in">
+                  <div className="border-b border-white/10 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Select Role
+                  </div>
+                  <div className="p-1">
+                    <Link
+                      to="/reseller-apply"
+                      onClick={() => setOpenMenu(null)}
+                      className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors hover:bg-white/5 text-foreground"
+                    >
+                      <span className="font-medium">Reseller</span>
+                      <span className="text-[9px] text-muted-foreground">30% commission</span>
+                    </Link>
+                    <Link
+                      to="/franchise-apply"
+                      onClick={() => setOpenMenu(null)}
+                      className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors hover:bg-white/5 text-foreground"
+                    >
+                      <span className="font-medium">Franchise</span>
+                      <span className="text-[9px] text-muted-foreground">50% commission</span>
+                    </Link>
+                    <Link
+                      to="/vendor-apply"
+                      onClick={() => setOpenMenu(null)}
+                      className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors hover:bg-white/5 text-foreground"
+                    >
+                      <span className="font-medium">Vendor</span>
+                      <span className="text-[9px] text-muted-foreground">40% commission</span>
+                    </Link>
+                    <Link
+                      to="/influencer-apply"
+                      onClick={() => setOpenMenu(null)}
+                      className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs transition-colors hover:bg-white/5 text-foreground"
+                    >
+                      <span className="font-medium">Influencer</span>
+                      <span className="text-[9px] text-muted-foreground">35% commission</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="mx-1 hidden md:block h-6 w-px bg-white/10" />
 
@@ -384,7 +416,7 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
             <div className="relative">
               <button
                 onClick={() => setOpenMenu(openMenu === 'lang' ? null : 'lang')}
-                className={`${iconBtn} hidden md:flex`}
+                className={`${iconBtn} flex`}
                 aria-label="Language"
               >
                 <Globe className="h-4 w-4" />
@@ -435,7 +467,7 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
             <div className="relative">
               <button
                 onClick={() => setOpenMenu(openMenu === 'cur' ? null : 'cur')}
-                className={`${iconBtn} hidden md:flex`}
+                className={`${iconBtn} flex`}
                 aria-label="Currency"
               >
                 <DollarSign className="h-4 w-4" />

@@ -1,0 +1,10 @@
+{
+  "required": "Dieses Feld ist erforderlich",
+  "email": "Bitte geben Sie eine gültige E-Mail ein",
+  "password": "Das Passwort muss mindestens 8 Zeichen lang sein",
+  "min_length": "Mindestlänge ist {{min}} Zeichen",
+  "max_length": "Maximale Länge ist {{max}} Zeichen",
+  "number": "Muss eine Zahl sein",
+  "url": "Muss eine gültige URL sein",
+  "phone": "Muss eine gültige Telefonnummer sein"
+}

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, ShoppingCart, ShoppingBag, Zap, Heart, Star, Sparkles, Users, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 import type { Product } from '@/lib/marketplaceData';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,6 +18,7 @@ export const ProductCard = ({ product }: Props) => {
   const [isFav, setIsFav] = useState(() => favorites.has(product.id));
   const { addToCart } = useCart();
   const { hasSubscription } = useAuth();
+  const { t } = useTranslation('common');
 
   useEffect(() => subscribeUserActivity(() => setIsFav(favorites.has(product.id))), [product.id]);
 
@@ -27,16 +29,16 @@ export const ProductCard = ({ product }: Props) => {
     e.preventDefault();
     e.stopPropagation();
     const nowFav = favorites.toggle(product.id);
-    toast.success(nowFav ? `Added ${product.name} to favorites` : `Removed ${product.name} from favorites`);
+    toast.success(nowFav ? t('added_to_favorites', { name: product.name }) : t('removed_from_favorites', { name: product.name }));
   };
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       await addToCart(product.id, 1);
-      toast.success(`${product.name} added to cart`);
+      toast.success(t('added_to_cart', { name: product.name }));
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Failed to add to cart';
+      const errorMsg = error instanceof Error ? error.message : t('failed_add_to_cart');
       toast.error(errorMsg);
     }
   };
@@ -65,7 +67,7 @@ export const ProductCard = ({ product }: Props) => {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan-400 opacity-75" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan-400" />
             </span>
-            {viewers} viewing
+            {viewers} {t('viewing')}
           </div>
           {/* Overlay on hover */}
           {hovered && (
@@ -74,21 +76,21 @@ export const ProductCard = ({ product }: Props) => {
                 onClick={toggleFav}
                 aria-pressed={isFav}
                 className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors ${isFav ? 'bg-primary text-primary-foreground' : 'bg-card/90 text-muted-foreground hover:bg-primary hover:text-primary-foreground'}`}
-                title={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                title={isFav ? t('remove_from_favorites') : t('add_to_favorites')}
               >
                 <Heart className={`h-4 w-4 ${isFav ? 'fill-current' : ''}`} />
               </button>
               <Link
                 to={`/product/${product.id}`}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-transform hover:scale-110"
-                title="View Details"
+                title={t('view_details')}
               >
                 <Eye className="h-4 w-4" />
               </Link>
               <button
                 onClick={handleAddToCart}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-card/90 text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
-                title="Add to Cart"
+                title={t('added_to_cart', { name: product.name })}
               >
                 <ShoppingCart className="h-4 w-4" />
               </button>
@@ -97,12 +99,12 @@ export const ProductCard = ({ product }: Props) => {
           {/* Status badge */}
           {product.status === 'trending' && (
             <span className="absolute left-2 top-2 flex items-center gap-1 rounded-md bg-gradient-to-r from-fuchsia-500 to-cyan-500 px-2 py-0.5 text-[10px] font-bold uppercase text-background shadow-lg">
-              <TrendingUp className="h-2.5 w-2.5" /> Trending
+              <TrendingUp className="h-2.5 w-2.5" /> {t('trending')}
             </span>
           )}
           {product.status === 'new' && (
             <span className="absolute left-2 top-2 rounded-md bg-mp-success/90 px-2 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">
-              New
+              {t('new')}
             </span>
           )}
         </div>
@@ -112,7 +114,7 @@ export const ProductCard = ({ product }: Props) => {
           <div className="flex items-center justify-between">
             <p className="text-xs font-medium text-cyan-300">{product.category}</p>
             <span className="flex items-center gap-1 rounded-full border border-fuchsia-400/30 bg-fuchsia-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-fuchsia-300">
-              <Sparkles className="h-2.5 w-2.5" /> AI {aiScore}
+              <Sparkles className="h-2.5 w-2.5" /> {t('ai_score', { score: aiScore })}
             </span>
           </div>
           <h3 className="mt-1 text-sm font-bold text-foreground truncate">{product.name}</h3>
@@ -135,14 +137,14 @@ export const ProductCard = ({ product }: Props) => {
                 to={`/product/${product.id}`}
                 className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-secondary py-2 text-xs font-medium text-foreground transition-colors hover:bg-accent"
               >
-                <Eye className="h-3.5 w-3.5" /> Details
+                <Eye className="h-3.5 w-3.5" /> {t('details')}
               </Link>
               <Link
                 to={hasSubscription ? `/app/${product.id}` : `/checkout?productId=${product.id}`}
                 className="flex flex-1 items-center justify-center gap-1 rounded-lg mp-gradient-bg py-2 text-xs font-semibold text-primary-foreground"
               >
                 {hasSubscription ? <Zap className="h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
-                {hasSubscription ? 'Access' : 'Buy Now'}
+                {hasSubscription ? t('access') : t('buy_now')}
               </Link>
             </div>
           )}

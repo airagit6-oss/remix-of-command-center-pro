@@ -1,0 +1,585 @@
+/**
+ * SOFTWARE VALA NEXUS - Global CSS Theme
+ * 
+ * Use this file for:
+ * 1. CSS-based color access via var(--color-xxx)
+ * 2. Dark theme enforcement
+ * 3. Base styling for NEXUS components
+ * 
+ * Import in your app:
+ *   @import '@/styles/nexus-theme.css';
+ * 
+ * Or add to index.html:
+ *   <link rel="stylesheet" href="/src/styles/nexus-theme.css">
+ */
+
+/* ============================================================================
+   NEXUS THEME ROOT VARIABLES
+   ============================================================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* ========================================================================
+     PRIMARY BRAND COLORS
+     ======================================================================== */
+  
+  --color-brand-blue: #00D4FF;
+  --color-brand-cyan: #00FFF0;
+  --color-brand-emerald: #00E676;
+
+  /* ========================================================================
+     DARK FOUNDATION
+     ======================================================================== */
+  
+  --color-bg-main: #050816;
+  --color-bg-page: #0B1020;
+  --color-bg-sidebar: #0A0F1C;
+  --color-bg-card: #111827;
+  --color-bg-modal: #161F35;
+
+  /* ========================================================================
+     TEXT SYSTEM
+     ======================================================================== */
+  
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #C7D2FE;
+  --color-text-muted: #94A3B8;
+  --color-text-disabled: #64748B;
+
+  /* ========================================================================
+     STATUS INDICATORS
+     ======================================================================== */
+  
+  --color-status-success: #00E676;
+  --color-status-warning: #F59E0B;
+  --color-status-danger: #EF4444;
+  --color-status-critical: #DC2626;
+  --color-status-info: #00D4FF;
+
+  /* ========================================================================
+     AI SYSTEM COLORS
+     ======================================================================== */
+  
+  --color-ai-primary: #00D4FF;
+  --color-ai-secondary: #00FFF0;
+  --color-ai-glow: #38BDF8;
+  --color-ai-premium: #7C3AED;
+
+  /* ========================================================================
+     MODULE SPECIFIC COLORS
+     ======================================================================== */
+  
+  --color-module-vala-ai: #00D4FF;
+  --color-module-api-manager: #7C3AED;
+  --color-module-server: #06B6D4;
+  --color-module-development: #3B82F6;
+  --color-module-product: #8B5CF6;
+  --color-module-task: #F59E0B;
+  --color-module-demo: #10B981;
+  --color-module-lead: #22C55E;
+  --color-module-sales: #00E676;
+  --color-module-marketing: #EC4899;
+  --color-module-seo: #A855F7;
+  --color-module-support: #14B8A6;
+  --color-module-finance: #F59E0B;
+  --color-module-legal: #EF4444;
+  --color-module-security: #DC2626;
+
+  /* ========================================================================
+     CHART COLORS (6 SERIES)
+     ======================================================================== */
+  
+  --color-chart-1: #00D4FF;
+  --color-chart-2: #00FFF0;
+  --color-chart-3: #00E676;
+  --color-chart-4: #F59E0B;
+  --color-chart-5: #EF4444;
+  --color-chart-6: #8B5CF6;
+
+  /* ========================================================================
+     GLOW EFFECTS
+     ======================================================================== */
+  
+  --glow-blue: rgba(0, 212, 255, 0.35);
+  --glow-cyan: rgba(0, 255, 240, 0.35);
+  --glow-green: rgba(0, 230, 118, 0.35);
+  --glow-purple: rgba(124, 58, 237, 0.35);
+  --glow-red: rgba(239, 68, 68, 0.35);
+
+  /* ========================================================================
+     BORDERS & DIVIDERS
+     ======================================================================== */
+  
+  --border-subtle: rgba(200, 213, 254, 0.1);
+  --border-light: rgba(200, 213, 254, 0.2);
+  --border-premium: #00FFF0;
+  --border-active: #00D4FF;
+
+  /* ========================================================================
+     SIDEBAR STYLES
+     ======================================================================== */
+  
+  --sidebar-bg: #0A0F1C;
+  --sidebar-active: #00D4FF;
+  --sidebar-hover: #111827;
+  --sidebar-icons: #94A3B8;
+  --sidebar-icons-active: #00D4FF;
+  --sidebar-text: #C7D2FE;
+
+  /* ========================================================================
+     SHADOWS
+     ======================================================================== */
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 20px rgba(0, 212, 255, 0.2);
+
+  /* ========================================================================
+     OPACITY LEVELS
+     ======================================================================== */
+  
+  --opacity-disabled: 0.5;
+  --opacity-hover: 0.8;
+  --opacity-focus: 0.9;
+
+  /* ========================================================================
+     SPACING (Optional)
+     ======================================================================== */
+  
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+
+  /* ========================================================================
+     BORDER RADIUS
+     ======================================================================== */
+  
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  /* ========================================================================
+     Z-INDEX LEVELS
+     ======================================================================== */
+  
+  --z-dropdown: 100;
+  --z-sticky: 500;
+  --z-fixed: 600;
+  --z-modal-backdrop: 1000;
+  --z-modal: 1100;
+  --z-tooltip: 1200;
+  --z-notification: 1300;
+}
+
+/* ============================================================================
+   GLOBAL THEME APPLICATION
+   ============================================================================ */
+
+/* Force dark theme everywhere */
+* {
+  color-scheme: dark;
+}
+
+/* Body defaults */
+body {
+  background-color: var(--color-bg-main);
+  color: var(--color-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  background-color: var(--color-bg-main);
+}
+
+/* ============================================================================
+   COMMON ELEMENT THEMING
+   ============================================================================ */
+
+/* Links */
+a {
+  color: var(--color-brand-blue);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-brand-cyan);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+/* Paragraphs and text */
+p {
+  color: var(--color-text-primary);
+  line-height: 1.6;
+}
+
+/* Small text and muted content */
+small, .muted {
+  color: var(--color-text-muted);
+}
+
+/* Disabled text */
+[disabled], .disabled {
+  color: var(--color-text-disabled);
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   BUTTON THEMING
+   ============================================================================ */
+
+button, [role="button"], .btn {
+  background-color: var(--color-brand-blue);
+  color: var(--color-bg-main);
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover, [role="button"]:hover, .btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px var(--glow-blue);
+}
+
+button:active, [role="button"]:active, .btn:active {
+  transform: translateY(0);
+}
+
+button:disabled, [role="button"]:disabled, .btn:disabled {
+  background-color: var(--color-text-disabled);
+  cursor: not-allowed;
+  opacity: var(--opacity-disabled);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  background-color: transparent;
+  color: var(--color-brand-blue);
+  border: 2px solid var(--color-brand-blue);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-brand-blue);
+  color: var(--color-bg-main);
+}
+
+/* Danger Button */
+.btn-danger {
+  background-color: var(--color-status-danger);
+}
+
+.btn-danger:hover {
+  background-color: var(--color-status-critical);
+}
+
+/* Success Button */
+.btn-success {
+  background-color: var(--color-status-success);
+  color: var(--color-bg-main);
+}
+
+/* ============================================================================
+   CARD & CONTAINER THEMING
+   ============================================================================ */
+
+/* Card components */
+.card, [role="article"] {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+}
+
+/* Premium card with glow */
+.card-premium {
+  border-color: var(--border-premium);
+  box-shadow: 0 0 20px var(--glow-blue);
+}
+
+/* Modal */
+.modal, [role="dialog"] {
+  background-color: var(--color-bg-modal);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+}
+
+/* Container */
+.container {
+  background-color: var(--color-bg-page);
+}
+
+/* ============================================================================
+   SIDEBAR THEMING
+   ============================================================================ */
+
+.sidebar, nav[aria-label="Main navigation"], [role="navigation"] {
+  background-color: var(--sidebar-bg);
+}
+
+/* Sidebar links */
+.sidebar a, nav[aria-label="Main navigation"] a {
+  color: var(--sidebar-text);
+  transition: all 0.2s ease;
+}
+
+/* Sidebar hover state */
+.sidebar a:hover, nav[aria-label="Main navigation"] a:hover {
+  background-color: var(--sidebar-hover);
+  color: var(--sidebar-text);
+}
+
+/* Sidebar active state */
+.sidebar a.active,
+nav[aria-label="Main navigation"] a.active,
+.sidebar a[aria-current="page"],
+nav[aria-label="Main navigation"] a[aria-current="page"] {
+  color: var(--sidebar-active);
+  background-color: var(--sidebar-hover);
+  border-left: 3px solid var(--sidebar-active);
+  padding-left: calc(var(--spacing-md) - 3px);
+}
+
+/* Sidebar icons */
+.sidebar-icon, .sidebar [class*="icon"] {
+  color: var(--sidebar-icons);
+}
+
+.sidebar-icon.active, .sidebar [class*="icon"].active {
+  color: var(--sidebar-icons-active);
+}
+
+/* ============================================================================
+   FORM ELEMENTS THEMING
+   ============================================================================ */
+
+input,
+textarea,
+select {
+  background-color: var(--color-bg-card);
+  color: var(--color-text-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-brand-blue);
+  box-shadow: 0 0 10px var(--glow-blue);
+  background-color: var(--color-bg-card);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  background-color: var(--sidebar-hover);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   STATUS INDICATOR THEMING
+   ============================================================================ */
+
+/* Status badges */
+.badge-success {
+  background-color: rgba(0, 230, 118, 0.2);
+  color: var(--color-status-success);
+  border: 1px solid rgba(0, 230, 118, 0.4);
+}
+
+.badge-warning {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: var(--color-status-warning);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.badge-danger {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: var(--color-status-danger);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.badge-critical {
+  background-color: rgba(220, 38, 38, 0.2);
+  color: var(--color-status-critical);
+  border: 1px solid rgba(220, 38, 38, 0.4);
+}
+
+.badge-info {
+  background-color: rgba(0, 212, 255, 0.2);
+  color: var(--color-status-info);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+}
+
+/* ============================================================================
+   SCROLL & INTERACTIVE ELEMENTS
+   ============================================================================ */
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-card);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-blue);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-cyan);
+}
+
+/* Selection color */
+::selection {
+  background-color: var(--color-brand-blue);
+  color: var(--color-bg-main);
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   ============================================================================ */
+
+/* Text colors */
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-muted { color: var(--color-text-muted); }
+.text-disabled { color: var(--color-text-disabled); }
+
+/* Brand colors */
+.text-blue { color: var(--color-brand-blue); }
+.text-cyan { color: var(--color-brand-cyan); }
+.text-emerald { color: var(--color-brand-emerald); }
+
+/* Status colors */
+.text-success { color: var(--color-status-success); }
+.text-warning { color: var(--color-status-warning); }
+.text-danger { color: var(--color-status-danger); }
+.text-critical { color: var(--color-status-critical); }
+.text-info { color: var(--color-status-info); }
+
+/* Background colors */
+.bg-main { background-color: var(--color-bg-main); }
+.bg-page { background-color: var(--color-bg-page); }
+.bg-card { background-color: var(--color-bg-card); }
+.bg-modal { background-color: var(--color-bg-modal); }
+
+/* Glow effects */
+.glow-blue { box-shadow: 0 0 20px var(--glow-blue); }
+.glow-cyan { box-shadow: 0 0 20px var(--glow-cyan); }
+.glow-green { box-shadow: 0 0 20px var(--glow-green); }
+.glow-purple { box-shadow: 0 0 20px var(--glow-purple); }
+.glow-red { box-shadow: 0 0 20px var(--glow-red); }
+
+/* Borders */
+.border-premium { border: 2px solid var(--border-premium); }
+.border-active { border: 2px solid var(--border-active); }
+
+/* Spacing */
+.p-xs { padding: var(--spacing-xs); }
+.p-sm { padding: var(--spacing-sm); }
+.p-md { padding: var(--spacing-md); }
+.p-lg { padding: var(--spacing-lg); }
+.p-xl { padding: var(--spacing-xl); }
+
+.m-xs { margin: var(--spacing-xs); }
+.m-sm { margin: var(--spacing-sm); }
+.m-md { margin: var(--spacing-md); }
+.m-lg { margin: var(--spacing-lg); }
+.m-xl { margin: var(--spacing-xl); }
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Ensure dark theme is used on color scheme preference */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    max-height: 60px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .card {
+    padding: var(--spacing-md);
+  }
+
+  button, .btn {
+    padding: 8px 16px;
+  }
+}
+
+/* ============================================================================
+   EXPORT & VERIFICATION
+   ============================================================================ */
+
+/*
+  This CSS file provides the complete NEXUS theme using CSS variables.
+  
+  How to use:
+  1. Import this file in your main app
+  2. Use CSS variables: background-color: var(--color-brand-blue);
+  3. Or use utility classes: <div class="bg-card text-primary">
+  
+  All colors are WCAG AA compliant.
+  All interactions are smooth and accessible.
+  Theme is fully dark mode.
+*/

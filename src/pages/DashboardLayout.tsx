@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, ShoppingBag, CreditCard, Heart, Clock, LogOut,
   User, Bell, Shield, Settings as SettingsIcon, Package,
@@ -42,6 +43,7 @@ const groups = [
 const UserSidebar = () => {
   const { state } = useSidebar();
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const collapsed = state === 'collapsed';
 
@@ -50,7 +52,7 @@ const UserSidebar = () => {
       <SidebarHeader className="border-b border-border p-4">
         <NavLink to="/" className="flex items-center gap-2">
           <Logo variant="round" height={32} />
-          {!collapsed && <span className="font-display text-base font-bold text-foreground">Software Vala</span>}
+          {!collapsed && <span className="font-display text-base font-bold text-foreground">{t('app_name', { defaultValue: 'Software Vala' })}</span>}
         </NavLink>
       </SidebarHeader>
 
@@ -103,7 +105,7 @@ const UserSidebar = () => {
           <SidebarMenuItem>
             <SidebarMenuButton onClick={() => { logout(); navigate('/'); }} tooltip="Logout">
               <LogOut className="h-4 w-4 shrink-0" />
-              <span>Logout</span>
+              <span>{t('logout', { defaultValue: 'Logout' })}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

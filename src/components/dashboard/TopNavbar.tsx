@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Search, Bell, PanelLeft, User, Sparkles, Mic, Shield, Activity, Globe2, Zap, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useDashboard } from "./DashboardLayout";
+import { useTranslation } from "react-i18next";
+import { fetchNotifications } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 
 const timeRanges = ["5m", "15m", "1h", "4h", "24h", "7d"];
@@ -9,9 +11,12 @@ const timeRanges = ["5m", "15m", "1h", "4h", "24h", "7d"];
 export function TopNavbar({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const { timeRange, setTimeRange, isLive, setIsLive, searchQuery, setSearchQuery } = useDashboard();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [now, setNow] = useState(new Date());
   const [revenue, setRevenue] = useState(48213);
   const [users, setUsers] = useState(1284);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [unreadAlerts, setUnreadAlerts] = useState(0);
 
   useEffect(() => {
     const i = setInterval(() => {
@@ -21,7 +26,25 @@ export function TopNavbar({ onToggleSidebar }: { onToggleSidebar: () => void }) 
         setUsers((u) => Math.max(900, u + (Date.now() % 11) - 5));
       }
     }, 1500);
-    return () => clearInterval(i);
+
+    // Fetch notifications on component mount
+    const loadNotifications = async () => {
+      try {
+        const notifs = await fetchNotifications();
+        setNotificationCount(notifs.filter(n => n.status === 'unread').length);
+      } catch {
+        // Fallback: show 0 notifications on error
+        setNotificationCount(0);
+      }
+    };
+
+    loadNotifications();
+    const notifInterval = setInterval(loadNotifications, 10000); // Refresh every 10 seconds
+
+    return () => {
+      clearInterval(i);
+      clearInterval(notifInterval);
+    };
   }, [isLive]);
 
   return (
@@ -133,31 +156,38 @@ export function TopNavbar({ onToggleSidebar }: { onToggleSidebar: () => void }) 
         <button
           onClick={() => navigate("/dashboard/chat")}
           className="relative p-1.5 rounded-md hover:bg-white/5 text-muted-foreground hover:text-blue-300 transition-colors"
-          aria-label="Internal Chat"
+          aria-label={t('internalChat')}
+          title={t('internalChat')}
         >
           <MessageCircle className="w-4 h-4" />
-          <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 text-[8px] flex items-center justify-center text-white font-bold shadow-[0_0_8px_hsl(200_90%_50%/0.6)]">
-            2
-          </span>
+          {notificationCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 text-[8px] flex items-center justify-center text-white font-bold shadow-[0_0_8px_hsl(200_90%_50%/0.6)]">
+              {notificationCount > 9 ? '9+' : notificationCount}
+            </span>
+          )}
         </button>
 
         {/* Alerts */}
         <button
           onClick={() => navigate("/alerts")}
           className="relative p-1.5 rounded-md hover:bg-white/5 text-muted-foreground hover:text-cyan-300 transition-colors"
-          aria-label="Alerts"
+          aria-label={t('alerts')}
+          title={t('alerts')}
         >
           <Bell className="w-4 h-4" />
-          <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-gradient-to-br from-rose-400 to-fuchsia-500 text-[8px] flex items-center justify-center text-white font-bold shadow-[0_0_8px_hsl(330_90%_55%/0.6)]">
-            3
-          </span>
+          {unreadAlerts > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-gradient-to-br from-rose-400 to-fuchsia-500 text-[8px] flex items-center justify-center text-white font-bold shadow-[0_0_8px_hsl(330_90%_55%/0.6)]">
+              {unreadAlerts > 9 ? '9+' : unreadAlerts}
+            </span>
+          )}
         </button>
 
         {/* Profile */}
         <button
           onClick={() => navigate("/dashboard/profile")}
           className="relative w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500/30 to-fuchsia-500/30 border border-white/10 flex items-center justify-center hover:scale-105 transition-transform"
-          aria-label="Profile"
+          aria-label={t('profile')}
+          title={t('profile')}
         >
           <User className="w-3.5 h-3.5 text-cyan-100" />
           <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-[hsl(220_25%_5%)]" />

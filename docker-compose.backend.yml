@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7-alpine
+    container_name: software-vala-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin_password_change_me
+      MONGO_INITDB_DATABASE: software-vala-ai-api-manager
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - software-vala
+
+  # Backend API Server
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: software-vala-backend
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      MONGODB_URI: mongodb://admin:admin_password_change_me@mongodb:27017/software-vala-ai-api-manager?authSource=admin
+      FRONTEND_URL: http://localhost:5173
+      JWT_SECRET: your-secret-key-change-in-production
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./src/server:/app/src/server
+      - /app/node_modules
+    command: npm run dev
+    networks:
+      - software-vala
+
+  # Frontend (optional - if building from same repo)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: software-vala-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      REACT_APP_API_URL: http://localhost:3000/api/ai-api-manager
+    depends_on:
+      - backend
+    volumes:
+      - ./src:/app/src
+      - ./index.html:/app/index.html
+      - /app/node_modules
+    networks:
+      - software-vala
+
+volumes:
+  mongodb_data:
+  mongodb_config:
+
+networks:
+  software-vala:
+    driver: bridge
+
+# Usage:
+# 
+# Start all services:
+#   docker-compose up -d
+#
+# Stop all services:
+#   docker-compose down
+#
+# View logs:
+#   docker-compose logs -f backend
+#   docker-compose logs -f mongodb
+#
+# Access:
+#   Backend API:  http://localhost:3000
+#   Frontend:     http://localhost:5173
+#   MongoDB:      mongodb://admin:admin_password_change_me@localhost:27017/
+#
+# Clean rebuild:
+#   docker-compose down -v
+#   docker-compose build --no-cache
+#   docker-compose up -d

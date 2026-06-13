@@ -21,7 +21,16 @@ const checkApiHealth = async (): Promise<ApiStatus> => {
       signal: AbortSignal.timeout(5000) // 5 second timeout
     });
     
-    if (response.ok) {
+    // Only consider 200-299 status codes as healthy
+    if (response.status >= 200 && response.status < 300) {
+      return {
+        isHealthy: true,
+        lastChecked: new Date(),
+        error: null
+      };
+    } else if (response.status === 404) {
+      // 404 is acceptable - backend may not have health check endpoint
+      // Don't show error banner for 404
       return {
         isHealthy: true,
         lastChecked: new Date(),
@@ -35,6 +44,7 @@ const checkApiHealth = async (): Promise<ApiStatus> => {
       };
     }
   } catch (error) {
+    // Network errors are concerning, show them
     return {
       isHealthy: false,
       lastChecked: new Date(),

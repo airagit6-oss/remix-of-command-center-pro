@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Lock, CreditCard, ArrowLeft, Shield, Check, Repeat } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Navbar } from '@/components/marketplace/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -21,6 +22,7 @@ const SubscribeCheckoutPage = () => {
 
   const navigate = useNavigate();
   const { activateSubscription } = useAuth();
+  const { t } = useTranslation('common');
   const [processing, setProcessing] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', cardNumber: '', expiry: '', cvc: '' });
 
@@ -43,24 +45,24 @@ const SubscribeCheckoutPage = () => {
       <Navbar />
       <div className="mx-auto max-w-[720px] px-6 pt-24 pb-16">
         <Link to="/subscription" className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="h-4 w-4" /> Back to Plans
+          <ArrowLeft className="h-4 w-4" /> {t('back_to_plans')}
         </Link>
 
-        <h1 className="font-display text-2xl font-bold text-foreground mb-2">Subscribe to {plan.name}</h1>
-        <p className="text-sm text-muted-foreground mb-8">Complete your subscription below</p>
+        <h1 className="font-display text-2xl font-bold text-foreground mb-2">{t('subscribe_to_plan', { plan: plan.name })}</h1>
+        <p className="text-sm text-muted-foreground mb-8">{t('complete_subscription')}</p>
 
         <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-5">
           {/* Form */}
           <div className="lg:col-span-3 space-y-5">
             <div className="rounded-xl border border-border bg-card p-5">
-              <h2 className="text-sm font-bold text-foreground mb-3">Your Details</h2>
+              <h2 className="text-sm font-bold text-foreground mb-3">{t('your_details')}</h2>
               <div className="space-y-3">
                 <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">Full Name</label>
+                  <label className="mb-1 block text-xs text-muted-foreground">{t('full_name')}</label>
                   <input value={form.name} onChange={update('name')} placeholder="John Doe" className={inputCls} required />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs text-muted-foreground">Email</label>
+                  <label className="mb-1 block text-xs text-muted-foreground">{t('email')}</label>
                   <input value={form.email} onChange={update('email')} type="email" placeholder="john@example.com" className={inputCls} required />
                 </div>
               </div>
@@ -68,22 +70,22 @@ const SubscribeCheckoutPage = () => {
 
             <div className="rounded-xl border border-border bg-card p-5">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-bold text-foreground">Payment</h2>
-                <span className="flex items-center gap-1 text-[10px] text-muted-foreground"><Lock className="h-3 w-3" /> Secure</span>
+                <h2 className="text-sm font-bold text-foreground">{t('payment')}</h2>
+                <span className="flex items-center gap-1 text-[10px] text-muted-foreground"><Lock className="h-3 w-3" /> {t('secure')}</span>
               </div>
               <div className="space-y-3">
                 <div className="relative">
-                  <label className="mb-1 block text-xs text-muted-foreground">Card Number</label>
+                  <label className="mb-1 block text-xs text-muted-foreground">{t('card_number')}</label>
                   <input value={form.cardNumber} onChange={update('cardNumber')} placeholder="4242 4242 4242 4242" className={inputCls} required />
                   <CreditCard className="absolute right-3 bottom-2.5 h-4 w-4 text-muted-foreground" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-1 block text-xs text-muted-foreground">Expiry</label>
+                    <label className="mb-1 block text-xs text-muted-foreground">{t('expiry')}</label>
                     <input value={form.expiry} onChange={update('expiry')} placeholder="MM / YY" className={inputCls} required />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs text-muted-foreground">CVC</label>
+                    <label className="mb-1 block text-xs text-muted-foreground">{t('cvc')}</label>
                     <input value={form.cvc} onChange={update('cvc')} placeholder="123" className={inputCls} required />
                   </div>
                 </div>
@@ -95,32 +97,32 @@ const SubscribeCheckoutPage = () => {
           <div className="lg:col-span-2">
             <div className="sticky top-20 space-y-4">
               <div className="rounded-xl border border-border bg-card p-5">
-                <h3 className="text-sm font-bold text-foreground mb-3">Subscription Summary</h3>
+                <h3 className="text-sm font-bold text-foreground mb-3">{t('subscription_summary')}</h3>
                 <div className="flex items-center gap-2 rounded-lg bg-secondary p-3 mb-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15">
                     <Repeat className="h-4 w-4 text-primary" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-foreground">{plan.name} Plan</p>
-                    <p className="text-[10px] text-muted-foreground capitalize">{billing} billing</p>
+                    <p className="text-xs font-semibold text-foreground">{plan.name} {t('plan')}</p>
+                    <p className="text-[10px] text-muted-foreground capitalize">{billing} {t('billing')}</p>
                   </div>
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">Plan price</span>
-                    <span className="text-foreground">${price}/{billing === 'monthly' ? 'mo' : 'yr'}</span>
+                    <span className="text-muted-foreground">{t('plan_price')}</span>
+                    <span className="text-foreground">${price}/{billing === 'monthly' ? t('mo') : t('yr')}</span>
                   </div>
                   <div className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">Tax</span>
+                    <span className="text-muted-foreground">{t('tax')}</span>
                     <span className="text-foreground">${tax}</span>
                   </div>
                 </div>
                 <div className="mt-3 flex justify-between border-t border-border pt-3">
-                  <span className="text-sm font-semibold text-foreground">Total</span>
+                  <span className="text-sm font-semibold text-foreground">{t('total')}</span>
                   <span className="font-display text-lg font-bold text-foreground">${total}</span>
                 </div>
                 <p className="mt-2 text-[10px] text-mp-gold flex items-center gap-1">
-                  <Repeat className="h-3 w-3" /> Recurring — billed {billing}. Cancel anytime.
+                  <Repeat className="h-3 w-3" /> {t('recurring_billed', { billing })}
                 </p>
               </div>
 
@@ -132,18 +134,18 @@ const SubscribeCheckoutPage = () => {
                 {processing ? (
                   <>
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                    Processing...
+                    {t('processing')}
                   </>
                 ) : (
                   <>
-                    <Lock className="h-4 w-4" /> Subscribe — ${total}
+                    <Lock className="h-4 w-4" /> {t('subscribe_button', { total })}
                   </>
                 )}
               </button>
 
               <div className="flex items-center justify-center gap-3 text-[10px] text-muted-foreground">
-                <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> SSL</span>
-                <span className="flex items-center gap-1"><Check className="h-3 w-3" /> 14-day trial</span>
+                <span className="flex items-center gap-1"><Shield className="h-3 w-3" /> {t('ssl')}</span>
+                <span className="flex items-center gap-1"><Check className="h-3 w-3" /> {t('trial')}</span>
               </div>
             </div>
           </div>

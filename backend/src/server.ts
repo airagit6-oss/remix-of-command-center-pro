@@ -6,6 +6,9 @@ import helmet from '@fastify/helmet';
 import { prisma, getPoolMetrics, disconnectPrisma } from './lib/prisma';
 import { redis, cache, invalidateCache, clearAllCache } from './lib/cache';
 import { rateLimit, createRateLimitHook, getRateLimitStatus } from './middleware/rateLimit.middleware';
+import { registerErrorHandler } from './middleware/errorHandler';
+import { authenticate, requireRole } from './middleware/auth.middleware';
+import { authorize } from './middleware/authorize';
 import { authRoutes } from './routes/auth.routes';
 import { alertsRoutes } from './routes/alerts.routes';
 import { categoryRoutes } from './routes/category.routes';
@@ -14,7 +17,6 @@ import { orderRoutes } from './routes/order.routes';
 import { reviewRoutes } from './routes/review.routes';
 import { authorRoutes } from './routes/author.routes';
 import { resellerRoutes } from './routes/reseller.routes';
-import { authenticate, requireRole } from './middleware/auth.middleware';
 
 // ============================================================
 // FASTIFY SERVER - OPTIMIZED FOR 10,000+ USERS
