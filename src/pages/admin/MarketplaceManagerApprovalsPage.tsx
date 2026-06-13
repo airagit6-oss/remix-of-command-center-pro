@@ -14,8 +14,8 @@ import {
 } from 'lucide-react';
 import {
   testDummyProducts,
-  approvalWorkflow,
-} from '../../lib/authorEndToEndTest';
+} from '../../tests/authorEndToEndTest';
+// Note: approvalWorkflow moved to tests/authorEndToEndTest - update usage if needed
 
 interface ApprovalProduct {
   id: string;

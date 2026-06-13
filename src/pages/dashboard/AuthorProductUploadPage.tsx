@@ -17,9 +17,8 @@ import {
   testDummyProducts,
   fileSizeLimits,
   mandatoryMetaTags,
-  approvalWorkflow,
-  validationRules,
-} from '../../lib/authorEndToEndTest';
+} from '../../tests/authorEndToEndTest';
+// Note: Some test constants have been moved. Check your usage if needed.
 
 interface MetaTags {
   title: string;
