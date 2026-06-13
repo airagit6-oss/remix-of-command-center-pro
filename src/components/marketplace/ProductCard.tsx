@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, ShoppingCart, ShoppingBag, Zap, Heart, Star, Sparkles, Users, TrendingUp } from 'lucide-react';
+import { Eye, ShoppingCart, ShoppingBag, Zap, Heart, Star, Sparkles, Users, TrendingUp, Share2, GitCompare, Flag, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import type { Product } from '@/lib/marketplaceData';
@@ -41,6 +41,41 @@ export const ProductCard = ({ product }: Props) => {
       const errorMsg = error instanceof Error ? error.message : t('failed_add_to_cart');
       toast.error(errorMsg);
     }
+  };
+
+  const handleShare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (navigator.share) {
+      navigator.share({
+        title: product.name,
+        text: product.shortDescription,
+        url: `${window.location.origin}/product/${product.id}`,
+      }).catch(() => {
+        // User cancelled share
+      });
+    } else {
+      // Fallback: copy URL to clipboard
+      const url = `${window.location.origin}/product/${product.id}`;
+      navigator.clipboard.writeText(url);
+      toast.success(t('link_copied'));
+    }
+  };
+
+  const handleCompare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const compareList = JSON.parse(localStorage.getItem('compareList') || '[]');
+    if (!compareList.includes(product.id)) {
+      compareList.push(product.id);
+      localStorage.setItem('compareList', JSON.stringify(compareList));
+      toast.success(t('added_to_compare', { name: product.name }));
+    } else {
+      toast.info(t('already_in_compare'));
+    }
+  };
+
+  const handleReport = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toast.success(t('report_submitted'));
   };
 
   return (
@@ -97,6 +132,30 @@ export const ProductCard = ({ product }: Props) => {
               >
                 <ShoppingCart className="h-4 w-4" />
               </button>
+              <button
+                onClick={handleShare}
+                aria-label="Share product"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-card/90 text-muted-foreground transition-colors hover:bg-cyan-500 hover:text-primary-foreground"
+                title="Share"
+              >
+                <Share2 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={handleCompare}
+                aria-label="Add to compare"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-card/90 text-muted-foreground transition-colors hover:bg-accent hover:text-primary-foreground"
+                title="Compare"
+              >
+                <GitCompare className="h-4 w-4" />
+              </button>
+              <button
+                onClick={handleReport}
+                aria-label="Report product"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-card/90 text-muted-foreground transition-colors hover:bg-red-500 hover:text-primary-foreground"
+                title="Report"
+              >
+                <Flag className="h-4 w-4" />
+              </button>
             </div>
           )}
           {/* Status badge */}
@@ -135,20 +194,45 @@ export const ProductCard = ({ product }: Props) => {
 
           {/* Hover action buttons */}
           {hovered && (
-            <div className="mt-3 flex gap-2 animate-in slide-in-from-bottom-2 duration-200">
-              <Link
-                to={`/product/${product.id}`}
-                className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-secondary py-2 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-              >
-                <Eye className="h-3.5 w-3.5" /> {t('details')}
-              </Link>
-              <Link
-                to={hasSubscription ? `/app/${product.id}` : `/checkout?productId=${product.id}`}
-                className="flex flex-1 items-center justify-center gap-1 rounded-lg mp-gradient-bg py-2 text-xs font-semibold text-primary-foreground"
-              >
-                {hasSubscription ? <Zap className="h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
-                {hasSubscription ? t('access') : t('buy_now')}
-              </Link>
+            <div className="mt-3 space-y-2 animate-in slide-in-from-bottom-2 duration-200">
+              <div className="flex gap-2">
+                <Link
+                  to={`/product/${product.id}`}
+                  className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-secondary py-2 text-xs font-medium text-foreground transition-colors hover:bg-accent"
+                >
+                  <Eye className="h-3.5 w-3.5" /> {t('details')}
+                </Link>
+                <Link
+                  to={hasSubscription ? `/app/${product.id}` : `/checkout?productId=${product.id}`}
+                  className="flex flex-1 items-center justify-center gap-1 rounded-lg mp-gradient-bg py-2 text-xs font-semibold text-primary-foreground"
+                >
+                  {hasSubscription ? <Zap className="h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
+                  {hasSubscription ? t('access') : t('buy_now')}
+                </Link>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleShare}
+                  className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-cyan-400/30 bg-cyan-500/5 py-1.5 text-xs font-medium text-cyan-400 transition-colors hover:bg-cyan-500/10"
+                  title="Share"
+                >
+                  <Share2 className="h-3 w-3" /> Share
+                </button>
+                <button
+                  onClick={handleCompare}
+                  className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-accent/30 bg-accent/5 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/10"
+                  title="Compare"
+                >
+                  <GitCompare className="h-3 w-3" /> Compare
+                </button>
+                <button
+                  onClick={handleReport}
+                  className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-red-400/30 bg-red-500/5 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/10"
+                  title="Report"
+                >
+                  <Flag className="h-3 w-3" /> Report
+                </button>
+              </div>
             </div>
           )}
         </div>

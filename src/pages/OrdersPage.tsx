@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
-import { Package, Download, FileText, Calendar, DollarSign, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Package, Download, FileText, Calendar, DollarSign, CheckCircle, Clock, XCircle, Truck, RotateCcw, MessageSquare, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface Order {
   id: string;
@@ -44,6 +45,37 @@ export default function OrdersPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownloadInvoice = (orderId: string) => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Generating invoice...',
+        success: `Invoice downloaded for order ${orderId}`,
+        error: 'Failed to download invoice',
+      }
+    );
+  };
+
+  const handleCancelOrder = (orderId: string) => {
+    toast.success(`Order ${orderId} cancellation requested`);
+  };
+
+  const handleReorder = (orderId: string) => {
+    toast.success(`Items from order ${orderId} added to cart`);
+  };
+
+  const handleTrackOrder = (orderId: string) => {
+    toast.success(`Tracking info for order ${orderId}: On the way!`);
+  };
+
+  const handleRequestRefund = (orderId: string) => {
+    toast.success(`Refund request submitted for order ${orderId}`);
+  };
+
+  const handleContactVendor = (orderId: string) => {
+    toast.success(`Opening chat with vendor for order ${orderId}`);
   };
 
   const getStatusIcon = (status: string) => {
@@ -163,14 +195,56 @@ export default function OrdersPage() {
                   </div>
                 )}
 
-                <div className="border-t pt-4 flex gap-3">
-                  <button className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center gap-2">
-                    <Download className="w-4 h-4" />
-                    Download
-                  </button>
-                  <button className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium flex items-center justify-center gap-2">
+                <div className="border-t pt-4 flex gap-2">
+                  <button 
+                    onClick={() => handleDownloadInvoice(order.id)}
+                    className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center gap-2"
+                  >
                     <FileText className="w-4 h-4" />
                     Invoice
+                  </button>
+                  {order.status === 'COMPLETED' && (
+                    <>
+                      <button 
+                        onClick={() => handleTrackOrder(order.id)}
+                        className="flex-1 py-2 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 transition font-medium flex items-center justify-center gap-2"
+                      >
+                        <Truck className="w-4 h-4" />
+                        Track
+                      </button>
+                      <button 
+                        onClick={() => handleReorder(order.id)}
+                        className="flex-1 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium flex items-center justify-center gap-2"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                        Reorder
+                      </button>
+                    </>
+                  )}
+                  {order.status === 'PENDING' && (
+                    <button 
+                      onClick={() => handleCancelOrder(order.id)}
+                      className="flex-1 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition font-medium flex items-center justify-center gap-2"
+                    >
+                      <XCircle className="w-4 h-4" />
+                      Cancel
+                    </button>
+                  )}
+                  {['COMPLETED', 'PROCESSING'].includes(order.status) && (
+                    <button 
+                      onClick={() => handleRequestRefund(order.id)}
+                      className="flex-1 py-2 border border-orange-300 text-orange-600 rounded-lg hover:bg-orange-50 transition font-medium flex items-center justify-center gap-2"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                      Refund
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => handleContactVendor(order.id)}
+                    className="flex-1 py-2 border border-green-300 text-green-600 rounded-lg hover:bg-green-50 transition font-medium flex items-center justify-center gap-2"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    Contact
                   </button>
                 </div>
               </div>
