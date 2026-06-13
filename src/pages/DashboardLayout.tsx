@@ -36,6 +36,7 @@ const groups = [
       { to: '/dashboard/billing', label: 'Billing', icon: CreditCard },
       { to: '/dashboard/licenses', label: 'Licenses', icon: Package },
       { to: '/dashboard/invoices', label: 'Invoices', icon: ShoppingBag },
+      { to: '/dashboard/subscriptions', label: 'My Subscriptions', icon: CreditCard },
       { to: '/dashboard/refunds', label: 'Refunds', icon: Heart },
       { to: '/dashboard/notifications', label: 'Notifications', icon: Bell },
       { to: '/dashboard/security', label: 'Security', icon: Shield },

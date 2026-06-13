@@ -4,7 +4,7 @@ import {
   LogOut, LayoutDashboard, Server, GitBranch, LayoutGrid, Image, Store, FolderTree,
   Star, Ticket, FileBarChart, Mail, ShieldCheck,
   Trophy, Zap, Crown, Award, TrendingUp, Globe,
-  Medal, Gift, Package, Target, Bell, ScrollText, Flame,
+  Medal, Gift, Package, Target, Bell, ScrollText, Flame, MessageSquare,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -88,6 +88,8 @@ const groups = [
   {
     label: 'System',
     items: [
+      { to: '/admin/achievements', label: 'Achievements', icon: Trophy },
+      { to: '/admin/chat', label: 'Internal Chat', icon: MessageSquare },
       { to: '/admin/settings', label: 'Settings', icon: Settings },
     ],
   },

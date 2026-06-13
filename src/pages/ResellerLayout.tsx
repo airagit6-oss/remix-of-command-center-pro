@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate, useLocation, Link } from 'react-router-do
 import {
   LayoutDashboard, Users, UserPlus, Kanban, BookUser, CreditCard,
   Package, TrendingUp, Settings, LogOut, Bell, Search,
-  Store, HelpCircle, ExternalLink, Percent, FileBarChart, Megaphone, History,
+  Store, HelpCircle, ExternalLink, Percent, FileBarChart, Megaphone, History, MessageSquare,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { ResellerProvider } from '@/contexts/ResellerContext';
@@ -58,6 +58,7 @@ const getGroups = (t: any) => [
   {
     label: t('account', { defaultValue: 'Account' }),
     items: [
+      { to: '/reseller/chat', label: t('chat', { defaultValue: 'Chat' }), icon: MessageSquare },
       { to: '/reseller/settings', label: t('settings', { defaultValue: 'Settings' }), icon: Settings },
     ],
   },
