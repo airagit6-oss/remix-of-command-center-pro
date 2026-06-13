@@ -9,107 +9,7 @@ import {
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Logo } from '@/components/brand/Logo';
-
-type Lang = { code: string; label: string; nativeName?: string };
-
-// 125 supported languages - LOAD FROM SUPPORTED_LANGUAGES ARRAY
-const LANGS: Lang[] = [
-  { code: 'en', label: 'English', nativeName: 'English' },
-  { code: 'es', label: 'Spanish', nativeName: 'Español' },
-  { code: 'fr', label: 'French', nativeName: 'Français' },
-  { code: 'de', label: 'German', nativeName: 'Deutsch' },
-  { code: 'it', label: 'Italian', nativeName: 'Italiano' },
-  { code: 'pt', label: 'Portuguese', nativeName: 'Português' },
-  { code: 'ru', label: 'Russian', nativeName: 'Русский' },
-  { code: 'ja', label: 'Japanese', nativeName: '日本語' },
-  { code: 'zh', label: 'Chinese', nativeName: '中文' },
-  { code: 'ko', label: 'Korean', nativeName: '한국어' },
-  { code: 'ar', label: 'Arabic', nativeName: 'العربية' },
-  { code: 'hi', label: 'Hindi', nativeName: 'हिन्दी' },
-  { code: 'vi', label: 'Vietnamese', nativeName: 'Tiếng Việt' },
-  { code: 'id', label: 'Indonesian', nativeName: 'Bahasa Indonesia' },
-  { code: 'th', label: 'Thai', nativeName: 'ไทย' },
-  { code: 'tr', label: 'Turkish', nativeName: 'Türkçe' },
-  { code: 'pl', label: 'Polish', nativeName: 'Polski' },
-  { code: 'nl', label: 'Dutch', nativeName: 'Nederlands' },
-  { code: 'sv', label: 'Swedish', nativeName: 'Svenska' },
-  { code: 'no', label: 'Norwegian', nativeName: 'Norsk' },
-  { code: 'da', label: 'Danish', nativeName: 'Dansk' },
-  { code: 'fi', label: 'Finnish', nativeName: 'Suomi' },
-  { code: 'el', label: 'Greek', nativeName: 'Ελληνικά' },
-  { code: 'ro', label: 'Romanian', nativeName: 'Română' },
-  { code: 'cs', label: 'Czech', nativeName: 'Čeština' },
-  { code: 'hu', label: 'Hungarian', nativeName: 'Magyar' },
-  { code: 'sk', label: 'Slovak', nativeName: 'Slovenčina' },
-  { code: 'uk', label: 'Ukrainian', nativeName: 'Українська' },
-  { code: 'be', label: 'Belarusian', nativeName: 'Беларусская' },
-  { code: 'he', label: 'Hebrew', nativeName: 'עברית' },
-  { code: 'fa', label: 'Persian', nativeName: 'فارسی' },
-  { code: 'ur', label: 'Urdu', nativeName: 'اردو' },
-  { code: 'pa', label: 'Punjabi', nativeName: 'ਪੰਜਾਬੀ' },
-  { code: 'bn', label: 'Bengali', nativeName: 'বাংলা' },
-  { code: 'ta', label: 'Tamil', nativeName: 'தமிழ்' },
-  { code: 'te', label: 'Telugu', nativeName: 'తెలుగు' },
-  { code: 'kn', label: 'Kannada', nativeName: 'ಕನ್ನಡ' },
-  { code: 'ml', label: 'Malayalam', nativeName: 'മലയാളം' },
-  { code: 'my', label: 'Burmese', nativeName: 'မြန်မာ' },
-  { code: 'km', label: 'Khmer', nativeName: 'ខ្មែរ' },
-  { code: 'lo', label: 'Lao', nativeName: 'ລາວ' },
-  { code: 'am', label: 'Amharic', nativeName: 'አማርኛ' },
-  { code: 'af', label: 'Afrikaans', nativeName: 'Afrikaans' },
-  { code: 'sq', label: 'Albanian', nativeName: 'Shqip' },
-  { code: 'hy', label: 'Armenian', nativeName: 'Հայերեն' },
-  { code: 'az', label: 'Azerbaijani', nativeName: 'Azərbaycanca' },
-  { code: 'eu', label: 'Basque', nativeName: 'Euskera' },
-  { code: 'bg', label: 'Bulgarian', nativeName: 'Български' },
-  { code: 'ca', label: 'Catalan', nativeName: 'Català' },
-  { code: 'ceb', label: 'Cebuano', nativeName: 'Cebuano' },
-  { code: 'ny', label: 'Chichewa', nativeName: 'Chichewa' },
-  { code: 'zh-CN', label: 'Chinese (Simplified)', nativeName: '简体中文' },
-  { code: 'zh-TW', label: 'Chinese (Traditional)', nativeName: '繁體中文' },
-  { code: 'co', label: 'Corsican', nativeName: 'Corsu' },
-  { code: 'hr', label: 'Croatian', nativeName: 'Hrvatski' },
-  { code: 'eo', label: 'Esperanto', nativeName: 'Esperanto' },
-  { code: 'et', label: 'Estonian', nativeName: 'Eesti' },
-  { code: 'tl', label: 'Filipino', nativeName: 'Tagalog' },
-  { code: 'fy', label: 'Frisian', nativeName: 'Frysk' },
-  { code: 'gl', label: 'Galician', nativeName: 'Galego' },
-  { code: 'ka', label: 'Georgian', nativeName: 'ქართული' },
-  { code: 'gu', label: 'Gujarati', nativeName: 'ગુજરાતી' },
-  { code: 'ht', label: 'Haitian Creole', nativeName: 'Kreyòl Ayisyen' },
-  { code: 'ha', label: 'Hausa', nativeName: 'Hausa' },
-  { code: 'haw', label: 'Hawaiian', nativeName: 'Ōlelo Hawaiʻi' },
-  { code: 'hmn', label: 'Hmong', nativeName: 'Hmoob' },
-  { code: 'is', label: 'Icelandic', nativeName: 'Íslenska' },
-  { code: 'ig', label: 'Igbo', nativeName: 'Igbo' },
-  { code: 'ga', label: 'Irish', nativeName: 'Gaeilge' },
-  { code: 'jw', label: 'Javanese', nativeName: 'Jawa' },
-  { code: 'kk', label: 'Kazakh', nativeName: 'Қазақша' },
-  { code: 'rw', label: 'Kinyarwanda', nativeName: 'Ikinyarwanda' },
-  { code: 'ku', label: 'Kurdish', nativeName: 'Kurdî' },
-  { code: 'ckb', label: 'Kurdish (Sorani)', nativeName: 'سۆرانی' },
-  { code: 'ky', label: 'Kyrgyz', nativeName: 'Кыргызча' },
-  { code: 'lv', label: 'Latvian', nativeName: 'Latviešu' },
-  { code: 'lt', label: 'Lithuanian', nativeName: 'Lietuvių' },
-  { code: 'lb', label: 'Luxembourgish', nativeName: 'Lëtzebuergesch' },
-  { code: 'mk', label: 'Macedonian', nativeName: 'Македонски' },
-  { code: 'mg', label: 'Malagasy', nativeName: 'Malagasy' },
-  { code: 'ms', label: 'Malay', nativeName: 'Melayu' },
-  { code: 'mt', label: 'Maltese', nativeName: 'Malti' },
-  { code: 'mi', label: 'Maori', nativeName: 'Te Reo Māori' },
-  { code: 'mr', label: 'Marathi', nativeName: 'मराठी' },
-  { code: 'mn', label: 'Mongolian', nativeName: 'Монгол' },
-  { code: 'ne', label: 'Nepali', nativeName: 'नेपाली' },
-  { code: 'ps', label: 'Pashto', nativeName: 'پښتو' },
-  { code: 'so', label: 'Somali', nativeName: 'Soomaali' },
-  { code: 'st', label: 'Southern Sotho', nativeName: 'Sesotho' },
-  { code: 'su', label: 'Sundanese', nativeName: 'Basa Sunda' },
-  { code: 'sw', label: 'Swahili', nativeName: 'Kiswahili' },
-  { code: 'tg', label: 'Tajik', nativeName: 'Тоҷикӣ' },
-  { code: 'tt', label: 'Tatar', nativeName: 'Татарча' },
-  { code: 'yo', label: 'Yoruba', nativeName: 'Yorùbá' },
-  { code: 'zu', label: 'Zulu', nativeName: 'isiZulu' },
-];
+import { SUPPORTED_LANGUAGES, availableLocales } from '@/lib/i18n';
 
 type Cur = { code: string; symbol: string; label: string };
 const CURRENCIES: Cur[] = [
@@ -196,10 +96,13 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
     setOpenMenu(null);
   };
 
-  const activeLang = LANGS.find(l => l.code === lang) || LANGS[0];
+  // Map SUPPORTED_LANGUAGES format to display format
+  const activeLang = SUPPORTED_LANGUAGES.find(l => l.code === lang) || SUPPORTED_LANGUAGES[0];
   const activeCur = CURRENCIES.find(c => c.code === currency) || CURRENCIES[0];
-  const filteredLangs = LANGS.filter(l =>
-    l.label.toLowerCase().includes(langQuery.toLowerCase()) || l.code.includes(langQuery.toLowerCase()),
+  
+  // Filter languages - show all 125, with indicator for supported languages
+  const filteredLangs = SUPPORTED_LANGUAGES.filter(l =>
+    l.name.toLowerCase().includes(langQuery.toLowerCase()) || l.code.includes(langQuery.toLowerCase()),
   );
 
   // Fetch real data from API
@@ -437,27 +340,32 @@ export const Navbar = ({ onToggleSidebar }: NavbarProps) => {
                     </div>
                   </div>
                   <div className="max-h-72 overflow-y-auto p-1">
-                    {filteredLangs.map(l => (
-                      <button
-                        key={l.code}
-                        onClick={() => pickLang(l.code)}
-                        className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs transition-colors hover:bg-white/5 ${
-                          l.code === lang ? 'text-cyan-300' : 'text-foreground'
-                        }`}
-                      >
-                        <span className="flex items-center gap-2.5">
-                          <span className="font-medium">{l.label}</span>
-                          <span className="text-[10px] uppercase text-muted-foreground">{l.code}</span>
-                        </span>
-                        {l.code === lang && <Check className="h-3.5 w-3.5" />}
-                      </button>
-                    ))}
+                    {filteredLangs.map(l => {
+                      const isSupported = availableLocales.includes(l.code.split('-')[0]);
+                      return (
+                        <button
+                          key={l.code}
+                          onClick={() => pickLang(l.code)}
+                          className={`flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-xs transition-colors hover:bg-white/5 ${
+                            l.code === lang ? 'text-cyan-300' : 'text-foreground'
+                          }`}
+                          title={isSupported ? 'Fully translated' : 'Uses English fallback'}
+                        >
+                          <span className="flex items-center gap-2.5">
+                            <span className="font-medium">{l.name}</span>
+                            <span className="text-[10px] uppercase text-muted-foreground">{l.code}</span>
+                            {!isSupported && <span className="text-[8px] text-amber-400">●</span>}
+                          </span>
+                          {l.code === lang && <Check className="h-3.5 w-3.5" />}
+                        </button>
+                      );
+                    })}
                     {filteredLangs.length === 0 && (
                       <p className="px-3 py-4 text-center text-xs text-muted-foreground">No language found</p>
                     )}
                   </div>
                   <div className="border-t border-white/10 px-3 py-2 text-[10px] text-muted-foreground">
-                    🌍 Auto-detected from your region · Realtime translation
+                    ● = Uses English fallback · 7/125 languages fully translated
                   </div>
                 </div>
               )}
