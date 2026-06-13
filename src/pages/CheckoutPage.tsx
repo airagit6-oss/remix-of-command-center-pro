@@ -3,20 +3,32 @@ import { useCart } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 import { CreditCard, Lock, ArrowLeft } from 'lucide-react';
+import { useFormPersist } from '../hooks/useFormPersist';
+import { toast } from 'sonner';
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('stripe');
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    address: '',
-    city: '',
-    country: '',
-    zipCode: ''
-  });
+  
+  // Use form persistence for checkout data
+  const { state: formData, setState: setFormData, clearState } = useFormPersist(
+    {
+      name: '',
+      email: '',
+      address: '',
+      city: '',
+      country: '',
+      zipCode: ''
+    },
+    {
+      key: 'checkout-form',
+      onRestore: () => {
+        toast.success('Checkout form restored from last session');
+      }
+    }
+  );
 
   if (!cart || cart.items.length === 0) {
     navigate('/cart');
@@ -62,18 +74,19 @@ export default function CheckoutPage() {
         }
 
         clearCart();
+        clearState(); // Clear saved form after successful payment
+        toast.success('Order placed successfully!');
         navigate('/success', { state: { orderId: response.order.id } });
       } else {
         clearCart();
+        clearState(); // Clear saved form after successful payment
+        toast.success('Order placed successfully!');
         navigate('/success', { state: { orderId: response.order.id } });
       }
     } catch (error: any) {
       console.error('Checkout failed:', error);
-      if (error.response?.data?.error) {
-        alert(error.response.data.error);
-      } else {
-        alert('Payment failed. Please try again.');
-      }
+      const errorMsg = error.response?.data?.error || 'Payment failed. Please try again.';
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -104,6 +117,7 @@ export default function CheckoutPage() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="John Doe"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -114,6 +128,7 @@ export default function CheckoutPage() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="john@example.com"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>

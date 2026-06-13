@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
+import { useFormPersist } from '../../hooks/useFormPersist';
 import {
   Package, Upload, Sparkles, Image as ImageIcon, DollarSign, KeyRound,
   Smartphone, Monitor, Tablet, CheckCircle2, ArrowRight, ArrowLeft, Cpu, Globe,
@@ -84,15 +86,39 @@ const STEPS = [
 ];
 
 export function AuthorUploadWizardPage() {
-  const [step, setStep] = useState(1);
-  const [device, setDevice] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
-  const [title, setTitle] = useState('Quantum Dashboard Pro');
-  const [summary, setSummary] = useState('Realtime analytics dashboard with AI insights, multi-tenant ready.');
-  const [tags, setTags] = useState<string[]>(['react', 'dashboard', 'ai', 'analytics']);
+  // Persistent form state for multi-step upload wizard
+  const { state: formState, setState: setFormState, clearState } = useFormPersist(
+    {
+      step: 1,
+      device: 'desktop' as 'desktop' | 'tablet' | 'mobile',
+      title: 'Quantum Dashboard Pro',
+      summary: 'Realtime analytics dashboard with AI insights, multi-tenant ready.',
+      tags: ['react', 'dashboard', 'ai', 'analytics'],
+      price: 89,
+    },
+    {
+      key: 'author-upload-wizard',
+      onRestore: () => {
+        toast.success('Upload wizard restored from last session', {
+          description: `Continuing from step ${formState.step}`
+        });
+      }
+    }
+  );
+
+  // Temporary UI state (not persisted)
   const [tagInput, setTagInput] = useState('');
-  const [price, setPrice] = useState(89);
   const [files, setFiles] = useState<{ name: string; size: number; progress: number }[]>([]);
   const [drag, setDrag] = useState(false);
+
+  // Destructure for easier access
+  const { step, device, title, summary, tags, price } = formState;
+  const setStep = (s: number) => setFormState({ ...formState, step: s });
+  const setDevice = (d: 'desktop' | 'tablet' | 'mobile') => setFormState({ ...formState, device: d });
+  const setTitle = (t: string) => setFormState({ ...formState, title: t });
+  const setSummary = (s: string) => setFormState({ ...formState, summary: s });
+  const setTags = (t: string[]) => setFormState({ ...formState, tags: t });
+  const setPrice = (p: number) => setFormState({ ...formState, price: p });
 
   const seoScore = Math.min(100, 30 + title.length * 0.4 + summary.length * 0.3 + tags.length * 6);
   const aiScore  = Math.min(100, 55 + tags.length * 4 + (files.length ? 10 : 0));
