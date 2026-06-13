@@ -45,9 +45,9 @@ export default function AlertsPage() {
   };
 
   const severityIcon = (s: string) => {
-    if (s === 'Critical') return <XCircle className="w-4 h-4 text-dd-error" />;
-    if (s === 'Medium') return <AlertTriangle className="w-4 h-4 text-dd-warning" />;
-    return <Clock className="w-4 h-4 text-dd-info" />;
+    if (s === 'Critical') return <XCircle className="w-4 h-4 text-dd-error" aria-label="Critical severity alert" />;
+    if (s === 'Medium') return <AlertTriangle className="w-4 h-4 text-dd-warning" aria-label="Medium severity alert" />;
+    return <Clock className="w-4 h-4 text-dd-info" aria-label="Low severity alert" />;
   };
 
   const activeCount = alerts.filter(a => a.status === 'Active').length;

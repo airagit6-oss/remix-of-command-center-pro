@@ -653,8 +653,9 @@ const AdminGalleryPage = () => {
                         <Replace className="h-3.5 w-3.5" />
                       </button>
                       <button onClick={(e) => { e.stopPropagation(); gallery.moderateMedia(selectedProductId, media.id, media.status === 'approved' ? 'rejected' : 'approved'); }} title="Toggle Approval"
-                        className={`h-7 w-7 rounded-lg flex items-center justify-center transition-colors ${media.status === 'approved' ? 'text-green-500 hover:bg-red-500/10 hover:text-red-500' : 'text-muted-foreground hover:bg-green-500/10 hover:text-green-500'}`}>
-                        {media.status === 'approved' ? <CheckCircle2 className="h-3.5 w-3.5" /> : <AlertTriangle className="h-3.5 w-3.5" />}
+                        className={`h-7 w-7 rounded-lg flex items-center justify-center transition-colors ${media.status === 'approved' ? 'text-green-500 hover:bg-red-500/10 hover:text-red-500' : 'text-muted-foreground hover:bg-green-500/10 hover:text-green-500'}`}
+                        aria-label={media.status === 'approved' ? 'Mark as rejected' : 'Mark as approved'}>
+                        {media.status === 'approved' ? <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> : <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />}
                       </button>
                       <button onClick={(e) => { e.stopPropagation(); gallery.removeMedia(selectedProductId, [media.id]); }} title="Delete"
                         className="h-7 w-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors">

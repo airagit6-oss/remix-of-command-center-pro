@@ -81,15 +81,15 @@ export default function OrdersPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'COMPLETED':
-        return <CheckCircle className="w-5 h-5 text-green-600" />;
+        return <CheckCircle className="w-5 h-5 text-green-600" aria-label="Order completed" />;
       case 'PENDING':
       case 'PROCESSING':
-        return <Clock className="w-5 h-5 text-yellow-600" />;
+        return <Clock className="w-5 h-5 text-yellow-600" aria-label="Order processing" />;
       case 'CANCELLED':
       case 'REFUNDED':
-        return <XCircle className="w-5 h-5 text-red-600" />;
+        return <XCircle className="w-5 h-5 text-red-600" aria-label="Order cancelled or refunded" />;
       default:
-        return <Package className="w-5 h-5 text-gray-600" />;
+        return <Package className="w-5 h-5 text-gray-600" aria-label="Order pending" />;
     }
   };
 
