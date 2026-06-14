@@ -15,11 +15,15 @@ export default async (req, res) => {
   }
 
   try {
-    const url = req.url || '';
-    console.log(`[API] ${req.method} ${url}`);
+    // Get the path - either from query param (if rewritten) or from req.url
+    const queryPath = req.query?.path;
+    const basePath = queryPath ? '/' + queryPath : req.url || '';
+    const url = basePath.startsWith('/api/v1') ? basePath : '/api/v1' + basePath;
+    
+    console.log(`[API] ${req.method} ${url} (basePath: ${basePath})`);
 
     // Health check - CRITICAL FOR FRONTEND
-    if (url === '/api/v1/health' || url === '/health') {
+    if (basePath === '/health' || url === '/api/v1/health') {
       res.status(200).json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
@@ -33,13 +37,13 @@ export default async (req, res) => {
     }
 
     // Readiness check
-    if (url === '/api/v1/ready' || url === '/ready') {
+    if (basePath === '/ready' || url === '/api/v1/ready') {
       res.status(200).json({ ready: true });
       return;
     }
 
     // Metrics endpoint
-    if (url === '/api/v1/metrics' || url === '/metrics') {
+    if (basePath === '/metrics' || url === '/api/v1/metrics') {
       res.status(200).json({
         timestamp: new Date().toISOString(),
         database: 'ok',
@@ -51,7 +55,7 @@ export default async (req, res) => {
     }
 
     // Cart - GET (fetch cart)
-    if (url === '/api/v1/cart' && req.method === 'GET') {
+    if ((basePath === '/cart' || url === '/api/v1/cart') && req.method === 'GET') {
       res.status(200).json({
         cart: { 
           id: 'cart-1',
@@ -65,7 +69,7 @@ export default async (req, res) => {
     }
 
     // Cart - POST (add to cart)
-    if (url === '/api/v1/cart' && req.method === 'POST') {
+    if ((basePath === '/cart' || url === '/api/v1/cart') && req.method === 'POST') {
       res.status(201).json({
         cart: { 
           id: 'cart-1',
@@ -80,7 +84,7 @@ export default async (req, res) => {
     }
 
     // Auth - Login
-    if (url === '/api/v1/auth/login' && req.method === 'POST') {
+    if ((basePath === '/auth/login' || url === '/api/v1/auth/login') && req.method === 'POST') {
       res.status(200).json({
         token: `token-${Date.now()}`,
         user: { 
@@ -94,7 +98,7 @@ export default async (req, res) => {
     }
 
     // Auth - Signup
-    if (url === '/api/v1/auth/signup' && req.method === 'POST') {
+    if ((basePath === '/auth/signup' || url === '/api/v1/auth/signup') && req.method === 'POST') {
       res.status(201).json({
         token: `token-${Date.now()}`,
         user: { 
@@ -108,7 +112,7 @@ export default async (req, res) => {
     }
 
     // Products - GET all
-    if (url === '/api/v1/products' && req.method === 'GET') {
+    if ((basePath === '/products' || url === '/api/v1/products') && req.method === 'GET') {
       res.status(200).json({
         products: [],
         total: 0,
@@ -118,7 +122,7 @@ export default async (req, res) => {
     }
 
     // Orders - GET user orders
-    if (url === '/api/v1/orders' && req.method === 'GET') {
+    if ((basePath === '/orders' || url === '/api/v1/orders') && req.method === 'GET') {
       res.status(200).json({
         orders: [],
         total: 0,
@@ -128,7 +132,7 @@ export default async (req, res) => {
     }
 
     // Orders - CREATE order
-    if (url === '/api/v1/orders' && req.method === 'POST') {
+    if ((basePath === '/orders' || url === '/api/v1/orders') && req.method === 'POST') {
       res.status(201).json({
         order: {
           id: `order-${Date.now()}`,
@@ -146,6 +150,7 @@ export default async (req, res) => {
     res.status(404).json({
       error: 'Not Found',
       path: url,
+      basePath: basePath,
       method: req.method,
       message: 'Endpoint not implemented'
     });
