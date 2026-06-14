@@ -18,6 +18,13 @@ dist-ssr
 .idea
 .DS_Store
 *.suo
+
+# Environment variables - NEVER commit these files
+.env
+.env.local
+.env.*.local
+.env.production
+backend/.env
 *.ntvs*
 *.njsproj
 *.sln
