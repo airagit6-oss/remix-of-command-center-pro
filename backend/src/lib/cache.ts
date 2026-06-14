@@ -4,14 +4,16 @@ import Redis from 'ioredis';
 // REDIS CACHING LAYER - Performance Multiplier
 // ============================================================
 
-const redis = new Redis(process.env.REDIS_URL || {
+const redisConfig = process.env.REDIS_URL ? process.env.REDIS_URL : {
   host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
   password: process.env.REDIS_PASSWORD,
   maxRetriesPerRequest: null,
   enableReadyCheck: false,
   enableOfflineQueue: true
-});
+};
+
+const redis = new Redis(redisConfig as any);
 
 redis.on('error', (err) => console.error('❌ Redis Error:', err));
 redis.on('connect', () => console.log('✅ Redis Connected'));

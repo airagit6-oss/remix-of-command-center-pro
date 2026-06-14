@@ -6,40 +6,22 @@ const prisma = new PrismaClient();
 // GET /cart
 export async function getCart(req: FastifyRequest, reply: FastifyReply) {
   try {
-    const userId = (req as any).user?.id;
-    const sessionId = (req as any).sessionId;
+    const userId = (req as any).user?.id || 'anonymous';
 
-    let cart;
-
-    if (userId) {
-      cart = await prisma.cart.findUnique({
-        where: { userId },
-        include: { items: { include: { product: true } } }
-      });
-    } else if (sessionId) {
-      cart = await prisma.cart.findUnique({
-        where: { sessionId },
-        include: { items: { include: { product: true } } }
-      });
-    }
+    let cart = await prisma.cart.findUnique({
+      where: { userId },
+      include: { items: { include: { product: true } } }
+    });
 
     if (!cart) {
       return reply.send({ cart: { items: [] }, total: 0 });
     }
 
     // Calculate total as sum of (price * quantity)
-    const total = cart.items.reduce((sum, item) => {
+    const total = cart.items.reduce((sum: number, item: any) => {
       const itemPrice = item.product?.price || 0;
       return sum + (itemPrice * (Number(item.quantity) || 0));
     }, 0);
-
-    // Validate product availability and prices
-    for (const item of cart.items) {
-      if (!item.product || item.product.status !== 'PUBLISHED') {
-        // Remove unavailable items
-        await prisma.cartItem.delete({ where: { id: item.id } });
-      }
-    }
 
     return reply.send({ cart, total: Number(total.toFixed(2)) });
   } catch (error) {
@@ -51,8 +33,7 @@ export async function getCart(req: FastifyRequest, reply: FastifyReply) {
 // POST /cart
 export async function addToCart(req: FastifyRequest, reply: FastifyReply) {
   try {
-    const userId = (req as any).user?.id;
-    const sessionId = (req as any).sessionId;
+    const userId = (req as any).user?.id || 'anonymous';
     const { productId, quantity } = req.body as any;
 
     if (!productId || !quantity || quantity < 1) {
@@ -63,31 +44,18 @@ export async function addToCart(req: FastifyRequest, reply: FastifyReply) {
       where: { id: productId }
     });
 
-    if (!product || product.status !== 'PUBLISHED') {
-      return reply.status(404).send({ error: 'Product not available' });
+    if (!product) {
+      return reply.status(404).send({ error: 'Product not found' });
     }
 
-    let cart;
+    let cart = await prisma.cart.upsert({
+      where: { userId },
+      update: {},
+      create: { userId },
+      include: { items: true }
+    });
 
-    if (userId) {
-      cart = await prisma.cart.upsert({
-        where: { userId },
-        update: {},
-        create: { userId },
-        include: { items: true }
-      });
-    } else if (sessionId) {
-      cart = await prisma.cart.upsert({
-        where: { sessionId },
-        update: {},
-        create: { sessionId },
-        include: { items: true }
-      });
-    } else {
-      return reply.status(400).send({ error: 'No user or session' });
-    }
-
-    const existingItem = cart.items.find(item => item.productId === productId);
+    const existingItem = cart.items.find((item: any) => item.productId === productId);
 
     if (existingItem) {
       await prisma.cartItem.update({
@@ -109,23 +77,11 @@ export async function addToCart(req: FastifyRequest, reply: FastifyReply) {
       include: { items: { include: { product: true } } }
     });
 
-    // Calculate total as sum of (price * quantity)
-    const total = updatedCart?.items.reduce((sum, item) => {
+    // Calculate total
+    const total = updatedCart?.items.reduce((sum: number, item: any) => {
       const itemPrice = item.product?.price || 0;
       return sum + (itemPrice * (Number(item.quantity) || 0));
     }, 0) || 0;
-
-    // Audit log
-    if (userId) {
-      await prisma.auditLog.create({
-        data: {
-          userId,
-          action: 'ADD_TO_CART',
-          entity: 'CartItem',
-          changes: { productId, quantity }
-        }
-      });
-    }
 
     return reply.send({ cart: updatedCart, total: Number(total.toFixed(2)) });
   } catch (error) {
@@ -139,14 +95,14 @@ export async function updateCartItem(req: FastifyRequest, reply: FastifyReply) {
   try {
     const { itemId } = req.params as any;
     const { quantity } = req.body as any;
-    const userId = (req as any).user?.id;
 
     if (!quantity || quantity < 1) {
       return reply.status(400).send({ error: 'Invalid quantity' });
     }
 
     const cartItem = await prisma.cartItem.findUnique({
-      where: { id: itemId }
+      where: { id: itemId },
+      include: { cart: true }
     });
 
     if (!cartItem) {
@@ -158,35 +114,20 @@ export async function updateCartItem(req: FastifyRequest, reply: FastifyReply) {
       data: { quantity }
     });
 
-    // Get updated cart
-    const cart = await prisma.cart.findUnique({
+    const updatedCart = await prisma.cart.findUnique({
       where: { id: cartItem.cartId },
       include: { items: { include: { product: true } } }
     });
 
-    // Calculate total
-    const total = cart?.items.reduce((sum, item) => {
+    const total = updatedCart?.items.reduce((sum: number, item: any) => {
       const itemPrice = item.product?.price || 0;
       return sum + (itemPrice * (Number(item.quantity) || 0));
     }, 0) || 0;
 
-    // Audit log
-    if (userId) {
-      await prisma.auditLog.create({
-        data: {
-          userId,
-          action: 'UPDATE_CART_ITEM',
-          entity: 'CartItem',
-          entityId: itemId,
-          changes: { quantity }
-        }
-      });
-    }
-
-    return reply.send({ cart, total: Number(total.toFixed(2)) });
+    return reply.send({ cart: updatedCart, total: Number(total.toFixed(2)) });
   } catch (error) {
-    console.error('Update cart item error:', error);
-    reply.status(500).send({ error: 'Failed to update cart item' });
+    console.error('Update cart error:', error);
+    reply.status(500).send({ error: 'Failed to update cart' });
   }
 }
 
@@ -194,10 +135,10 @@ export async function updateCartItem(req: FastifyRequest, reply: FastifyReply) {
 export async function removeFromCart(req: FastifyRequest, reply: FastifyReply) {
   try {
     const { itemId } = req.params as any;
-    const userId = (req as any).user?.id;
 
     const cartItem = await prisma.cartItem.findUnique({
-      where: { id: itemId }
+      where: { id: itemId },
+      include: { cart: true }
     });
 
     if (!cartItem) {
@@ -208,76 +149,49 @@ export async function removeFromCart(req: FastifyRequest, reply: FastifyReply) {
       where: { id: itemId }
     });
 
-    // Get updated cart
-    const cart = await prisma.cart.findUnique({
+    const updatedCart = await prisma.cart.findUnique({
       where: { id: cartItem.cartId },
       include: { items: { include: { product: true } } }
     });
 
-    // Calculate total
-    const total = cart?.items.reduce((sum, item) => {
+    const total = updatedCart?.items.reduce((sum: number, item: any) => {
       const itemPrice = item.product?.price || 0;
       return sum + (itemPrice * (Number(item.quantity) || 0));
     }, 0) || 0;
 
-    // Audit log
-    if (userId) {
-      await prisma.auditLog.create({
-        data: {
-          userId,
-          action: 'REMOVE_FROM_CART',
-          entity: 'CartItem',
-          entityId: itemId
-        }
-      });
-    }
-
-    return reply.send({ cart, total: Number(total.toFixed(2)) });
+    return reply.send({ cart: updatedCart, total: Number(total.toFixed(2)) });
   } catch (error) {
     console.error('Remove from cart error:', error);
     reply.status(500).send({ error: 'Failed to remove from cart' });
   }
 }
 
-// DELETE /cart
+// DELETE /cart (clear entire cart)
 export async function clearCart(req: FastifyRequest, reply: FastifyReply) {
   try {
-    const userId = (req as any).user?.id;
-    const sessionId = (req as any).sessionId;
+    const userId = (req as any).user?.id || 'anonymous';
 
-    let cart;
+    const cart = await prisma.cart.findUnique({
+      where: { userId }
+    });
 
-    if (userId) {
-      cart = await prisma.cart.findUnique({ where: { userId } });
-    } else if (sessionId) {
-      cart = await prisma.cart.findUnique({ where: { sessionId } });
+    if (!cart) {
+      return reply.send({ success: true });
     }
 
-    if (cart) {
-      await prisma.cartItem.deleteMany({
-        where: { cartId: cart.id }
-      });
-    }
+    await prisma.cartItem.deleteMany({
+      where: { cartId: cart.id }
+    });
 
-    // Audit log
-    if (userId) {
-      await prisma.auditLog.create({
-        data: {
-          userId,
-          action: 'CLEAR_CART',
-          entity: 'Cart'
-        }
-      });
-    }
-
-    return reply.send({ cart: { items: [] }, total: 0 });
+    return reply.send({ cart: { items: [], total: 0 }, success: true });
   } catch (error) {
     console.error('Clear cart error:', error);
     reply.status(500).send({ error: 'Failed to clear cart' });
   }
 }
 
-export function cartRoutes(fastify: FastifyInstance) {
+// Register routes with Fastify
+export async function cartRoutes(fastify: FastifyInstance) {
   fastify.get('/cart', getCart);
   fastify.post('/cart', addToCart);
   fastify.patch('/cart/:itemId', updateCartItem);
