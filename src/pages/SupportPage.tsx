@@ -48,7 +48,7 @@ const SupportPage = () => {
           {[
             { icon: Mail, title: t('support.emailSupport', { defaultValue: 'Email Support' }), desc: 'support@saashub.io', action: () => { window.location.href = 'mailto:support@saashub.io'; } },
             { icon: MessageSquare, title: t('support.liveChat', { defaultValue: 'Live Chat' }), desc: t('support.chatHours', { defaultValue: 'Available 9am–6pm IST' }), action: () => toast.info(t('support.chatMsg', { defaultValue: 'Live chat opens 9am–6pm IST. Drop us an email meanwhile.' })) },
-            { icon: BookOpen, title: t('support.documentation', { defaultValue: 'Documentation' }), desc: t('support.browseDocs', { defaultValue: 'Browse our docs' }), action: () => window.open('https://docs.lovable.dev', '_blank', 'noopener,noreferrer') },
+            { icon: BookOpen, title: t('support.documentation', { defaultValue: 'Documentation' }), desc: t('support.browseDocs', { defaultValue: 'Browse our docs' }), action: () => window.open('https://softwarevala.net/support', '_blank', 'noopener,noreferrer') },
           ].map(c => (
             <button key={c.title} onClick={c.action} type="button"
               className="rounded-xl border border-border bg-card p-5 flex flex-col items-center text-center hover:bg-accent transition-colors">

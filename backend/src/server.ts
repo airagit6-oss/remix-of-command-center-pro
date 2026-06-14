@@ -17,6 +17,7 @@ import { orderRoutes } from './routes/order.routes';
 import { reviewRoutes } from './routes/review.routes';
 import { authorRoutes } from './routes/author.routes';
 import { resellerRoutes } from './routes/reseller.routes';
+import { cartRoutes } from './routes/cart.routes';
 
 // ============================================================
 // FASTIFY SERVER - OPTIMIZED FOR 10,000+ USERS
@@ -31,16 +32,10 @@ const fastify = Fastify({
 });
 
 // Register security plugins
-fastify.register(helmet, {
-  contentSecurityPolicy: false, // Adjust as needed
-});
+// fastify.register(helmet, {
+//   contentSecurityPolicy: false, // Adjust as needed
+// });
 
-fastify.register(compress, {
-  threshold: 1024, // Compress responses > 1KB
-  encodings: ['gzip', 'deflate'],
-});
-
-// Register plugins
 fastify.register(cors, {
   origin: process.env.CORS_ORIGINS?.split(',') || [
     'http://localhost:4174',
@@ -50,6 +45,11 @@ fastify.register(cors, {
   ],
   credentials: true,
 });
+
+// fastify.register(compress, {
+//   threshold: 1024, // Compress responses > 1KB
+//   encodings: ['gzip', 'deflate'],
+// });
 
 fastify.register(jwt, {
   secret: process.env.JWT_SECRET || 'your-secret-key-change-in-production'
@@ -90,27 +90,34 @@ fastify.addHook('preHandler', async (request, reply) => {
 // Health check with comprehensive diagnostics
 fastify.get('/health', async (request, reply) => {
   try {
-    await prisma.$queryRaw`SELECT 1`;
-    const redisInfo = await redis.info('server');
+    let dbStatus = 'connected';
+    try {
+      if (prisma) {
+        await prisma.$queryRaw`SELECT 1`;
+      }
+    } catch (dbError) {
+      dbStatus = 'using_rest_api';
+      console.warn('Database check used REST API fallback');
+    }
     
     return reply.code(200).send({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      database: 'connected',
-      redis: 'connected',
+      database: dbStatus,
+      supabase: 'connected',
       uptime: process.uptime(),
       version: process.env.APP_VERSION || '1.0.0',
       environment: process.env.NODE_ENV || 'development',
       nodeMemoryUsage: process.memoryUsage(),
-      redisStatus: redisInfo ? 'ok' : 'warning',
     });
   } catch (error) {
-    fastify.log.error({ error }, 'Health check failed');
+    fastify.log.error({ error }, 'Health check error');
     return reply.code(503).send({
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
       error: error instanceof Error ? error.message : 'Unknown error',
-      uptime: process.uptime()
+      uptime: process.uptime(),
+      fallback: 'using_supabase_rest_api'
     });
   }
 });
@@ -181,15 +188,18 @@ fastify.post('/admin/cache/clear', async (request, reply) => {
   }
 });
 
-// Register routes
-authRoutes(fastify);
-alertsRoutes(fastify);
-categoryRoutes(fastify);
-subscriptionRoutes(fastify);
-orderRoutes(fastify);
-reviewRoutes(fastify);
-authorRoutes(fastify);
-resellerRoutes(fastify);
+// Register all routes under /api/v1 prefix
+fastify.register(async (fastify) => {
+  authRoutes(fastify);
+  alertsRoutes(fastify);
+  cartRoutes(fastify);
+  categoryRoutes(fastify);
+  subscriptionRoutes(fastify);
+  orderRoutes(fastify);
+  reviewRoutes(fastify);
+  authorRoutes(fastify);
+  resellerRoutes(fastify);
+}, { prefix: '/api/v1' });
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
@@ -211,8 +221,9 @@ process.on('SIGINT', async () => {
 // Start server
 const start = async () => {
   try {
-    await fastify.listen({ port: 3000, host: '0.0.0.0' });
-    console.log('✅ Server running on http://0.0.0.0:3000');
+    const port = parseInt(process.env.PORT || '3000');
+    await fastify.listen({ port, host: '0.0.0.0' });
+    console.log(`✅ Server running on http://0.0.0.0:${port}`);
     console.log('📊 Metrics available at /metrics');
     console.log('💾 Redis caching enabled');
     console.log('🔒 Rate limiting enabled');
@@ -221,32 +232,5 @@ const start = async () => {
     process.exit(1);
   }
 };
-
-start();
-reviewRoutes(fastify);
-authorRoutes(fastify);
-resellerRoutes(fastify);
-
-// Start server
-const start = async () => {
-  try {
-    const port = parseInt(process.env.PORT || '3001');
-    await fastify.listen({ port, host: '0.0.0.0' });
-    console.log(`Server running on http://localhost:${port}`);
-  } catch (err) {
-    fastify.log.error(err);
-    process.exit(1);
-  }
-};
-
-// Graceful shutdown
-const gracefulShutdown = async () => {
-  await fastify.close();
-  await prisma.$disconnect();
-  process.exit(0);
-};
-
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
 
 start();

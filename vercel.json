@@ -1,0 +1,50 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "installCommand": "npm install --legacy-peer-deps",
+  "framework": "vite",
+  "env": {
+    "VITE_SUPABASE_PROJECT_ID": "@supabase_project_id",
+    "VITE_SUPABASE_PUBLISHABLE_KEY": "@supabase_publishable_key",
+    "VITE_SUPABASE_URL": "@supabase_url",
+    "VITE_API_URL": "@api_url"
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://remix-of-command-center-pro-1-backend.vercel.app/api/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/dist/assets/.*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/.*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        }
+      ]
+    }
+  ]
+}

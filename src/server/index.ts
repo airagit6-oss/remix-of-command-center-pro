@@ -93,6 +93,18 @@ app.get('/health', (req: Request, res: Response) => {
   res.status(200).json(health);
 });
 
+// Also expose at /api/v1/health for frontend
+app.get('/api/v1/health', (req: Request, res: Response) => {
+  const health = {
+    status: 'UP',
+    timestamp: new Date().toISOString(),
+    database: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+    environment: process.env.NODE_ENV || 'development',
+  };
+
+  res.status(200).json(health);
+});
+
 // ============================================================================
 // API ROUTES
 // ============================================================================

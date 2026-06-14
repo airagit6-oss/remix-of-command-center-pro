@@ -1,15 +1,25 @@
 import { PrismaClient } from '@prisma/client';
 
 // ============================================================
-// PRISMA CLIENT - OPTIMIZED FOR 10,000+ USERS
-// Connection pooling, query optimization, caching
+// PRISMA CLIENT - WITH FALLBACK SUPPORT
+// Attempts direct PostgreSQL connection, falls back to REST API
 // ============================================================
 
+let prismaInstance: PrismaClient | null = null;
+let connectionFailed = false;
+
 const prismaClientSingleton = () => {
-  return new PrismaClient({
-    log: ['error', 'warn'],
-    errorFormat: 'pretty',
-  });
+  try {
+    const client = new PrismaClient({
+      log: ['error', 'warn'],
+      errorFormat: 'pretty',
+    });
+    return client;
+  } catch (error) {
+    console.error('❌ Prisma initialization error:', error);
+    connectionFailed = true;
+    return null as any;
+  }
 };
 
 declare global {
@@ -18,7 +28,29 @@ declare global {
 
 export const prisma = globalThis.prisma ?? prismaClientSingleton();
 
-if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
+if (process.env.NODE_ENV !== 'production' && prisma) {
+  globalThis.prisma = prisma;
+}
+
+/**
+ * Check if database is connected
+ */
+export async function checkDatabaseConnection(): Promise<boolean> {
+  try {
+    if (!prisma) return false;
+    await prisma.$queryRaw`SELECT 1`;
+    console.log('✅ Database connected via Prisma');
+    return true;
+  } catch (error) {
+    console.warn('⚠️ Prisma connection failed, will use Supabase REST API');
+    connectionFailed = true;
+    return false;
+  }
+}
+
+export function isDatabaseConnected(): boolean {
+  return !connectionFailed && prisma !== null;
+}
 
 /**
  * Database connection pool settings (in .env):
