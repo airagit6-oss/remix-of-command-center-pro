@@ -84,7 +84,7 @@ router.post('/items', async (req: Request, res: Response) => {
     }
 
     // Try MongoDB first
-    let cart = await getOrCreateCart(userId);
+    const cart = await getOrCreateCart(userId);
     
     if (cart) {
       // Add to MongoDB cart
@@ -157,7 +157,7 @@ router.delete('/items/:itemId', async (req: Request, res: Response) => {
     const userId = req.query.userId as string || 'demo-user';
 
     // Try MongoDB first
-    let cart = await Cart.findOne({ userId });
+    const cart = await Cart.findOne({ userId });
     
     if (cart) {
       // Remove from MongoDB cart
@@ -218,7 +218,7 @@ router.put('/items/:itemId', async (req: Request, res: Response) => {
     }
 
     // Try MongoDB first
-    let cart = await Cart.findOne({ userId });
+    const cart = await Cart.findOne({ userId });
     
     if (cart) {
       // Update in MongoDB cart
@@ -284,7 +284,7 @@ router.delete('/', async (req: Request, res: Response) => {
     const userId = req.query.userId as string || 'demo-user';
 
     // Try MongoDB first
-    let cart = await Cart.findOne({ userId });
+    const cart = await Cart.findOne({ userId });
     
     if (cart) {
       // Clear MongoDB cart

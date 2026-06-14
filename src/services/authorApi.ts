@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { api } from '@/lib/api';
 
 export interface AuthorProduct {
