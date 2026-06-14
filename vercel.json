@@ -11,10 +11,6 @@
   },
   "rewrites": [
     {
-      "source": "/api/v1/:path*",
-      "destination": "/api?path=:path"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
