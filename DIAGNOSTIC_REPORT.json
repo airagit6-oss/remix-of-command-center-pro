@@ -1,0 +1,20 @@
+{
+  "issues": [
+    "Backend routes not registered with /api"
+  ],
+  "passed": [
+    "VITE_API_URL",
+    "API client configuration",
+    "API prefix",
+    "cart.routes",
+    "auth.routes",
+    "order.routes",
+    "Backend port config",
+    "CORS",
+    "Docker Compose services",
+    "Docker backend port",
+    "Nginx /api routing",
+    "Nginx proxy setup"
+  ],
+  "warnings": []
+}
