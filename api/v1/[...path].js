@@ -14,13 +14,16 @@ export default async (req, res) => {
   }
 
   try {
-    const path = req.query.path ? Array.isArray(req.query.path) ? '/' + req.query.path.join('/') : '/' + req.query.path : '';
-    const fullPath = `/api/v1${path}`;
+    // Get the actual requested path
+    // req.url from Vercel will be the full path like /api/v1/health
+    const fullPath = req.url || '/api/v1';
+    const pathMatch = fullPath.match(/\/api\/v1(.*)/) || ['', ''];
+    const path = pathMatch[1] || '/';
     
     console.log(`[API Route] ${req.method} ${fullPath}`);
 
     // Health check
-    if (path === '/health') {
+    if (path === '/health' || path === '') {
       res.status(200).json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
@@ -51,7 +54,7 @@ export default async (req, res) => {
       return;
     }
 
-    // Cart - GET (fetch cart)
+    // Cart - GET
     if (path === '/cart' && req.method === 'GET') {
       res.status(200).json({
         cart: { 
@@ -65,7 +68,7 @@ export default async (req, res) => {
       return;
     }
 
-    // Cart - POST (add to cart)
+    // Cart - POST
     if (path === '/cart' && req.method === 'POST') {
       res.status(201).json({
         cart: { 
@@ -108,7 +111,7 @@ export default async (req, res) => {
       return;
     }
 
-    // Products - GET all
+    // Products - GET
     if (path === '/products' && req.method === 'GET') {
       res.status(200).json({
         products: [],
@@ -118,7 +121,7 @@ export default async (req, res) => {
       return;
     }
 
-    // Orders - GET user orders
+    // Orders - GET
     if (path === '/orders' && req.method === 'GET') {
       res.status(200).json({
         orders: [],
@@ -128,7 +131,7 @@ export default async (req, res) => {
       return;
     }
 
-    // Orders - CREATE order
+    // Orders - POST
     if (path === '/orders' && req.method === 'POST') {
       res.status(201).json({
         order: {
@@ -143,7 +146,7 @@ export default async (req, res) => {
       return;
     }
 
-    // Default 404 response
+    // Default 404
     res.status(404).json({
       error: 'Not Found',
       path: fullPath,
