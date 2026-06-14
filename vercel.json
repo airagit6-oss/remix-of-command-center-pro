@@ -11,8 +11,8 @@
   },
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://remix-of-command-center-pro-1-backend.vercel.app/api/:path*"
+      "source": "/api/v1/(.*)",
+      "destination": "/api"
     },
     {
       "source": "/(.*)",
@@ -21,7 +21,7 @@
   ],
   "headers": [
     {
-      "source": "/dist/assets/.*",
+      "source": "/dist/assets/**",
       "headers": [
         {
           "key": "Cache-Control",
@@ -30,7 +30,7 @@
       ]
     },
     {
-      "source": "/.*",
+      "source": "/**",
       "headers": [
         {
           "key": "Cache-Control",
