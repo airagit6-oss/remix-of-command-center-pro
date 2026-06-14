@@ -14,19 +14,26 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Get the requested path (e.g., "/v1/cart" from "/api/v1/cart")
+    // Vercel passes the full URL path in req.url
     const fullPath = req.url || '/';
-    const path = fullPath.startsWith('/api') ? fullPath.substring(4) : fullPath; // Remove /api prefix
     
-    console.log(`[API Handler] ${req.method} /api${path} (original: ${fullPath})`);
+    // Extract the path after /api/
+    let path = fullPath;
+    if (fullPath.startsWith('/api/')) {
+      path = fullPath.substring(4); // Remove /api prefix
+    } else if (fullPath.startsWith('/')) {
+      path = fullPath;
+    }
+    
+    console.log(`[API] ${req.method} ${fullPath} -> ${path}`);
 
     // Route to v1 API
     if (path.startsWith('/v1/')) {
       const v1Path = path.substring(3); // Remove /v1
       
-      // Health check
-      if (v1Path === '/health' || v1Path === '') {
-        res.status(200).json({
+      // Health check - match /v1/health
+      if (v1Path === '/health') {
+        return res.status(200).json({
           status: 'healthy',
           timestamp: new Date().toISOString(),
           database: 'connected',
@@ -35,30 +42,37 @@ module.exports = async (req, res) => {
           version: '1.0.0',
           environment: 'production'
         });
-        return;
+      }
+
+      // Root v1 path
+      if (v1Path === '' || v1Path === '/') {
+        return res.status(200).json({
+          status: 'healthy',
+          timestamp: new Date().toISOString(),
+          message: 'API v1 ready',
+          environment: 'production'
+        });
       }
 
       // Readiness check
       if (v1Path === '/ready') {
-        res.status(200).json({ ready: true });
-        return;
+        return res.status(200).json({ ready: true });
       }
 
       // Metrics endpoint
       if (v1Path === '/metrics') {
-        res.status(200).json({
+        return res.status(200).json({
           timestamp: new Date().toISOString(),
           database: 'ok',
           redis: 'ok',
           memory: process.memoryUsage(),
           uptime: process.uptime()
         });
-        return;
       }
 
       // Cart - GET
       if (v1Path === '/cart' && req.method === 'GET') {
-        res.status(200).json({
+        return res.status(200).json({
           cart: { 
             id: 'cart-1',
             userId: req.headers['x-user-id'] || 'anonymous',
@@ -67,12 +81,11 @@ module.exports = async (req, res) => {
           },
           success: true
         });
-        return;
       }
 
       // Cart - POST
       if (v1Path === '/cart' && req.method === 'POST') {
-        res.status(201).json({
+        return res.status(201).json({
           cart: { 
             id: 'cart-1',
             userId: req.headers['x-user-id'] || 'anonymous',
@@ -82,12 +95,11 @@ module.exports = async (req, res) => {
           message: 'Item added to cart',
           success: true
         });
-        return;
       }
 
       // Auth - Login
       if (v1Path === '/auth/login' && req.method === 'POST') {
-        res.status(200).json({
+        return res.status(200).json({
           token: `token-${Date.now()}`,
           user: { 
             id: 'user-1', 
@@ -96,12 +108,11 @@ module.exports = async (req, res) => {
           },
           success: true
         });
-        return;
       }
 
       // Auth - Signup
       if (v1Path === '/auth/signup' && req.method === 'POST') {
-        res.status(201).json({
+        return res.status(201).json({
           token: `token-${Date.now()}`,
           user: { 
             id: `user-${Date.now()}`, 
@@ -110,32 +121,29 @@ module.exports = async (req, res) => {
           },
           success: true
         });
-        return;
       }
 
       // Products - GET
       if (v1Path === '/products' && req.method === 'GET') {
-        res.status(200).json({
+        return res.status(200).json({
           products: [],
           total: 0,
           success: true
         });
-        return;
       }
 
       // Orders - GET
       if (v1Path === '/orders' && req.method === 'GET') {
-        res.status(200).json({
+        return res.status(200).json({
           orders: [],
           total: 0,
           success: true
         });
-        return;
       }
 
       // Orders - POST
       if (v1Path === '/orders' && req.method === 'POST') {
-        res.status(201).json({
+        return res.status(201).json({
           order: {
             id: `order-${Date.now()}`,
             userId: req.headers['x-user-id'] || 'anonymous',
@@ -145,20 +153,20 @@ module.exports = async (req, res) => {
           },
           success: true
         });
-        return;
       }
     }
 
-    // Default 404
-    res.status(404).json({
+    // Default 404 - with debugging info
+    return res.status(404).json({
       error: 'Not Found',
       path: fullPath,
+      extractedPath: path,
       method: req.method,
       message: 'Endpoint not implemented'
     });
   } catch (error) {
     console.error('[API Error]', error);
-    res.status(500).json({
+    return res.status(500).json({
       error: 'Internal Server Error',
       message: error instanceof Error ? error.message : 'Unknown error',
       success: false
