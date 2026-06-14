@@ -3,6 +3,16 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install --legacy-peer-deps",
   "framework": "vite",
+  "functions": {
+    "api/[...path].js": {
+      "maxDuration": 60,
+      "memory": 1024
+    },
+    "api/v1/[...path].js": {
+      "maxDuration": 60,
+      "memory": 1024
+    }
+  },
   "env": {
     "VITE_SUPABASE_PROJECT_ID": "@supabase_project_id",
     "VITE_SUPABASE_PUBLISHABLE_KEY": "@supabase_publishable_key",
